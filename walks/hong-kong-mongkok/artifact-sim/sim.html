@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Declared / Constituted — a containment simulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0e0e10;
+    --panel: #14141a;
+    --ink: #e8e6df;
+    --dim: #8a857b;
+    --faint: #3a3a3f;
+    --line: #26262a;
+    --accent: #c9a962;
+    --declared: #6a9cc4;
+    --constituted: #c45a3f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); height: 100%; overflow: hidden; }
+  body {
+    font: 11px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  .stage {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+  }
+  .canvas-wrap {
+    position: relative;
+    overflow: hidden;
+    background: #0a0a0c;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .band-label {
+    position: absolute;
+    left: 20px;
+    font: 600 11px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border: 1px solid currentColor;
+    backdrop-filter: blur(2px);
+    background: rgba(10,10,12,0.6);
+  }
+  .band-label.d { top: 16px; color: var(--declared); }
+  .band-label.c { bottom: 16px; color: var(--constituted); }
+
+  aside {
+    border-left: 1px solid var(--line);
+    padding: 26px 22px;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    overflow-y: auto;
+  }
+  aside .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  aside h1 {
+    font: italic 400 22px/1.15 "Playfair Display", Georgia, serif;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+    margin: 4px 0 0;
+  }
+  aside .sub {
+    font-size: 11.5px;
+    color: #c9c3b6;
+    line-height: 1.55;
+  }
+
+  .meters {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .meter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .meter .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .meter .row .label { color: var(--dim); }
+  .meter .d .label { color: var(--declared); }
+  .meter .c .label { color: var(--constituted); }
+  .meter .row .val {
+    font: 700 12px/1 "IBM Plex Mono", monospace;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .bar {
+    height: 5px;
+    background: #1a1a1f;
+    border: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .bar .fill { position: absolute; inset: 0; width: 0; transition: width 240ms ease; }
+  .bar.d .fill { background: var(--declared); }
+  .bar.c .fill { background: var(--constituted); }
+
+  .section-title {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+
+  .trust {
+    display: grid;
+    gap: 6px;
+  }
+  .trust .label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .trust .label-row strong {
+    color: var(--accent);
+    font-family: "Playfair Display", serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0;
+    font-weight: 400;
+    text-transform: none;
+  }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  button {
+    font: 600 10px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: #1a1a1f;
+    border: 1px solid var(--line);
+    padding: 10px;
+    cursor: pointer;
+    transition: background 140ms ease;
+  }
+  button:hover { background: #26262a; }
+  button.primary { background: var(--accent); color: #0e0e10; border-color: var(--accent); }
+
+  .takeaway {
+    margin-top: auto;
+    padding: 14px 16px;
+    border-left: 2px solid var(--accent);
+    background: #1a1a1f;
+    font: italic 12.5px/1.55 "Playfair Display", serif;
+    color: #cfc9bd;
+  }
+  .takeaway em { color: var(--ink); }
+
+  footer {
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+    line-height: 1.6;
+  }
+  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); font-family: "Playfair Display", serif; }
+
+  @media (max-width: 760px) {
+    .stage { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+    aside { border-left: none; border-top: 1px solid var(--line); max-height: 54vh; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="canvas-wrap">
+    <canvas id="c"></canvas>
+    <div class="band-label d">Declared · dashed-line rooms</div>
+    <div class="band-label c">Constituted · walled rooms</div>
+  </div>
+
+  <aside>
+    <div>
+      <div class="eyebrow">FIELD GUIDE · RUNNABLE COMPANION</div>
+      <h1>A containment simulation</h1>
+      <p class="sub">The same population lives in two worlds. The upper band uses dashed-line rules that each agent either respects or crosses. The lower band uses walls. Watch the failure mode of each.</p>
+    </div>
+
+    <div class="meters">
+      <div class="meter">
+        <div class="section-title">Breaches</div>
+        <div class="row d">
+          <span class="label">Declared crossings</span>
+          <span class="val" id="breaches-d">0</span>
+        </div>
+        <div class="bar d"><div class="fill" id="fill-d"></div></div>
+        <div class="row c">
+          <span class="label">Constituted crossings</span>
+          <span class="val" id="breaches-c">0</span>
+        </div>
+        <div class="bar c"><div class="fill" id="fill-c"></div></div>
+      </div>
+
+      <div class="meter">
+        <div class="row">
+          <span class="label">Agents</span>
+          <span class="val" id="agents">—</span>
+        </div>
+        <div class="row">
+          <span class="label">Elapsed</span>
+          <span class="val" id="elapsed">0s</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust">
+      <div class="label-row">
+        <span>Ambient trust</span>
+        <strong id="trust-val">0.75</strong>
+      </div>
+      <input type="range" id="trust" min="0" max="1" step="0.01" value="0.75" />
+      <div class="sub" style="font-size:11px; color:var(--dim); font-style:italic; font-family:'Playfair Display', serif;">The probability that a new agent, meeting a dashed line, respects it. Drag to re-roll the society.</div>
+    </div>
+
+    <div class="controls">
+      <button id="toggle" class="primary">Pause</button>
+      <button id="reset">Reset</button>
+    </div>
+
+    <div class="takeaway" id="takeaway">
+      Starting balanced. High trust keeps the dashed-line rooms nearly as full as the walled ones. As trust drops, <em>the upper band fails first</em> — not because the lines moved, but because the agreement to honor them evaporated.
+    </div>
+
+    <footer>
+      hong kong · mong kok · 2026-04-23 · <em>a walk</em>
+    </footer>
+  </aside>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const toggleBtn = document.getElementById('toggle');
+  const resetBtn = document.getElementById('reset');
+  const trustEl = document.getElementById('trust');
+  const trustValEl = document.getElementById('trust-val');
+  const breachesD = document.getElementById('breaches-d');
+  const breachesC = document.getElementById('breaches-c');
+  const fillD = document.getElementById('fill-d');
+  const fillC = document.getElementById('fill-c');
+  const elapsedEl = document.getElementById('elapsed');
+  const agentsEl = document.getElementById('agents');
+  const takeawayEl = document.getElementById('takeaway');
+
+  let dpr = 1;
+  let W = 0, H = 0;
+  let running = true;
+  let agents = [];
+  let rooms = []; // {x,y,w,h,kind,id}
+  let boundaries = []; // {x1,y1,x2,y2,kind}
+  let breaches = { d: 0, c: 0 };
+  let startMs = 0;
+
+  const TARGET_AGENTS = 120;
+  const COLS = 4, ROWS = 4; // 4x2 rooms per band
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const wrap = canvas.parentElement;
+    W = wrap.clientWidth;
+    H = wrap.clientHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    buildRooms();
+  }
+
+  function buildRooms() {
+    rooms = [];
+    boundaries = [];
+    const bandH = H / 2;
+    const padY = 36;
+
+    const cellW = W / COLS;
+    const cellH = (bandH - padY * 2) / 2;
+
+    // Declared band (top half), 2 rows of 4 rooms
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const x = c * cellW;
+        const y = padY + r * cellH;
+        rooms.push({ x, y, w: cellW, h: cellH, kind: 'd', id: `d-${r}-${c}` });
+      }
+    }
+    // Constituted band (bottom half)
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const x = c * cellW;
+        const y = bandH + padY + r * cellH;
+        rooms.push({ x, y, w: cellW, h: cellH, kind: 'c', id: `c-${r}-${c}` });
+      }
+    }
+    // Boundaries = each room's 4 edges (shared ones dedup'd by drawing only interior cuts)
+    // We treat each agent crossing ANY room edge of its current room as a breach.
+  }
+
+  function spawnAgents() {
+    agents = [];
+    const per = TARGET_AGENTS / rooms.length;
+    for (const room of rooms) {
+      const n = Math.round(per + (Math.random() - 0.5) * 2);
+      for (let i = 0; i < n; i++) {
+        const trust = clampedTrust();
+        const pad = 4;
+        const x = room.x + pad + Math.random() * (room.w - pad * 2);
+        const y = room.y + pad + Math.random() * (room.h - pad * 2);
+        const ang = Math.random() * Math.PI * 2;
+        const sp = 0.4 + Math.random() * 0.6;
+        agents.push({
+          x, y,
+          vx: Math.cos(ang) * sp,
+          vy: Math.sin(ang) * sp,
+          trust,
+          roomId: room.id,
+          kind: room.kind,
+        });
+      }
+    }
+  }
+
+  function clampedTrust() {
+    const base = parseFloat(trustEl.value);
+    // Sample around the base, clamped, with some spread
+    return Math.max(0, Math.min(1, base + (Math.random() - 0.5) * 0.3));
+  }
+
+  function findRoom(x, y) {
+    for (const r of rooms) {
+      if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) return r;
+    }
+    return null;
+  }
+
+  function reset() {
+    breaches = { d: 0, c: 0 };
+    startMs = performance.now();
+    spawnAgents();
+    updateMeters();
+  }
+
+  function updateMeters() {
+    breachesD.textContent = breaches.d;
+    breachesC.textContent = breaches.c;
+    const max = Math.max(1, breaches.d, breaches.c);
+    fillD.style.width = (breaches.d / max * 100).toFixed(0) + '%';
+    fillC.style.width = (breaches.c / max * 100).toFixed(0) + '%';
+    agentsEl.textContent = agents.length;
+
+    const ratio = breaches.d > 0 || breaches.c > 0
+      ? (breaches.d / (breaches.d + breaches.c)).toFixed(2)
+      : '—';
+    const tv = parseFloat(trustEl.value);
+    let note;
+    if (tv > 0.85) {
+      note = 'High trust. The <em>dashed-line rooms</em> are holding; the signs are enough. Tokyo in daylight.';
+    } else if (tv > 0.55) {
+      note = 'Moderate trust. Declared rooms leak slowly; the population is still cooperative enough that the signs mostly work.';
+    } else if (tv > 0.3) {
+      note = 'Low trust. The declared boundaries are visibly failing. The walled rooms are unaffected — a Jersey barrier does not ask for cooperation.';
+    } else {
+      note = 'Collapse. The dashed lines hold no authority at all; agents cross them like weather. The walls remain. <em>This is what bollards are for.</em>';
+    }
+    takeawayEl.innerHTML = note;
+  }
+
+  function step() {
+    for (const a of agents) {
+      const nx = a.x + a.vx;
+      const ny = a.y + a.vy;
+
+      // very light wandering
+      a.vx += (Math.random() - 0.5) * 0.02;
+      a.vy += (Math.random() - 0.5) * 0.02;
+      const spd = Math.hypot(a.vx, a.vy);
+      if (spd > 0.9) { a.vx = a.vx / spd * 0.9; a.vy = a.vy / spd * 0.9; }
+      if (spd < 0.3) { a.vx = a.vx / spd * 0.3; a.vy = a.vy / spd * 0.3; }
+
+      // keep inside canvas
+      if (nx < 0) { a.vx = Math.abs(a.vx); continue; }
+      if (nx > W) { a.vx = -Math.abs(a.vx); continue; }
+      if (ny < 0) { a.vy = Math.abs(a.vy); continue; }
+      if (ny > H) { a.vy = -Math.abs(a.vy); continue; }
+
+      const curRoom = findRoom(a.x, a.y);
+      const nextRoom = findRoom(nx, ny);
+
+      if (!curRoom || !nextRoom || nextRoom.id === curRoom.id) {
+        a.x = nx; a.y = ny;
+        continue;
+      }
+
+      // Crossing a room boundary
+      if (curRoom.kind === 'c') {
+        // Constituted: wall. Bounce. Very rare leak via corners not counted.
+        // reflect velocity toward the nearer edge
+        const dx = nx - curRoom.x;
+        const dy = ny - curRoom.y;
+        if (dx < 1 || dx > curRoom.w - 1) a.vx = -a.vx;
+        else if (dy < 1 || dy > curRoom.h - 1) a.vy = -a.vy;
+        else { a.vx = -a.vx; a.vy = -a.vy; }
+      } else {
+        // Declared: dashed line. Respect with probability = trust.
+        if (Math.random() < a.trust) {
+          // respect — bounce
+          const dx = nx - curRoom.x;
+          const dy = ny - curRoom.y;
+          if (dx < 1 || dx > curRoom.w - 1) a.vx = -a.vx;
+          else if (dy < 1 || dy > curRoom.h - 1) a.vy = -a.vy;
+          else { a.vx = -a.vx; a.vy = -a.vy; }
+        } else {
+          // breach
+          breaches[curRoom.kind] += 1;
+          a.x = nx; a.y = ny;
+          a.roomId = nextRoom.id;
+          if (nextRoom.kind !== curRoom.kind) a.kind = nextRoom.kind;
+          // agents only re-decide trust when they spawn — this crossing remains a single breach event
+        }
+      }
+    }
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+    // bands subtle background
+    ctx.fillStyle = '#0a0a0c';
+    ctx.fillRect(0, 0, W, H);
+
+    // declared boundaries — dashed lines between rooms
+    ctx.save();
+    ctx.strokeStyle = 'rgba(106,156,196,0.55)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 5]);
+    for (const r of rooms) {
+      if (r.kind !== 'd') continue;
+      ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
+    }
+    ctx.restore();
+
+    // constituted boundaries — solid walls
+    ctx.save();
+    ctx.strokeStyle = 'rgba(196,90,63,0.9)';
+    ctx.lineWidth = 2;
+    for (const r of rooms) {
+      if (r.kind !== 'c') continue;
+      ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
+    }
+    ctx.restore();
+
+    // thin divider between bands
+    ctx.save();
+    ctx.strokeStyle = 'rgba(58,58,63,0.7)';
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(0, H / 2);
+    ctx.lineTo(W, H / 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // agents
+    for (const a of agents) {
+      const color = a.kind === 'd'
+        ? 'rgba(232,230,223,0.9)'
+        : 'rgba(232,230,223,0.9)';
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function loop() {
+    if (running) {
+      step();
+      render();
+      const elapsed = Math.floor((performance.now() - startMs) / 1000);
+      elapsedEl.textContent = elapsed + 's';
+      if (elapsed % 1 === 0) updateMeters();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    running = !running;
+    toggleBtn.textContent = running ? 'Pause' : 'Play';
+    toggleBtn.classList.toggle('primary', running);
+  });
+  resetBtn.addEventListener('click', reset);
+  trustEl.addEventListener('input', () => {
+    const v = parseFloat(trustEl.value);
+    trustValEl.textContent = v.toFixed(2);
+    // re-roll trust for new spawns; also retune existing agents gently
+    for (const a of agents) {
+      a.trust = Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.3));
+    }
+    updateMeters();
+  });
+  window.addEventListener('resize', () => { resize(); reset(); });
+
+  resize();
+  reset();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

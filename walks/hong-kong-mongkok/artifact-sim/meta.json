@@ -1,0 +1,5 @@
+{
+  "title": "Companion — A containment simulation",
+  "medium": "generative simulation — the same population of agents lives in two worlds at once. The upper band has dashed-line rooms (declared) that each agent respects only with probability = trust. The lower band has walled rooms (constituted) that nobody crosses. A slider lets you re-roll the society's ambient trust.",
+  "caption": "A city's ratio of cones to barriers is a reliable index of how much it still trusts its inhabitants. Drag the trust down and watch the upper band fail; the lower band never budges."
+}

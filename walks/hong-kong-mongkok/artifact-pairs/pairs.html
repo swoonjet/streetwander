@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Paired Specimens — declared and constituted</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0e0e10;
+    --panel: #14141a;
+    --ink: #e8e6df;
+    --dim: #8a857b;
+    --faint: #5a564f;
+    --line: #26262a;
+    --accent: #c9a962;
+    --declared: #6a9cc4;
+    --constituted: #c45a3f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font: 12px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 28px 56px; }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 32px;
+  }
+  header .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  header h1 {
+    font: italic 400 34px/1.1 "Playfair Display", Georgia, serif;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  header .sub { font-size: 12px; color: var(--dim); margin-top: 6px; }
+  header .n { text-align: right; font-size: 10px; color: var(--dim); letter-spacing: 0.14em; }
+  header .n strong { color: var(--ink); font-weight: 600; font-size: 22px; font-family: "Playfair Display", serif; display: block; }
+
+  .lede {
+    font: 13px/1.62 "IBM Plex Mono", monospace;
+    color: #c9c3b6;
+    margin: 0 0 28px;
+    max-width: 720px;
+  }
+  .lede em { font-style: italic; color: var(--accent); }
+
+  .legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 36px;
+    padding: 16px 18px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+  }
+  .legend .side {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .legend .sw {
+    width: 10px; height: 10px; margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .legend .sw.d { background: var(--declared); }
+  .legend .sw.c { background: var(--constituted); }
+  .legend .side .name {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .legend .side .desc {
+    color: #c9c3b6;
+    font-size: 11.5px;
+    line-height: 1.5;
+    font-style: italic;
+    font-family: "Playfair Display", serif;
+  }
+  .legend .side.d .name { color: var(--declared); }
+  .legend .side.c .name { color: var(--constituted); }
+
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    gap: 20px;
+    align-items: stretch;
+    padding: 22px 0;
+    border-top: 1px dashed var(--line);
+  }
+  .pair:first-of-type { border-top: none; padding-top: 0; }
+
+  .side-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .side-card .img {
+    position: relative;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: #0a0a0c;
+  }
+  .side-card .img img {
+    width: 100%; height: 100%;
+    display: block;
+    object-fit: cover;
+    filter: contrast(1.02) saturate(0.9);
+  }
+  .side-card .img .flag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font: 600 10px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.2em;
+    padding: 5px 8px;
+    color: #fff;
+    backdrop-filter: blur(2px);
+  }
+  .side-card.d .img .flag { background: rgba(106,156,196,0.82); }
+  .side-card.c .img .flag { background: rgba(196,90,63,0.82); }
+
+  .side-card .body .kind {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .side-card.d .body .kind { color: var(--declared); }
+  .side-card.c .body .kind { color: var(--constituted); }
+  .side-card .body .noun {
+    font: 400 18px/1.15 "Playfair Display", serif;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+  .side-card .body p {
+    font: italic 12.5px/1.52 "Playfair Display", serif;
+    color: #cfc9bd;
+    margin: 0;
+  }
+
+  .hinge {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hinge::before {
+    content: "";
+    position: absolute;
+    top: 10%; bottom: 10%;
+    left: 50%;
+    width: 1px;
+    background: linear-gradient(var(--declared), var(--faint), var(--constituted));
+  }
+  .hinge .label {
+    position: relative;
+    background: var(--bg);
+    padding: 12px 0;
+    font: 600 11px/1.2 "IBM Plex Mono", monospace;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    text-align: center;
+    width: 40px;
+    word-spacing: 40px;
+    text-transform: uppercase;
+  }
+  .hinge .label .num {
+    display: block;
+    font-family: "Playfair Display", serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0;
+    margin-bottom: 4px;
+  }
+
+  .pair-note {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    padding: 10px 14px;
+    border-left: 2px solid var(--accent);
+    background: var(--panel);
+    font: italic 13px/1.5 "Playfair Display", serif;
+    color: #cfc9bd;
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); }
+
+  @media (max-width: 720px) {
+    .pair { grid-template-columns: 1fr; gap: 14px; }
+    .hinge { height: 40px; }
+    .hinge::before { top: 50%; left: 10%; right: 10%; width: auto; height: 1px; background: linear-gradient(90deg, var(--declared), var(--faint), var(--constituted)); }
+    .hinge .label { width: max-content; padding: 6px 12px; word-spacing: 0; }
+    .hinge .label .num { display: inline-block; margin: 0 10px 0 0; }
+    .legend { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">FIELD GUIDE · COMPANION · PAIRED SPECIMENS</div>
+      <h1>Declared &amp; Constituted</h1>
+      <div class="sub">Five pairs. Same job, two enforcement modes.</div>
+    </div>
+    <div class="n"><strong>5</strong>pairs</div>
+  </header>
+
+  <p class="lede">
+    Every object carries a rule. Some objects carry it on the surface, addressed to a reader; some carry it in the shape itself, addressed to nobody in particular. <em>The skill of reading a street is noticing which rules each object has agreed to say out loud, and which it has absorbed into its silhouette.</em>
+  </p>
+
+  <div class="legend">
+    <div class="side d">
+      <div class="sw d"></div>
+      <div>
+        <span class="name">Declarative</span>
+        <span class="desc">Rules on the surface. Rules by recognition. Fail gracefully when ignored — merely embarrassed, not broken.</span>
+      </div>
+    </div>
+    <div class="side c">
+      <div class="sw c"></div>
+      <div>
+        <span class="name">Constitutive</span>
+        <span class="desc">Rules in the shape. Rules by being. Non-compliance is physically awkward or impossible.</span>
+      </div>
+    </div>
+  </div>
+
+  <article class="pair">
+    <div class="side-card d">
+      <div class="img">
+        <img src="mk_pair1a_cone_00001_.jpg" alt="traffic cone" />
+        <span class="flag">declared</span>
+      </div>
+      <div class="body">
+        <div class="kind">Pylonus solitaria</div>
+        <div class="noun">The lone traffic cone</div>
+        <p>Two kilograms of fluorescent paint and a polite civic threat. A cone does not enforce; it attests. Its success depends on ambient civic literacy.</p>
+      </div>
+    </div>
+    <div class="hinge"><div class="label"><span class="num">01</span>vs</div></div>
+    <div class="side-card c">
+      <div class="img">
+        <img src="mk_pair1b_jersey_00001_.jpg" alt="Jersey barrier" />
+        <span class="flag">constituted</span>
+      </div>
+      <div class="body">
+        <div class="kind">Murus saxeus</div>
+        <div class="noun">The concrete Jersey barrier</div>
+        <p>Invented 1955 on the New Jersey Turnpike because the symbolic kind stopped being enough. Does not ask your opinion. Settles the question with mass.</p>
+      </div>
+    </div>
+    <p class="pair-note">A city's ratio of cones to barriers is a reliable index of how much it still trusts its inhabitants. Tokyo is cones. The Las Vegas Strip after 2017 is barriers.</p>
+  </article>
+
+  <article class="pair">
+    <div class="side-card d">
+      <div class="img">
+        <img src="mk_pair2a_placard_00001_.jpg" alt="museum placard" />
+        <span class="flag">declared</span>
+      </div>
+      <div class="body">
+        <div class="kind">Tabula comitis</div>
+        <div class="noun">The museum placard</div>
+        <p>A cone for artworks. Assumes the visitor already believes they ought not to touch; the sign only reminds them which thing.</p>
+      </div>
+    </div>
+    <div class="hinge"><div class="label"><span class="num">02</span>vs</div></div>
+    <div class="side-card c">
+      <div class="img">
+        <img src="mk_pair2b_vitrine_00001_.jpg" alt="museum vitrine" />
+        <span class="flag">constituted</span>
+      </div>
+      <div class="body">
+        <div class="kind">Vitrina custos</div>
+        <div class="noun">The glass vitrine</div>
+        <p>A Jersey barrier for art. Has opinions no visitor can argue with. Curatorial aesthetics drift toward the placard in peacetime and back toward the vitrine when the auditor visits.</p>
+      </div>
+    </div>
+    <p class="pair-note">Contemporary curatorship has migrated toward the placard on the theory that the vitrine insults the visitor. Security directors are migrating back, on the theory that the visitor has been insulting the paintings.</p>
+  </article>
+
+  <article class="pair">
+    <div class="side-card d">
+      <div class="img">
+        <img src="mk_pair3a_signlimit_00001_.jpg" alt="speed limit sign" />
+        <span class="flag">declared</span>
+      </div>
+      <div class="body">
+        <div class="kind">Lex pallida</div>
+        <div class="noun">The speed-limit sign</div>
+        <p>A number on a metal disc governing the whole road. Addresses an assumed reader at cruising attention, presuming a shared idea of <em>acceptable</em>.</p>
+      </div>
+    </div>
+    <div class="hinge"><div class="label"><span class="num">03</span>vs</div></div>
+    <div class="side-card c">
+      <div class="img">
+        <img src="mk_pair3b_bump_00001_.jpg" alt="speed bump" />
+        <span class="flag">constituted</span>
+      </div>
+      <div class="body">
+        <div class="kind">Moles asphalti</div>
+        <div class="noun">The speed bump</div>
+        <p>A sentence in geology. Governs only its own ten meters, at the unmissable cost of your suspension. No readership assumed.</p>
+      </div>
+    </div>
+    <p class="pair-note">Most traffic-calming disputes are disputes about where the cost of the rule ought to land — on the reader, or on the suspension.</p>
+  </article>
+
+  <article class="pair">
+    <div class="side-card d">
+      <div class="img">
+        <img src="mk_pair4a_dresscode_00001_.jpg" alt="dress code placard" />
+        <span class="flag">declared</span>
+      </div>
+      <div class="body">
+        <div class="kind">Codex vestium</div>
+        <div class="noun">The dress code at the door</div>
+        <p>"Jackets required." A rule that admits to being one. Can be broken with a shrug — only the social cost varies.</p>
+      </div>
+    </div>
+    <div class="hinge"><div class="label"><span class="num">04</span>vs</div></div>
+    <div class="side-card c">
+      <div class="img">
+        <img src="mk_pair4b_lighting_00001_.jpg" alt="warm restaurant lighting" />
+        <span class="flag">constituted</span>
+      </div>
+      <div class="body">
+        <div class="kind">Lux tabulata</div>
+        <div class="noun">180-lux warm downlight</div>
+        <p>No placard, no rule posted. The ceiling simply refuses to illuminate anyone who arrived in gym shorts at the same register as the jackets. Atmosphere is enforcement that has refused to sign its work.</p>
+      </div>
+    </div>
+    <p class="pair-note">Most of what we call "atmosphere" is enforcement without signage. Venue designers know this and lean on it because signs kill the register they're trying to produce.</p>
+  </article>
+
+  <article class="pair">
+    <div class="side-card d">
+      <div class="img">
+        <img src="mk_pair5a_photo_00001_.jpg" alt="menu photograph" />
+        <span class="flag">declared</span>
+      </div>
+      <div class="body">
+        <div class="kind">Fotografia edulis</div>
+        <div class="noun">The menu photograph</div>
+        <p>Retouchable, printable, lit. A promise that is explicitly a promise. The image is downstream of a story and can be corrected.</p>
+      </div>
+    </div>
+    <div class="hinge"><div class="label"><span class="num">05</span>vs</div></div>
+    <div class="side-card c">
+      <div class="img">
+        <img src="mk_pair5b_sampuru_00001_.jpg" alt="plastic food sample" />
+        <span class="flag">constituted</span>
+      </div>
+      <div class="body">
+        <div class="kind">Simulacrum ciborum</div>
+        <div class="noun">The plastic food sample</div>
+        <p>Sampuru. Hand-carved from resin by a Gujō sculptor, sitting in a window, refusing to decay. Can't be eaten; can't be lied about; can't be pulled down at the next rebrand.</p>
+      </div>
+    </div>
+    <p class="pair-note">Japan's sampuru industry is a constitutive answer to a problem the West continues to treat declaratively. The wax tempura does the menu-photo's job with better long-term fidelity and worse copy.</p>
+  </article>
+
+  <footer>
+    <div>FIELD GUIDE COMPANION · "Declared &amp; Constituted" · 2026-04-23</div>
+    <div><em>a walk through Mong Kok</em></div>
+  </footer>
+</div>
+</body>
+</html>
