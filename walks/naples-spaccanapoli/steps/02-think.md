@@ -1,0 +1,13 @@
+SEED:
+- A small statue tucked into a niche on the right-hand baroque facade, inches from an iron railing and a yellow-lit shopfront — a votive object treated as ordinary masonry
+- A painted banner strung across the street overhead, suspended by wires from building to building, held aloft by nothing but neighborly consent
+- In the foreground, two seated figures compressed by the 360° projection into squat, dwarfish shapes — the equirectangular math deforming bodies while leaving the architecture nearly honest
+
+WANDER:
+Pick the niche. Naples is studded with these — *edicole votive*, small shrines set into the walls of ordinary buildings, Madonnas and saints ringed by plastic flowers and a working lightbulb, sometimes six feet up, sometimes at head height. Nobody officially owns them. The diocese doesn't maintain them, the comune doesn't insure them, and yet the candles keep getting replaced and the flowers keep getting swapped out after rain. It's a maintenance protocol that has survived regime change, cholera, fascism, and TikTok, and it runs on nothing but the low-grade embarrassment of being the first neighbor to let the bulb go out. Which is the same mechanism that keeps a surprising amount of open-source alive — not ideology, not enthusiasm, but a distributed shame that someone is watching; Linux ships because a maintainer somewhere doesn't want to be the reason a kernel regression landed. We over-index on incentive design and under-index on *witnessed neglect* as a motivational substrate — the uncollected leaf in the shared driveway, the group chat nobody quite leaves, the Wikipedia typo that gets fixed within 48 hours by someone whose name you will never learn. Once you see the pattern it's everywhere, and it suggests something uncomfortable about anonymity: the places in the world that run on being-watched don't work when the watching goes away. The edicola holds as long as the neighborhood knows itself. Turn the building over to short-term rentals and the candle gets a week, maybe two, and then the niche is just a dent in the plaster with a dead bulb in it — architectural evidence of a civic operating system that quietly failed to boot.
+
+BRANCH:
+The 360° math flattening the seated diners into gnomes — projection as enforced anamorphism, and how much of "photography" is optical bias pretending to be neutral record.
+
+ECHO:
+Extends and inverts step 1's thread. Step 1 was governance-by-fatigue (whoever stops reverting loses); this is governance-by-recognition (whoever stops watching loses). Both run without statutes, but graffiti wins by anonymity and the madonnella depends on its opposite — being known by name, from the second-floor window.

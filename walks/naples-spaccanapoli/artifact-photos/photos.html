@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Photo Plates — a field guide to unsigned civic protocols</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0e0e10;
+    --panel: #14141a;
+    --ink: #e8e6df;
+    --dim: #8a857b;
+    --line: #26262a;
+    --accent: #c9a962;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font: 12px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 40px 28px 56px; }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 32px;
+  }
+  header .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  header h1 {
+    font: italic 400 34px/1.1 "Playfair Display", Georgia, serif;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  header .sub { font-size: 12px; color: var(--dim); margin-top: 6px; }
+  header .n { text-align: right; font-size: 10px; color: var(--dim); letter-spacing: 0.14em; }
+  header .n strong { color: var(--ink); font-weight: 600; font-size: 22px; font-family: "Playfair Display", serif; display: block; }
+
+  .lede {
+    font: 13px/1.62 "IBM Plex Mono", monospace;
+    color: #c9c3b6;
+    margin: 0 0 36px;
+    max-width: 720px;
+  }
+  .lede em { font-style: italic; color: var(--accent); }
+
+  .plates {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
+  figure.plate {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 14px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  figure.plate .img {
+    position: relative;
+    aspect-ratio: 1/1;
+    background: #0a0a0c;
+    overflow: hidden;
+  }
+  figure.plate .img img {
+    width: 100%; height: 100%;
+    display: block;
+    object-fit: cover;
+    filter: contrast(1.02) saturate(0.92);
+  }
+  figure.plate .img .plate-no {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font: 600 10px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.2em;
+    color: #fff;
+    background: rgba(0,0,0,0.55);
+    padding: 5px 8px;
+    backdrop-filter: blur(2px);
+  }
+  figure.plate figcaption { padding: 0 6px 4px; }
+  figure.plate .name {
+    font: 400 19px/1.15 "Playfair Display", serif;
+    color: var(--ink);
+    margin: 0 0 2px;
+  }
+  figure.plate .name em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+    font-size: 13px;
+    margin-left: 6px;
+    letter-spacing: 0.02em;
+  }
+  figure.plate .taxon {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 10px;
+  }
+  figure.plate p {
+    font: italic 12.5px/1.55 "Playfair Display", serif;
+    color: #cfc9bd;
+    margin: 0;
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); }
+
+  @media (max-width: 720px) {
+    .plates { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">FIELD GUIDE · COMPANION NOTE · PHOTOGRAPHIC PLATES</div>
+      <h1>Photo Plates</h1>
+      <div class="sub">Eight entries from the lower operating system.</div>
+    </div>
+    <div class="n"><strong>8</strong>plates</div>
+  </header>
+
+  <p class="lede">
+    Specimens, imagined and rendered. Not photographs of the walk, but photographs of what the walk conjured — the patterns the glossary tried to name. <em>Each plate stands in for an entry whose proper habitat is a street at dusk, a wall at arm-height, a shrine nobody maintains.</em>
+  </p>
+
+  <div class="plates">
+
+    <figure class="plate">
+      <div class="img">
+        <img src="naples_waterline_00001_.jpg" alt="arm-height waterline" />
+        <span class="plate-no">plate 01</span>
+      </div>
+      <figcaption>
+        <div class="name">Arm-height waterline <em>n.</em></div>
+        <div class="taxon">graffiti band · ~2.3 m · reach-of-a-standing-adult</div>
+        <p>A geological record of solo working conditions. The wall remembers every hand that could afford the reach, and stops precisely where bodies stop.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="plate">
+      <div class="img">
+        <img src="naples_edicola_00001_.jpg" alt="edicola decay curve" />
+        <span class="plate-no">plate 02</span>
+      </div>
+      <figcaption>
+        <div class="name">Edicola decay curve <em>n.</em></div>
+        <div class="taxon">street shrine · flowers → candle → bulb → glass</div>
+        <p>The predictable sequence of failure when the candle-quorum drops below threshold. The plaster outlasts them all.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="plate">
+      <div class="img">
+        <img src="naples_cowpath_00001_.jpg" alt="cow-path lamp" />
+        <span class="plate-no">plate 03</span>
+      </div>
+      <figcaption>
+        <div class="name">Cow-path lamp <em>n.</em></div>
+        <div class="taxon">accidental wayfinding · signal-in-a-gradient</div>
+        <p>Any light not installed for wayfinding that nonetheless performs it. Smuggles the incidental information <em>someone lives here</em> inside its directional pull.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="plate">
+      <div class="img">
+        <img src="naples_fabric_00001_.jpg" alt="fabric tell" />
+        <span class="plate-no">plate 04</span>
+      </div>
+      <figcaption>
+        <div class="name">Fabric tell <em>n.</em></div>
+        <div class="taxon">textile-time · strung not built</div>
+        <p>A regime's first anxiety. Reads the pulse before the pulse has named itself. Regulators go after statues because they think permanence equals seriousness; politics is serious on Tuesday.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="plate">
+      <div class="img">
+        <img src="naples_kerb_00001_.jpg" alt="kerb privilege / sittable edge" />
+        <span class="plate-no">plate 05</span>
+      </div>
+      <figcaption>
+        <div class="name">Kerb privilege <em>n.</em></div>
+        <div class="taxon">unlabeled affordance · anti-bench</div>
+        <p>The surplus use-value that unlabeled seating extracts from labeled seating. The more explicitly a thing is offered, the less fully it tends to be used.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="plate">
+      <div class="img">
+        <img src="naples_nightblank_00001_.jpg" alt="nightly blank page" />
+        <span class="plate-no">plate 06</span>
+      </div>
+      <figcaption>
+        <div class="name">Nightly blank page <em>n.</em></div>
+        <div class="taxon">time-shared surface · merchant-by-day, writer-by-night</div>
+        <p>A civic resource allocated by schedule rather than ownership. The shutter publishes itself through closure, by a contract nobody drafted and everyone honors.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="plate">
+      <div class="img">
+        <img src="naples_palimpsest_00001_.jpg" alt="palimpsest floor" />
+        <span class="plate-no">plate 07</span>
+      </div>
+      <figcaption>
+        <div class="name">Palimpsest floor <em>n.</em></div>
+        <div class="taxon">saturation · signature → texture → substrate</div>
+        <p>The week the transition happened, nobody recorded. The individual tag stopped being legible and the aggregate began to be — a reef crossing from graveyard to organism.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="plate">
+      <div class="img">
+        <img src="naples_spillover_00001_.jpg" alt="transaction-spillover lighting" />
+        <span class="plate-no">plate 08</span>
+      </div>
+      <figcaption>
+        <div class="name">Transaction-spillover lighting <em>n.</em></div>
+        <div class="taxon">pre-municipal illumination · leakage as infrastructure</div>
+        <p>An older protocol than the streetlamp. What actually lights a street is any sustained reason for someone to be there after dark; the cloister proves the non-commercial variant.</p>
+      </figcaption>
+    </figure>
+
+  </div>
+
+  <footer>
+    <div>FIELD GUIDE COMPANION · PHOTOGRAPHIC PLATES · 2026-04-23</div>
+    <div><em>a walk through Spaccanapoli</em></div>
+  </footer>
+</div>
+</body>
+</html>

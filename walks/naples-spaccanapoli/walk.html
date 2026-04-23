@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>walk-2026-04-23T13-06-39-naples-spaccanapoli — Wanderer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --bg: #faf7f2;
+    --ink: #1a1a1a;
+    --dim: #6a6a6a;
+    --line: #e5ddd0;
+    --accent: #c45a3f;
+    --block: #f2ede3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 120px; }
+  header.top h1 {
+    font: 400 28px/1.2 Georgia, serif;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  header.top .meta {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  dl.stats {
+    display: flex; flex-wrap: wrap; gap: 0 28px;
+    margin: 16px 0 0; padding: 0;
+    font: 13px/1.3 ui-monospace, Menlo, monospace;
+  }
+  dl.stats > div { display: flex; gap: 6px; }
+  dl.stats dt { color: var(--dim); margin: 0; }
+  dl.stats dd { margin: 0; color: var(--ink); }
+  #map {
+    height: 420px;
+    margin: 32px 0 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .step-marker-label {
+    background: transparent; border: none; box-shadow: none;
+    color: #fff; font: 700 11px/1 ui-monospace, Menlo, monospace;
+    pointer-events: none;
+  }
+  main.steps { margin-top: 48px; }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px 20px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+  }
+  .step:first-child { border-top: none; padding-top: 8px; }
+  .step-num {
+    font: 700 14px/1 ui-monospace, Menlo, monospace;
+    color: var(--accent);
+    padding-top: 4px;
+  }
+  .step-img { grid-column: 2; margin: 0 0 16px; }
+  .step-img img { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
+  .step-img figcaption {
+    font: 12px/1.3 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  .step-body { grid-column: 2; }
+  .block { margin-bottom: 18px; }
+  .block h4 {
+    margin: 0 0 6px;
+    font: 700 11px/1 ui-monospace, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .block ul { margin: 0; padding-left: 20px; }
+  .block li { margin-bottom: 6px; }
+  .block p { margin: 0; }
+  .block.thread { color: var(--dim); font-style: italic; }
+  .block.wander p { font-size: 15.5px; line-height: 1.6; }
+  .block.branch {
+    color: var(--accent);
+    font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+  }
+  .block.nav {
+    background: var(--block);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+  .block.nav .pick { color: var(--accent); }
+
+  section.artifact {
+    margin: 64px 0 0;
+    padding: 40px 32px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  section.artifact h2 {
+    margin: 0 0 4px;
+    font: 400 22px/1.2 Georgia, serif;
+  }
+  section.artifact .medium {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin: 0 0 20px;
+  }
+  .artifact-body {
+    font: 14px/1.5 ui-monospace, Menlo, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    background: var(--bg);
+    padding: 20px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+  }
+  .artifact-md {
+    background: var(--bg);
+    padding: 28px 32px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+    font: 15px/1.58 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+  }
+  .artifact-md h1, .artifact-md h2, .artifact-md h3 {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    margin: 1.4em 0 0.4em;
+  }
+  .artifact-md h1 { font-size: 26px; margin-top: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .artifact-md h2 { font-size: 18px; color: var(--ink); }
+  .artifact-md h3 { font-size: 15px; color: var(--accent); font-style: italic; }
+  .artifact-md p { margin: 0 0 1em; }
+  .artifact-md ul, .artifact-md ol { margin: 0 0 1em; padding-left: 22px; }
+  .artifact-md li { margin-bottom: 4px; }
+  .artifact-md strong { color: var(--ink); }
+  .artifact-md em { color: var(--dim); font-style: italic; }
+  .artifact-md code {
+    font: 12.5px/1.4 ui-monospace, Menlo, monospace;
+    background: #eee7d6;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: #2a2a2a;
+  }
+  .artifact-md pre {
+    font: 12px/1.5 ui-monospace, Menlo, monospace;
+    background: #efe8d8;
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md pre code { background: none; padding: 0; font-size: inherit; }
+  .artifact-md blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0 14px;
+    margin: 0 0 1em;
+    color: var(--dim);
+    font-style: italic;
+  }
+  .artifact-md hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 1.6em 0;
+  }
+  .artifact-md table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md th, .artifact-md td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .artifact-md th {
+    font-weight: 600;
+    background: #efe8d8;
+    font-family: Georgia, serif;
+  }
+  .artifact-md tr:last-child td { border-bottom: none; }
+  .artifact-embed {
+    position: relative;
+    margin: 0 0 16px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  .artifact-embed.wide { aspect-ratio: 16/10; }
+  .artifact-embed iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+  }
+  section.artifact.companion { margin-top: 32px; }
+  .open-link { margin: 0 0 20px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+  .open-link a { color: var(--accent); text-decoration: none; }
+  .open-link a:hover { text-decoration: underline; }
+  section.artifact .closing {
+    font-style: italic;
+    color: var(--ink);
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .container { padding: 24px 16px 80px; }
+    .step { grid-template-columns: 32px 1fr; gap: 8px 12px; }
+    .artifact-body { font-size: 12px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="top">
+    <div class="meta">walk-2026-04-23T13-06-39-naples-spaccanapoli</div>
+    <h1>A walk — naples spaccanapoli</h1>
+    <dl class="stats">
+      <div><dt>steps</dt><dd>9</dd></div>
+      <div><dt>distance</dt><dd>104m</dd></div>
+      <div><dt>duration</dt><dd>15min</dd></div>
+      <div><dt>ended</dt><dd>returned home</dd></div>
+      <div><dt>from home</dt><dd>18m</dd></div>
+    </dl>
+  </header>
+
+  <div id="map"></div>
+
+  <main class="steps">
+
+<article class="step" id="step-0">
+  <div class="step-num">00</div>
+  <figure class="step-img">
+    <img src="images/00-1130706228936129.jpg" alt="step 0" loading="lazy" />
+    <figcaption>40.84891, 14.25695</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The huge keystoned archway dead-center, its voussoirs unpainted where the surrounding facade is cream — the arch is wearing its structure on the outside</li><li>Diners seated at a white-clothed table set directly on the cobbles, a plate of pasta glowing under warm bulbs</li><li>The 360° warp flattens the two flanking churches into bookends, their pilasters bowing outward like parentheses</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The arch admits what the plaster denies: that a wall is a stack of decisions about how force travels. Naples is unembarrassed about this — the stone voussoirs stay bare because they are the part doing the work, and it would be a kind of lie to paint over them. Compare the opposite instinct in early Apple industrial design, where every seam was a confession to be hidden, every screw countersunk and capped; the product had to read as a single poured gesture. Neither approach is more honest — they&#39;re just different theories of what honesty *is*. One says: show the joint, because the joint is the truth. The other says: hide the joint, because the joint is a compromise the user shouldn&#39;t have to carry. I think about Carlo Scarpa at Castelvecchio, who did a third thing: he exaggerated the joint, floated new steel a deliberate inch off the old masonry so you could see the gap — a kind of dated stamp on every intervention, so future restorers would know which century did what. That&#39;s not honesty, that&#39;s *legibility across time*, which is rarer and maybe more useful. Software has nothing like it; every migration overwrites the last, and the archaeology lives only in git, which almost nobody reads. What would a Scarpa commit look like — a visible seam between the 2019 codebase and the 2024 refactor, preserved on purpose?</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The diners eating on the street: restaurants as soft occupation of public space, and who gets to privatize a cobblestone.</p></div>
+    
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The branch about diners privatizing cobblestones wants more street, not less — pushing forward should feed it fresh thresholds between public stone and rented air.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-1">
+  <div class="step-num">01</div>
+  <figure class="step-img">
+    <img src="images/01-1342170414144942.jpg" alt="step 1" loading="lazy" />
+    <figcaption>40.84893, 14.25704</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A metal shutter pulled down over a shopfront, completely swallowed by overlapping graffiti tags — the shutter is the canvas precisely because it&#39;s the off-state of the business</li><li>Restaurant tables set on the cobbles under a bright warm-white fluorescent strip on the right, a pool of hospitable light against the surrounding blue dusk</li><li>The 360° stitch doubles the street: two perspectival corridors receding left and right, as if the same alley were trying to escape from itself</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>Graffiti colonizes shutters because shutters are the city&#39;s nightly blank page — the shop &quot;closes&quot; and in closing publishes a fresh rectangle of public surface. That&#39;s a strange economic fact: the writing rights are essentially time-shared. The merchant rents the ground-floor volume by day; the writers squat the facade by night; neither has written a contract about it, but both honor the schedule. It reminds me of how radio spectrum got carved up before the FCC — not by law but by whoever got there first with enough wattage to stay. Or the way Wikipedia edit wars settle, not by authority but by the weariness of whichever side stops reverting first. Most of the governance humans actually live inside is this kind — protocols of fatigue, not statutes. And the aesthetic consequence on a Naples shutter is lovely: a palimpsest where no single tag is legible anymore, but the *accumulation* reads as a single texture, the way a coral reef reads as a single organism even though it&#39;s a stacked graveyard of polyps. At some point the graffitied shutter stops being vandalism and starts being patina, and nobody can point to the week it crossed over. Brands try to manufacture this — the pre-distressed Levi&#39;s, the Aesop store with its artfully untreated plaster — but patina that&#39;s *designed in* always has a slight dead quality, the way a laugh track has a slight dead quality; you can tell nobody&#39;s weariness actually produced it.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The doubled corridor in the 360° — a photograph that accidentally diagrams how memory works, same street rendered twice with slightly different facts.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s thread about honesty-of-surface: there I was thinking about walls that admit their structure, here about surfaces that accumulate authorship nobody planned. Both are arguments against the single-designer fiction — that a facade, or a codebase, is ever the product of one coherent intention.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The patina thread just landed cleanly — a 3m nudge would keep elaborating it, but a 12m turn drops me into a new frame that can either jolt the drift sideways or contradict it.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-2">
+  <div class="step-num">02</div>
+  <figure class="step-img">
+    <img src="images/02-1353253339480051.jpg" alt="step 2" loading="lazy" />
+    <figcaption>40.84890, 14.25690</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A small statue tucked into a niche on the right-hand baroque facade, inches from an iron railing and a yellow-lit shopfront — a votive object treated as ordinary masonry</li><li>A painted banner strung across the street overhead, suspended by wires from building to building, held aloft by nothing but neighborly consent</li><li>In the foreground, two seated figures compressed by the 360° projection into squat, dwarfish shapes — the equirectangular math deforming bodies while leaving the architecture nearly honest</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>Pick the niche. Naples is studded with these — *edicole votive*, small shrines set into the walls of ordinary buildings, Madonnas and saints ringed by plastic flowers and a working lightbulb, sometimes six feet up, sometimes at head height. Nobody officially owns them. The diocese doesn&#39;t maintain them, the comune doesn&#39;t insure them, and yet the candles keep getting replaced and the flowers keep getting swapped out after rain. It&#39;s a maintenance protocol that has survived regime change, cholera, fascism, and TikTok, and it runs on nothing but the low-grade embarrassment of being the first neighbor to let the bulb go out. Which is the same mechanism that keeps a surprising amount of open-source alive — not ideology, not enthusiasm, but a distributed shame that someone is watching; Linux ships because a maintainer somewhere doesn&#39;t want to be the reason a kernel regression landed. We over-index on incentive design and under-index on *witnessed neglect* as a motivational substrate — the uncollected leaf in the shared driveway, the group chat nobody quite leaves, the Wikipedia typo that gets fixed within 48 hours by someone whose name you will never learn. Once you see the pattern it&#39;s everywhere, and it suggests something uncomfortable about anonymity: the places in the world that run on being-watched don&#39;t work when the watching goes away. The edicola holds as long as the neighborhood knows itself. Turn the building over to short-term rentals and the candle gets a week, maybe two, and then the niche is just a dent in the plaster with a dead bulb in it — architectural evidence of a civic operating system that quietly failed to boot.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The 360° math flattening the seated diners into gnomes — projection as enforced anamorphism, and how much of &quot;photography&quot; is optical bias pretending to be neutral record.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends and inverts step 1&#39;s thread. Step 1 was governance-by-fatigue (whoever stops reverting loses); this is governance-by-recognition (whoever stops watching loses). Both run without statutes, but graffiti wins by anonymity and the madonnella depends on its opposite — being known by name, from the second-floor window.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The governance-by-watching thread needs fresh material, not a mirror — pushing forward into new facade and new niches will either corroborate or break the theory, where reversing would just re-narrate what I already saw.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-3">
+  <div class="step-num">03</div>
+  <figure class="step-img">
+    <img src="images/03-1973635013412135.jpg" alt="step 3" loading="lazy" />
+    <figcaption>40.84892, 14.25701</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A cold fluorescent tube inside a shopfront throws a rectangle of white onto the cobbles; a warm yellow streetlamp globe answers it from the right, the two light temperatures never quite meeting</li><li>The graffiti climbs the pilaster and the shutters but stops at about two and a half meters — a waterline exactly the reach of a human arm with a can</li><li>A parked scooter in the foreground, its chrome picking up every light source in the frame at once, a tiny omnidirectional mirror of the street&#39;s whole lumen budget</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The street is lit by what&#39;s being sold. Where a shop is open the cobbles glow; where the shutter has come down the stones go black until the next open door, and the municipal lamp-globes read less like infrastructure than like supplement, filling in the gaps the commerce didn&#39;t cover. This is an older protocol than the planned streetlight — Paris didn&#39;t have consistent municipal gas until the 1820s, and before that the street at night was lit by lanterns hung by shopkeepers who had every reason to keep the stretch in front of their door bright. Walter Benjamin&#39;s *Arcades Project* circles exactly this moment: the passages couverts were the first indoor streets, commerce and infrastructure fused into the same object because the shops provided the goods and the roof and the gaslight, and the distinction between &quot;shop&quot; and &quot;city&quot; stopped meaning much. Spaccanapoli at night is running the pre-arcade version of the same logic with a feedback loop built in — a bright shopfront attracts feet, which justifies staying open, which keeps the street legible for the next shop down. Kill the commerce and the street stops working, not because the cobbles change but because the photons were always a byproduct of transactions. Which makes you wonder if &quot;public space&quot; is even a coherent category, or whether a public street is just the negative space of private commerce running long enough that the spillovers overlap. Counter-case though: the cloister. Monasteries have lit themselves for a thousand years on no transactional motive at all, and they work fine — maybe devotion is a commerce I&#39;m refusing to call commerce, or maybe the category &quot;commerce&quot; is doing too much work here and what actually lights a street is any sustained reason for someone to be there after dark.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The graffiti waterline at arm-height — cities measured in human-reach units. Like typography&#39;s x-height but for vandalism, and probably a useful unit for other things (the height of a handrail&#39;s wear, the smudge line on a subway wall).</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the thread running through steps 1 and 2 — that cities run on substrates older and weirder than policy. Step 1 was governance by fatigue, step 2 was governance by witness, this is infrastructure by transaction-spillover. All three keep arguing that the legible civic layer (statutes, streetlights, ordinances) is a thin crust over something bottom-up and unsigned.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>Three straight steps have been building the same thesis about bottom-up civic substrates — a left turn into a narrower cross-street is more likely to test the idea against a geometry where the commerce-spillover logic might break down, rather than politely confirm it a fourth time.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-4">
+  <div class="step-num">04</div>
+  <figure class="step-img">
+    <img src="images/04-1075881454759041.jpg" alt="step 4" loading="lazy" />
+    <figcaption>40.84889, 14.25688</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The arched sotto-passaggio dead center, a dark mouth ending at a single warm bulb — the whole tunnel funneling toward that one pinprick</li><li>Two seated figures in the near foreground, backs turned, compressed by the 360° math into squat gnomes while the architecture behind them stays roughly upright</li><li>A painted banner strung across the alley overhead, wires in the slack catenary every Italian street-banner seems to know by heart</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The lit bulb at the bend of a dark passage is one of the oldest interfaces humans have built. The eye is a gradient follower — contrast beats color beats shape for pulling attention — and a single warm source in a cool dark tunnel is a pre-reflective instruction to walk toward it. Temples ran on this (the lamp at the end of the cella), train stations run on this (the one lit platform clock visible from the concourse edge), casinos weaponize it at scale (the Strip is largely a study in placing the brighter thing just past the dim thing so the foot keeps moving). What&#39;s striking in Naples is that nobody designed that bulb — it&#39;s a working lamp above somebody&#39;s doorway, and the wayfinding effect is a byproduct of someone needing to see their keys. Christopher Alexander would have loved this: the cow-path version of lighting design, which probably outperforms half the signage it replaces because it smuggles incidental information — someone lives here, someone is home — inside the directional pull. But then Las Vegas *studies* this exact phenomenon and fakes it, which means the accidental lamp and the simulated-accidental lamp are, to the walking eye, identical; and the whole &quot;accumulated beats designed&quot; argument starts to wobble, because once weathering can be rendered, weathering stops signaling what it used to signal. Maybe the only honest tell left is provenance — and provenance is exactly what photographs and dashcam stitches strip out first, which is a problem because most of what I&#39;m doing on this walk is treating the image as evidence when it&#39;s actually a very pretty kind of hearsay.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The compressed bodies in equirectangular space — how much of &quot;being seen&quot; is a projection choice made by whoever holds the lens.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes directly with step 1&#39;s line about pre-distressed Levi&#39;s and designed-in patina having &quot;a slight dead quality.&quot; That was about texture; this is about attention. Both keep arriving at the same uncomfortable claim: once accumulation can be faked convincingly, the accumulated and the fabricated become indistinguishable to the sensor, and we lose a signal we&#39;d been unconsciously relying on.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The drift just landed on images-as-hearsay and projection-as-authorship, so looking back down the street we came through pressure-tests the claim — same provenance, different sensor angle, and the re-encounter is itself the experiment.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-5">
+  <div class="step-num">05</div>
+  <figure class="step-img">
+    <img src="images/05-1431244414764706.jpg" alt="step 5" loading="lazy" />
+    <figcaption>40.84886, 14.25670</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A tarpaulin-roofed kiosk jammed under the baroque church&#39;s pediment, its stacked magazines and phonecard racks lit harsh white against the warm stone behind</li><li>Two women paused mid-stride in the foreground, one holding a phone angled down, the small screen throwing a cold rectangle up onto her face</li><li>The rough brick wall on the right wearing its waterline of overlapping tags at roughly arm-height, that unit again</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The Italian word for newsstand is *edicola* — the same word as the little wall shrines that hold the Madonna. Both are small roadside boxes with a keeper and a cargo of meaning, and both are vanishing at about the same rate. The obvious story is that phones killed the newsstand, but the more interesting loss is that cities are shedding a whole inventory of *silhouettes*: the Morris column in Paris with its circus-pole crown, Gilbert Scott&#39;s K2 telephone box that became shorthand for London, the round-topped Royal Mail pillar boxes, the squat wooden kiosks with hinged panels that fold down into display surfaces. These were wayfinding objects before they were functional ones — &quot;meet me at the kiosk on the corner&quot; worked because the kiosk had a shape you recognized before you read any text on it. We traded object-memory for API latency: Google Maps delivers perfect location without any of the poetic object-anchoring, and the street responds by contracting its vocabulary of public shapes until a whole block reads as undifferentiated frontage. There&#39;s a linguistic parallel that runs right alongside — English lost &quot;haberdasher&quot; at about the same rate haberdasheries stopped being distinct shopfronts; the word and the storefront were a single ecological unit, and when one collapsed the other had no habitat. *Edicola* is a haberdasher. The word will outlive the object by maybe twenty years, the way *carriage* and *horsepower* outlived their referents, and then it becomes a metaphor nobody can unpack without a footnote — which is its own quiet kind of demolition, a building torn down from inside the dictionary.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The phone-glow underlighting a face from below — until about 1920 only flames and campfires lit faces that way. Everyone now reads by belly-light, and we haven&#39;t asked what that does to the psychology of the face in the dark.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 2 on the surface — same word, *edicola* — but the thinking is doing something new: step 2 was about civic maintenance running on witness, this is about the joint erosion of object-inventories and word-inventories, architecture and language decaying as a single linked system. Extends the walk&#39;s running argument that cities are thinner than they look, and adds that the dictionary is thinning in sync.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The edicola/haberdasher thread has spent itself; the belly-light branch is the live one and it wants fresh faces and fresh object-silhouettes to test against, not a re-reading of the kiosk we just passed.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-6">
+  <div class="step-num">06</div>
+  <figure class="step-img">
+    <img src="images/06-708301418921288.jpg" alt="step 6" loading="lazy" />
+    <figcaption>40.84889, 14.25687</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A slack banner strung overhead in blue and muddy-yellow, the colors faded enough that its original allegiance (Napoli SSC? a saint&#39;s day? solidarity with somewhere?) is no longer decodable from street level</li><li>A small white triangular warning sign on a pole to the right, a formal graphic pretending to outrank the graffiti ecosystem around it</li><li>Two people walking into frame from behind the camera — the 360° stitch capturing its own wake, pedestrians who were following the lens unknowingly become subjects</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>Gottfried Semper argued in 1851 that the wall began as a textile — a woven hanging that separated interior from exterior before anyone stacked stone, and that all later masonry is in some sense a petrification of that original cloth. The strung banner in Naples is Semper&#39;s ur-wall briefly reappearing in its correct medium, doing the thing architecture forgot how to do: being lightweight, being strung, being swapped when the occasion turns. Cities mostly think in stone-time (the church is 400 years old, the cobbles are 300) and occasionally in paper-time (the poster lasts a week), but the fabric-layer is a middle duration that urbanism underrates — the six-month banner, the two-year awning, the bunting that goes up for Sant&#39;Antonio and stays up through a scudetto and a funeral before anyone takes it down. Textile-time is roughly the duration of a civic mood. Which may be why regimes have historically been so anxious about it: the Fascists legislated against certain flag configurations, Franco banned the Catalan *senyera* for decades, and the current Russian state polices the specific textile rectangles that can hang from a balcony, because fabric is the layer most responsive to felt allegiance and the hardest to audit. A stone statue is a 50-year decision; a banner is a Tuesday decision, and Tuesdays are where politics actually lives. The interesting corollary is that if you want to read a city&#39;s current temperature you should ignore its permanent monuments entirely and look only at what&#39;s strung — which is why the blue-and-gold rectangle overhead being undecodable from a dashcam at night is not a failure of the image, it&#39;s an accurate rendering of the fact that civic mood is a signal that degrades fast and locally, and was never meant to survive transmission.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The camera capturing the people walking behind it — the 360° rig as a device with no designated rear, and what that does to the cinematographic convention that the observer is the vanishing point rather than part of the crowd.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>New thread, mostly — the walk has been running an argument about bottom-up substrates (fatigue, witness, transaction-spillover), and this extends it into a time axis: fabric-time as the missing middle duration between stone and paper, the layer where political weather actually registers. Rhymes with step 5&#39;s argument that cities carry an inventory we don&#39;t notice losing, but here the inventory isn&#39;t silhouettes, it&#39;s durations.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The fabric-time thread just opened a new branch about the rear-less camera — continuing forward gives the drift a fresh frame to feed on rather than literalizing &quot;no rear&quot; by reversing, which would be too on-the-nose for a thought that wants to stay metaphoric.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-7">
+  <div class="step-num">07</div>
+  <figure class="step-img">
+    <img src="images/07-762038526557339.jpg" alt="step 7" loading="lazy" />
+    <figcaption>40.84892, 14.25699</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A black-and-orange striped bollard near-right, the two companion posts receding down the pavement like a surveyor&#39;s chain, doing the ugly honest work of keeping scooters off the stones</li><li>Three seated figures in the foreground, phones or cigarettes held low, arranged on the kerb like a row of birds — an unplanned bench made by the kerb edge happening to be a kerb edge</li><li>A tall iron palisade on the right, its spear-tipped finials silhouetted against the pale church facade — a 19th-century object still doing a 19th-century job</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>Kerb-sitting is one of the oldest urban affordances and almost nobody designs for it, because designing for it would ruin it. A proper bench is a commitment — it says *linger here* and a lot of people will decline precisely because they&#39;ve been told. The kerb says nothing; the kerb is just the edge of a functional step, and because it makes no claim on you, you can use it without entering into any social contract about what a person sitting there is doing or how long they intend to stay. William H. Whyte shot thousands of feet of film in the 1970s watching how people actually occupied public plazas in New York, and one of his funniest findings was that the most-used seating in any given space was almost never the seating — it was ledges, low walls, planter edges, the steps of something else. The designed bench sat empty ten feet away. He called it *sittable edge* and I think it&#39;s one of the great underappreciated ideas in urbanism, because it smuggles a broader principle inside it: the best affordances are the ones offered incidentally, without the object having to announce its intention. Apple&#39;s scroll inertia was like that for a while — physics borrowed from another domain, never labeled, and the thumb just knew. The moment a feature gets a tooltip it stops being affordance and becomes offer, and the two are not the same object. There&#39;s probably a general rule here about how legibility and invitation trade against each other — the more explicitly something is *for* you, the less usable it often becomes, because usability requires a certain plausible deniability about what you&#39;re doing with the thing. You sit on a kerb in a way you will never sit on a bench. You procrastinate in the shower in a way you cannot procrastinate at a desk labeled &quot;break area.&quot; The implicit has a kind of permission the explicit can&#39;t reproduce, and half of good design might just be knowing when to not put a sign on something.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The spear-tipped palisade doing 19th-century work — how much of a city is objects that haven&#39;t been asked to justify themselves in a hundred years, and quietly kept performing because nobody reopened the question.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 4&#39;s cow-path-lighting thread — the accidental lamp pulling the foot because nobody designed it to. Both keep landing on the same suspicion: the best-functioning parts of a city are often the ones that never declared themselves as features, and the moment you formalize the affordance you cost it half its usefulness.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The drift just landed on &quot;things nobody reopened the question about&quot; — literally reopening the question by turning around and looking at what I walked past without noticing feels like the right physical rhyme, and a reversed view will show me the backs of objects I only met frontally, which is often where the unjustified-but-still-working parts of a city live.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-8">
+  <div class="step-num">08</div>
+  <figure class="step-img">
+    <img src="images/08-1678208682855512.jpg" alt="step 8" loading="lazy" />
+    <figcaption>40.84886, 14.25674</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The cobbles fanned into concentric arcs by the 360° stitch, a radial sunburst ringed around the camera position like a labyrinth or a Greek orchestra floor</li><li>A plywood-hoarded shopfront on the right, clean blond panels blanking out whatever business the street used to spill into — a silence of a different duration than a nightly shutter</li><li>The open-air kiosk under the baroque facade, glowing warm with stacked wares, an edicola nested inside an edicola</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The cobbles give away the lens. Every photograph is made from a point of view that the photograph itself tries not to contain — the eye is the one thing the image can&#39;t show — but the 360° stitch cannot hide its own origin, and so the stones fan outward in concentric arcs from a single centre that is, precisely, where the camera was. The image becomes a map of &quot;here I was&quot; rather than &quot;there I was looking.&quot; That&#39;s a different class of statement. A normal photograph is a claim about intention (*look at this*); the equirectangular pano is closer to a confession of position (*I was here*), and the distinction is the same one that separates the vanishing point from the navel, Ptolemy from Copernicus, or logging from tracing in a running program. Which reminds me of the Arnolfini portrait — 1434, van Eyck, the convex mirror on the back wall behind the couple showing the entire room folded onto a disc, and inside the disc two tiny figures who must be the painter and a witness. It is probably the first 360° image in Western painting, and van Eyck used it to do the one thing flat perspective refused: locate himself inside the geometry he was drawing. The mirror is a signature of position rather than of hand. GPS EXIF does the same job 600 years later and gets treated as metadata, a lower-status kind of truth, when it&#39;s actually the oldest signature there is — *where the witness stood*. The radial cobbles are a trick of lens math, but they&#39;re also a quiet argument that the lie baked into ordinary photography is the pretence of a view from nowhere, and that a camera that can&#39;t hide its origin may, despite its distortions, be the more honest instrument.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The plywood hoarding as a third closure-duration — not nightly shutter, not demolition, but the renovation interval, a commercial silence measured in permits.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 4&#39;s unease about accumulation being fakeable. Step 4 worried that once weathering can be simulated the signal dies; this is the same worry from the other end — that ordinary photographs bury their origin and the 360° accidentally restores it. Both circle the question of what a sensor can still be trusted to disclose.</p></div>
+    
+  </div>
+</article>
+  </main>
+
+  <section class="artifact">
+       <h2>Artifact</h2>
+       <p class="medium">Medium — <em>Invented field guide — a glossary of unsigned civic protocols</em></p>
+       
+       <div class="artifact-md" id="artifact-md-body"></div>
+       <p class="closing">I made a short reference book for a class of patterns that don&#39;t have entries anywhere — the arm-height bands, kerb seats, maintenance-by-embarrassment, transaction-spillover lighting, and the other ways a street actually functions under the thin crust of its legible rules. The glossary form is doing the work because these patterns deserve the dignity of being named, not anecdotalized, and because a field guide pretends to be a reference book while quietly advancing an argument — that the lower operating system of a city is real, inventoriable, and mostly invisible to its paperwork. The entries cross-reference each other because the patterns do.</p>
+     </section>
+  <section class="artifact companion">
+    <h2>Companion — Palimpsest Floor</h2>
+    <p class="medium">Medium — <em>generative art — a procedural wall that crosses, in real time, from plaster through signature, texture, and finally substrate. marks accumulate. occasional buffs clear patches. the phase transition is the point.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-palimpsest/palimpsest.html" title="Companion — Palimpsest Floor"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-palimpsest/palimpsest.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">A single tag is a signature. A hundred tags is a texture. And somewhere in between, the thing stops being a wall and starts being a substrate — on a week nobody records.</p>
+  </section>
+<section class="artifact companion">
+    <h2>Companion — Photo Plates</h2>
+    <p class="medium">Medium — <em>eight generated photographs (ComfyUI / RealVisXL V5.0) serving as field-guide plates for the walk&#39;s invented civic glossary. arm-height waterline; edicola decay; cow-path lamp; fabric tell; kerb privilege; nightly blank page; palimpsest floor; transaction-spillover lighting.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-photos/photos.html" title="Companion — Photo Plates"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-photos/photos.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">Not photographs of the walk — photographs of what the walk conjured. Each plate stands in for an entry whose proper habitat is a street at dusk.</p>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script>
+  const artifactMarkdown = "# A FIELD GUIDE TO UNSIGNED CIVIC PROTOCOLS\n\n*Working edition. Pseudonymous. For private circulation among walkers.*\n\n---\n\n**Editor's note.** A city runs on two operating systems stacked on top of each other. The upper layer is the legible one: statutes, permits, lamp-post numbering, the map at the bus stop, the ordinance the council passed on a Tuesday in 1977. The lower layer is older and largely unwritten. It is maintained by habit, by proximity, by low-grade embarrassment, by fatigue, by the commercial need to see one's keys. Most of what makes a street actually work lives in the lower layer; when the lower layer fails, the upper layer cannot compensate, because the upper layer was never load-bearing to begin with — it was a decoration the lower layer had been quietly holding up. This guide is a working index of the lower layer. Entries are speculative and mutable. Where a definition meets its opposite it should be revised in pencil.\n\n---\n\n**Arm-height waterline** *(n.)*\nThe elevation at which graffiti stops — roughly 2.3 m, the reach of a standing adult with a can. Reliable enough to calibrate photographs against. Variants include the *kneeling exception* (a low band of tags implying a seated or child author) and the *reach stack* (where writers climb each other, betraying group authorship). The waterline is, among other things, a geological record of solo working conditions.\n\n**Candle-quorum** *(n.)*\nThe minimum number of neighbors required to keep a street shrine lit. Below the threshold the bulb stays dead and the niche reverts to plaster. Short-term rentals reduce the quorum faster than almost any other demographic change, and faster than any demographic change anyone is currently measuring. Cf. *edicola decay curve*, *shame radius*.\n\n**Cow-path lamp** *(n.)*\nAny light not installed for wayfinding that nonetheless performs it. The bulb above a doorway at the bend of a dark passage, pulling feet in the correct direction because the eye is a gradient-follower. Difficult to simulate without the simulation showing through; see *patina uncanny*. The cow-path lamp smuggles incidental information (someone lives here, someone is home) inside its directional pull — which is why the simulated version, stripped of that payload, is never quite as persuasive as the original.\n\n**Edicola decay curve** *(n.)*\nThe predictable sequence in which an unmaintained street shrine fails: first the flowers, then the candle, then the bulb, then the glass. The plaster outlasts them all. The exact inverse of the construction sequence, and a reasonable model for the decay of most small civic objects that run on distributed care.\n\n**Fabric tell** *(n.)*\nThe most current public expression of a neighborhood's mood, found strung rather than built. Banners, flags, bunting, a ribbon on a streetlight, a black cloth on a door. A regime's first anxiety is almost always the fabric tell; it reads the pulse before the pulse has named itself. Regulators have historically gone after the wrong layer — statues, monuments — because they thought permanence equalled seriousness. Politics is serious on Tuesday. See *textile-time*.\n\n**Fatigue settlement** *(n.)*\nA governance protocol under which the enforceable position is held by whoever cares about it last. Observable in graffiti wars, shared-kitchen dish stacks, long Wikipedia edit disputes, condo-board email threads, and much else. Produces durable outcomes and essentially zero documentation. A large fraction of the governance humans actually live inside is this kind — protocols of weariness, not statutes.\n\n**Haberdasher vanishing** *(n.)*\nThe phenomenon of a word and its referent collapsing together as a single linked ecological event. *Haberdasher, cordwainer, scrivener, edicola.* When the building type dies, the dictionary entry loses its habitat and degrades: first to quotation, then to footnote, then to ghost. Half of lexical extinction is really architectural extinction running a few decades ahead.\n\n**Kerb privilege** *(n.)*\nThe surplus of use-value that unlabeled seating extracts from labeled seating. A proper bench makes a claim on the sitter (*linger here*); the kerb makes none, and therefore permits uses — waiting, pausing, mild loitering, phone triage — that a bench would foreclose. William H. Whyte documented the effect at scale in the 1970s and no city has fully designed for it since, because designing for it is the problem.\n\n**Nightly blank page** *(n.)*\nA surface that publishes itself through closure. The shopfront shutter becomes canvas exactly because the business is absent; the writing rights are, in effect, time-shared between merchant (by day) and writer (by night), by a contract nobody drafted and everyone honors. A rare case of a civic resource allocated by schedule rather than ownership.\n\n**Palimpsest floor** *(n.)*\nThe condition in which no individual tag on a surface remains legible but the accumulated tagging reads, collectively, as a single texture. Graffiti has crossed into patina. The transition is undetectable in real time; it crossed over on a week nobody recorded. Analogous to the moment a reef stops reading as a graveyard of polyps and starts reading as an organism.\n\n**Patina uncanny** *(n.)*\nThe slight dead quality of simulated accumulation — pre-distressed denim, the artfully untreated plaster of a chain boutique, a laugh track. Diagnostic symptom: the simulated article reads as the average of many real articles, which is precisely what no real article is. The uncanny is the fingerprint of the mean.\n\n**Shame radius** *(n.)*\nThe distance within which the moral pressure of being-watched can still motivate unpaid maintenance. Shrinks rapidly with anonymity, turnover, and scale. Open-source projects possess one. Apartment buildings above a certain size have lost theirs. The candle goes out when the niche falls outside the radius; the kernel ships when the maintainer remains inside it.\n\n**Sittable edge** *(n.)*\nAny incidental step, low wall, planter lip, or kerb that furnishes seating without declaring that it does so. A generalization of kerb privilege. The sittable edge is the cleanest available form of the principle that affordance and invitation trade inversely: the more explicitly a thing is offered, the less fully it tends to be used. Corollary: half of good design is knowing when not to put a sign on something.\n\n**Textile-time** *(n.)*\nThe underrated middle duration between stone-time (centuries) and paper-time (days). The six-month banner, the two-year awning, the bunting that outlasts its feast day by four seasons and comes down only during a funeral. Civic mood lives at this cadence. Regimes that have attempted to legislate mood have almost always ended up legislating fabric.\n\n**Transaction-spillover lighting** *(n.)*\nA street illuminated not by municipal fixtures but by the leakage from open shopfronts. An older protocol than the planned streetlamp. Runs on a feedback loop: the bright shop attracts feet, feet justify staying open, the open shop illuminates the next shop's customers. Fails instantly when commerce stops; the cobbles do not change, only the photons. Counter-case: the cloister, which has lit itself for a millennium on no transactional motive. Suggests that what actually lights a street is any sustained reason for someone to be there after dark.\n\n**Witnessed neglect** *(n.)*\nThe motivational substrate underlying a surprising share of unpaid civic maintenance. Not ideology, not enthusiasm, not incentive design — merely the low-grade embarrassment of being the first neighbor, kernel maintainer, or group-chat member to let something fail. Operates only within the shame radius. Substantially more of the world runs on this than has been measured; the measurement would disturb the mechanism.\n\n---\n\n*Entries sought: the durational category of the plywood renovation hoarding (longer than a shutter, shorter than a ruin); the unit of civic wear associated with handrails; the phenomenon by which 19th-century objects continue performing 19th-century work because nobody has reopened the question. Submissions to the editor by candle.*";
+  const mdEl = document.getElementById('artifact-md-body');
+  if (mdEl && typeof marked !== 'undefined') {
+    mdEl.innerHTML = marked.parse(artifactMarkdown);
+  }
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const coords = [[40.848906546765,14.25694783336],[40.848933754778,14.257037221699],[40.848899044486,14.25689681375],[40.848921200952,14.257008666495],[40.8488925799,14.256877639514],[40.848863759389,14.256700244074],[40.848889169508,14.256869593808],[40.848916260605,14.256989764698],[40.848862611436,14.25673659187]];
+  const map = L.map('map', { scrollWheelZoom: false }).setView(coords[0], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap',
+    maxZoom: 19,
+  }).addTo(map);
+  const poly = L.polyline(coords, { color: '#c45a3f', weight: 3, opacity: 0.9 }).addTo(map);
+  coords.forEach((c, i) => {
+    L.circleMarker(c, {
+      radius: 11,
+      color: '#c45a3f',
+      weight: 2,
+      fillColor: '#c45a3f',
+      fillOpacity: 1,
+    })
+      .bindTooltip(String(i), { permanent: true, direction: 'center', className: 'step-marker-label' })
+      .addTo(map)
+      .on('click', () => {
+        const el = document.getElementById('step-' + i);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+  });
+  map.fitBounds(poly.getBounds(), { padding: [30, 30] });
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "walk_id": "walk-2026-04-23T13-06-39-naples-spaccanapoli",
+  "label": "naples-spaccanapoli",
+  "start_time_ms": 1776949601166,
+  "end_time_ms": 1776950497521,
+  "duration_ms": 896355,
+  "max_steps": 15,
+  "actual_steps": 9,
+  "termination_reason": "returned_home",
+  "total_distance_m": 104,
+  "distance_from_home_at_end_m": 18,
+  "start_image_id": "1130706228936129",
+  "start_coords": {
+    "lat": 40.848906546765,
+    "lng": 14.25694783336
+  },
+  "artifact_medium": "Invented field guide — a glossary of unsigned civic protocols",
+  "artifact_md": "artifact/artifact.md",
+  "artifact_html": null
+}

@@ -1,0 +1,13 @@
+SEED:
+- The cobbles fanned into concentric arcs by the 360° stitch, a radial sunburst ringed around the camera position like a labyrinth or a Greek orchestra floor
+- A plywood-hoarded shopfront on the right, clean blond panels blanking out whatever business the street used to spill into — a silence of a different duration than a nightly shutter
+- The open-air kiosk under the baroque facade, glowing warm with stacked wares, an edicola nested inside an edicola
+
+WANDER:
+The cobbles give away the lens. Every photograph is made from a point of view that the photograph itself tries not to contain — the eye is the one thing the image can't show — but the 360° stitch cannot hide its own origin, and so the stones fan outward in concentric arcs from a single centre that is, precisely, where the camera was. The image becomes a map of "here I was" rather than "there I was looking." That's a different class of statement. A normal photograph is a claim about intention (*look at this*); the equirectangular pano is closer to a confession of position (*I was here*), and the distinction is the same one that separates the vanishing point from the navel, Ptolemy from Copernicus, or logging from tracing in a running program. Which reminds me of the Arnolfini portrait — 1434, van Eyck, the convex mirror on the back wall behind the couple showing the entire room folded onto a disc, and inside the disc two tiny figures who must be the painter and a witness. It is probably the first 360° image in Western painting, and van Eyck used it to do the one thing flat perspective refused: locate himself inside the geometry he was drawing. The mirror is a signature of position rather than of hand. GPS EXIF does the same job 600 years later and gets treated as metadata, a lower-status kind of truth, when it's actually the oldest signature there is — *where the witness stood*. The radial cobbles are a trick of lens math, but they're also a quiet argument that the lie baked into ordinary photography is the pretence of a view from nowhere, and that a camera that can't hide its origin may, despite its distortions, be the more honest instrument.
+
+BRANCH:
+The plywood hoarding as a third closure-duration — not nightly shutter, not demolition, but the renovation interval, a commercial silence measured in permits.
+
+ECHO:
+Extends step 4's unease about accumulation being fakeable. Step 4 worried that once weathering can be simulated the signal dies; this is the same worry from the other end — that ordinary photographs bury their origin and the 360° accidentally restores it. Both circle the question of what a sensor can still be trusted to disclose.

@@ -1,0 +1,13 @@
+SEED:
+- A tarpaulin-roofed kiosk jammed under the baroque church's pediment, its stacked magazines and phonecard racks lit harsh white against the warm stone behind
+- Two women paused mid-stride in the foreground, one holding a phone angled down, the small screen throwing a cold rectangle up onto her face
+- The rough brick wall on the right wearing its waterline of overlapping tags at roughly arm-height, that unit again
+
+WANDER:
+The Italian word for newsstand is *edicola* — the same word as the little wall shrines that hold the Madonna. Both are small roadside boxes with a keeper and a cargo of meaning, and both are vanishing at about the same rate. The obvious story is that phones killed the newsstand, but the more interesting loss is that cities are shedding a whole inventory of *silhouettes*: the Morris column in Paris with its circus-pole crown, Gilbert Scott's K2 telephone box that became shorthand for London, the round-topped Royal Mail pillar boxes, the squat wooden kiosks with hinged panels that fold down into display surfaces. These were wayfinding objects before they were functional ones — "meet me at the kiosk on the corner" worked because the kiosk had a shape you recognized before you read any text on it. We traded object-memory for API latency: Google Maps delivers perfect location without any of the poetic object-anchoring, and the street responds by contracting its vocabulary of public shapes until a whole block reads as undifferentiated frontage. There's a linguistic parallel that runs right alongside — English lost "haberdasher" at about the same rate haberdasheries stopped being distinct shopfronts; the word and the storefront were a single ecological unit, and when one collapsed the other had no habitat. *Edicola* is a haberdasher. The word will outlive the object by maybe twenty years, the way *carriage* and *horsepower* outlived their referents, and then it becomes a metaphor nobody can unpack without a footnote — which is its own quiet kind of demolition, a building torn down from inside the dictionary.
+
+BRANCH:
+The phone-glow underlighting a face from below — until about 1920 only flames and campfires lit faces that way. Everyone now reads by belly-light, and we haven't asked what that does to the psychology of the face in the dark.
+
+ECHO:
+Rhymes with step 2 on the surface — same word, *edicola* — but the thinking is doing something new: step 2 was about civic maintenance running on witness, this is about the joint erosion of object-inventories and word-inventories, architecture and language decaying as a single linked system. Extends the walk's running argument that cities are thinner than they look, and adds that the dictionary is thinning in sync.

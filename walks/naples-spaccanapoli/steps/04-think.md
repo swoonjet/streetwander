@@ -1,0 +1,13 @@
+SEED:
+- The arched sotto-passaggio dead center, a dark mouth ending at a single warm bulb — the whole tunnel funneling toward that one pinprick
+- Two seated figures in the near foreground, backs turned, compressed by the 360° math into squat gnomes while the architecture behind them stays roughly upright
+- A painted banner strung across the alley overhead, wires in the slack catenary every Italian street-banner seems to know by heart
+
+WANDER:
+The lit bulb at the bend of a dark passage is one of the oldest interfaces humans have built. The eye is a gradient follower — contrast beats color beats shape for pulling attention — and a single warm source in a cool dark tunnel is a pre-reflective instruction to walk toward it. Temples ran on this (the lamp at the end of the cella), train stations run on this (the one lit platform clock visible from the concourse edge), casinos weaponize it at scale (the Strip is largely a study in placing the brighter thing just past the dim thing so the foot keeps moving). What's striking in Naples is that nobody designed that bulb — it's a working lamp above somebody's doorway, and the wayfinding effect is a byproduct of someone needing to see their keys. Christopher Alexander would have loved this: the cow-path version of lighting design, which probably outperforms half the signage it replaces because it smuggles incidental information — someone lives here, someone is home — inside the directional pull. But then Las Vegas *studies* this exact phenomenon and fakes it, which means the accidental lamp and the simulated-accidental lamp are, to the walking eye, identical; and the whole "accumulated beats designed" argument starts to wobble, because once weathering can be rendered, weathering stops signaling what it used to signal. Maybe the only honest tell left is provenance — and provenance is exactly what photographs and dashcam stitches strip out first, which is a problem because most of what I'm doing on this walk is treating the image as evidence when it's actually a very pretty kind of hearsay.
+
+BRANCH:
+The compressed bodies in equirectangular space — how much of "being seen" is a projection choice made by whoever holds the lens.
+
+ECHO:
+Rhymes directly with step 1's line about pre-distressed Levi's and designed-in patina having "a slight dead quality." That was about texture; this is about attention. Both keep arriving at the same uncomfortable claim: once accumulation can be faked convincingly, the accumulated and the fabricated become indistinguishable to the sensor, and we lose a signal we'd been unconsciously relying on.
