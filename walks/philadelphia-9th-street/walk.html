@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>walk-2026-04-23T13-45-28-philadelphia-9th-street — Wanderer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --bg: #faf7f2;
+    --ink: #1a1a1a;
+    --dim: #6a6a6a;
+    --line: #e5ddd0;
+    --accent: #c45a3f;
+    --block: #f2ede3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 120px; }
+  header.top h1 {
+    font: 400 28px/1.2 Georgia, serif;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  header.top .meta {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  dl.stats {
+    display: flex; flex-wrap: wrap; gap: 0 28px;
+    margin: 16px 0 0; padding: 0;
+    font: 13px/1.3 ui-monospace, Menlo, monospace;
+  }
+  dl.stats > div { display: flex; gap: 6px; }
+  dl.stats dt { color: var(--dim); margin: 0; }
+  dl.stats dd { margin: 0; color: var(--ink); }
+  #map {
+    height: 420px;
+    margin: 32px 0 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .step-marker-label {
+    background: transparent; border: none; box-shadow: none;
+    color: #fff; font: 700 11px/1 ui-monospace, Menlo, monospace;
+    pointer-events: none;
+  }
+  main.steps { margin-top: 48px; }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px 20px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+  }
+  .step:first-child { border-top: none; padding-top: 8px; }
+  .step-num {
+    font: 700 14px/1 ui-monospace, Menlo, monospace;
+    color: var(--accent);
+    padding-top: 4px;
+  }
+  .step-img { grid-column: 2; margin: 0 0 16px; }
+  .step-img img { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
+  .step-img figcaption {
+    font: 12px/1.3 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  .step-body { grid-column: 2; }
+  .block { margin-bottom: 18px; }
+  .block h4 {
+    margin: 0 0 6px;
+    font: 700 11px/1 ui-monospace, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .block ul { margin: 0; padding-left: 20px; }
+  .block li { margin-bottom: 6px; }
+  .block p { margin: 0; }
+  .block.thread { color: var(--dim); font-style: italic; }
+  .block.wander p { font-size: 15.5px; line-height: 1.6; }
+  .block.branch {
+    color: var(--accent);
+    font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+  }
+  .block.nav {
+    background: var(--block);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+  .block.nav .pick { color: var(--accent); }
+
+  section.artifact {
+    margin: 64px 0 0;
+    padding: 40px 32px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  section.artifact h2 {
+    margin: 0 0 4px;
+    font: 400 22px/1.2 Georgia, serif;
+  }
+  section.artifact .medium {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin: 0 0 20px;
+  }
+  .artifact-body {
+    font: 14px/1.5 ui-monospace, Menlo, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    background: var(--bg);
+    padding: 20px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+  }
+  .artifact-md {
+    background: var(--bg);
+    padding: 28px 32px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+    font: 15px/1.58 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+  }
+  .artifact-md h1, .artifact-md h2, .artifact-md h3 {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    margin: 1.4em 0 0.4em;
+  }
+  .artifact-md h1 { font-size: 26px; margin-top: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .artifact-md h2 { font-size: 18px; color: var(--ink); }
+  .artifact-md h3 { font-size: 15px; color: var(--accent); font-style: italic; }
+  .artifact-md p { margin: 0 0 1em; }
+  .artifact-md ul, .artifact-md ol { margin: 0 0 1em; padding-left: 22px; }
+  .artifact-md li { margin-bottom: 4px; }
+  .artifact-md strong { color: var(--ink); }
+  .artifact-md em { color: var(--dim); font-style: italic; }
+  .artifact-md code {
+    font: 12.5px/1.4 ui-monospace, Menlo, monospace;
+    background: #eee7d6;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: #2a2a2a;
+  }
+  .artifact-md pre {
+    font: 12px/1.5 ui-monospace, Menlo, monospace;
+    background: #efe8d8;
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md pre code { background: none; padding: 0; font-size: inherit; }
+  .artifact-md blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0 14px;
+    margin: 0 0 1em;
+    color: var(--dim);
+    font-style: italic;
+  }
+  .artifact-md hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 1.6em 0;
+  }
+  .artifact-md table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md th, .artifact-md td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .artifact-md th {
+    font-weight: 600;
+    background: #efe8d8;
+    font-family: Georgia, serif;
+  }
+  .artifact-md tr:last-child td { border-bottom: none; }
+  .artifact-embed {
+    position: relative;
+    margin: 0 0 16px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  .artifact-embed.wide { aspect-ratio: 16/10; }
+  .artifact-embed iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+  }
+  section.artifact.companion { margin-top: 32px; }
+  .open-link { margin: 0 0 20px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+  .open-link a { color: var(--accent); text-decoration: none; }
+  .open-link a:hover { text-decoration: underline; }
+  section.artifact .closing {
+    font-style: italic;
+    color: var(--ink);
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .container { padding: 24px 16px 80px; }
+    .step { grid-template-columns: 32px 1fr; gap: 8px 12px; }
+    .artifact-body { font-size: 12px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="top">
+    <div class="meta">walk-2026-04-23T13-45-28-philadelphia-9th-street</div>
+    <h1>A walk — philadelphia 9th street</h1>
+    <dl class="stats">
+      <div><dt>steps</dt><dd>9</dd></div>
+      <div><dt>distance</dt><dd>146m</dd></div>
+      <div><dt>duration</dt><dd>14min</dd></div>
+      <div><dt>ended</dt><dd>returned home</dd></div>
+      <div><dt>from home</dt><dd>10m</dd></div>
+    </dl>
+  </header>
+
+  <div id="map"></div>
+
+  <main class="steps">
+
+<article class="step" id="step-0">
+  <div class="step-num">00</div>
+  <figure class="step-img">
+    <img src="images/00-131662115586570.jpg" alt="step 0" loading="lazy" />
+    <figcaption>39.93840, -75.15799</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The tangle of overhead wires cutting the flat gray sky into irregular quadrilaterals</li><li>A red-and-white traffic cone sitting alone mid-street, no barrier or work around it</li><li>&quot;SPECIALTY MEATS&quot; signage on the right, red field, yellow serif, slightly cropped</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The wires aren&#39;t designed — they&#39;re *accreted*, each one a decision made by a different person in a different decade answering a different problem (power, then telephone, then cable, then fiber), and the sky ends up looking like a palimpsest more than a plan. This is what Stewart Brand called pace layering before he called it that: the fastest-moving infrastructure rides on top of the slowest, and nobody ever goes back and rationalizes the stack. You can see the same thing in an old codebase — a Rails app from 2011 with a React shim bolted on in 2017 and a GraphQL gateway bolted on in 2021, each layer added by someone who correctly judged it was cheaper to add than to refactor. The traffic cone is the same move at a different scale: a single orange object placed to mean &quot;something is off here,&quot; no documentation, no ticket, and yet everyone understands it and drives around it. That&#39;s a *protocol* — lighter than a sign, heavier than a gesture, the municipal equivalent of a `TODO` comment that ends up outliving three full rewrites. I wonder if there&#39;s a taxonomy somewhere of disposable-but-persistent objects: the cone, the sawhorse, the reserved-parking lawn chair that Philadelphians actually have a name for (savesies). Every city&#39;s informal grammar is thicker than its formal one; the formal grammar is just what got litigated.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Savesies as a property-rights system — what else does a folding chair do that a statute can&#39;t?</p></div>
+    
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The savesies thread wants a fresh frame — turning onto a new street might surface a different informal grammar (a stoop, a mural, a shuttered window) that either extends or contradicts the folding-chair-as-statute idea without just repeating the wire-palimpsest beat.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-1">
+  <div class="step-num">01</div>
+  <figure class="step-img">
+    <img src="images/01-130389699076409.jpg" alt="step 1" loading="lazy" />
+    <figcaption>39.93849, -75.15799</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>&quot;CASEIFICIO CLAUDIO&quot; in chunky slab caps with a little olive-branch glyph tucked into the O</li><li>The Di Bruno Bros. banner announcing &quot;A Philadelphia Tradition Since 1939&quot; in a casual italic, with a tiny illustrated portrait of the two brothers between the phone number and the name</li><li>A handwritten chalkboard on the sidewalk that reads &quot;NDUJA&quot; in blocky marker — the kind of word you only write by hand</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>&quot;Caseificio&quot; is the tell. It&#39;s not a translation, it&#39;s a performance — a shop in South Philly using the Italian word for &quot;cheesemaker&quot; to signal something the English word can&#39;t, which is lineage. The sign beneath it says &quot;CLAUDIO SPECIALTY FOODS&quot; in a tidier, more Anglicized register, because that&#39;s the one that has to appear on the invoice and the insurance form; the Italian one is the one that has to appear in the customer&#39;s mouth. This is the same move a restaurant makes when it prints the menu in two columns and leaves *cacio e pepe* untranslated — you&#39;re being invited to pronounce it, and the pronunciation is half the meal. Every immigrant neighborhood runs on this two-register system, and you can read the demographic tide by watching which register is louder: when the Italian caseificio gets smaller than the English &quot;SPECIALTY FOODS,&quot; the grandchildren have taken over and the customers are no longer mostly the cousins. Chinatowns do the inverse — the Chinese characters get bigger as the street becomes more of a destination and less of a residence, because now the characters are doing *atmosphere* rather than *information*. There&#39;s probably a third stage where the foreign word becomes pure ornament, drained of meaning, the way &quot;café&quot; sits on the awning of a place that sells drip coffee in paper cups. The NDUJA on the chalkboard resists this — it&#39;s still information, because most passersby genuinely do not know what nduja is, and the chalk itself is a kind of promise that whoever wrote it will be there to explain it. Chalk is a conversational medium; vinyl is a broadcast one. You can&#39;t chalk a lie, quite, because the hand is visible in the letter.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The awning as a stratigraphic record — each generation repaints over the last and you can date a shop by peeling the signage like tree rings.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s thread about informal grammar being thicker than formal grammar — the cone and the chalkboard are cousins, both lightweight signals doing work that the official channel can&#39;t or won&#39;t. But this one opens a new axis: the *register-switching* one, where the informal thing isn&#39;t just expedient, it&#39;s the only channel that carries the meaning at all.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The register-switching thought wants a fresh block to test itself on — turning the corner pulls me off the Italian spine of 9th Street and into whatever the next linguistic stratum is, which is exactly the jolt the drift needs before it settles into a thesis.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-2">
+  <div class="step-num">02</div>
+  <figure class="step-img">
+    <img src="images/02-226770909208490.jpg" alt="step 2" loading="lazy" />
+    <figcaption>39.93832, -75.15800</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A row of empty wooden produce tables along the curb, wheels visible, canopy frames bare, stacked like waiting furniture</li><li>A &quot;FOR RENT&quot; sign propped upright on one of the tables — hand-printed, orphaned, not clearly tied to any one building</li><li>The green &quot;SALTER ST&quot; blade bent slightly off-axis from decades of getting clipped by trucks</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The tables are the Italian Market in its undressed state. Empty, the infrastructure is more visible than the commerce ever lets it be: wheels, hinges, the brackets where the canopy poles slot in, the faint dark stain of a thousand mornings of fish water and bruised peaches. A laid market isn&#39;t empty, it&#39;s *set* — the way a dinner table before guests isn&#39;t empty, it&#39;s ready. Japanese has a word adjacent to this, *ma*, for the active negative space between things; French kitchens use *mise en place* for the same gesture at a smaller scale: the readiness is the object. There&#39;s a category worth holding onto here — designed-empty vs. neglected-empty. A church on Tuesday, a beach umbrella rack in January, the Tsukiji auction floor at 4 p.m. aren&#39;t vacant, they&#39;re in resting phase, and the resting phase is half of what they are. A ghost town is vacant; a stage between performances is set. The FOR RENT sign propped on one of the tables pulls toward the first condition while everything around it holds the second, and that tension — a rented-out table bearing a sign about some *other* emptiness nearby — is almost concrete poetry, the sign and its ground refusing to agree on what vacancy means. I keep thinking about the way Roman amphitheaters ended up valued for their emptiness more than their use; the Colosseum is more itself without the games. Maybe the rule is that the longer a piece of infrastructure lasts, the more its resting state becomes the thing people remember it by — the grandchildren of these vendors will know the tables more intimately than they ever knew what was sold on them.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>*Mise en place* as a design philosophy — what would a UI look like if it were built to show its readied, pre-use state as a legitimate interface rather than a hidden one?</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s pace-layering: the tables are the slow layer, the vendors the fast one, and today the fast layer has rolled home and left the slow one on display. But it sharpens that thread — infrastructure isn&#39;t just a substrate, it develops its own aesthetic in the absence of use, and that aesthetic can outcompete the original function in cultural memory.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The sharpest, shortest turn — a deliberate jolt off the market&#39;s long axis, trading the drift&#39;s slow-infrastructure register for whatever a side street offers before the mise-en-place thread over-ripens.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-3">
+  <div class="step-num">03</div>
+  <figure class="step-img">
+    <img src="images/03-2969562370032436.jpg" alt="step 3" loading="lazy" />
+    <figcaption>39.93833, -75.15805</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A painted mural portrait of a man in a pale gray suit, looming on the side wall of a corner building, scaled up to maybe two stories</li><li>The cobra-neck streetlamp arching out into the middle of the frame, its single bulb casting nothing yet because the sun is still up</li><li>The hard low-angle winter sun raking the brick facades on the right into orange, while the left side of the street stays in flat blue shadow</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>A two-story painted face on a brick wall is doing something very particular that a photograph at the same scale could not — it&#39;s *vouching*. Murals of specific people on the side walls of South Philly buildings (Sinatra, Rocky, the neighborhood butcher who died last year) are a vernacular form of canonization, and the medium matters: paint says &quot;we hired someone, we held the ladder, we agreed.&quot; A vinyl print of the same image at the same size would read as advertising; the brushstroke is what converts the gesture from commerce to consecration. This is why the Catholic church, for most of its history, refused to allow mechanically reproduced images on altars — the labor of making was inseparable from the sanctity of the thing made, and a printed Madonna was understood to be a different *species* of object from a painted one, even at identical resolution. Walter Benjamin worried about this too but from the opposite end, mourning aura&#39;s collapse under reproduction; the South Philly mural is interesting because it&#39;s a self-conscious refusal of that collapse, a community choosing the slow medium because the slowness is the message. There&#39;s a parallel in handwritten signatures on legal documents in 2026 — we *know* a typed name would suffice, we *know* the wet ink is symbolic, and yet the symbolism is load-bearing; remove it and the contract feels naked even when it&#39;s still binding. Maybe the rule is that whenever a society wants to mark something as serious, it reaches backward one technology generation: paint instead of print, ink instead of type, vellum instead of paper, stone instead of vellum. The seriousness is borrowed from the obsolescence. Which suggests, uncomfortably, that the most consecrated objects of the next century will be the ones rendered in deliberately bad pixels — the JPEG artifact as the new gold leaf.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The economics of *vouching* as a service — what would it cost to hire a muralist to paint your LinkedIn photo on a wall, and why does that question feel obscene in a way that &quot;what does a billboard cost&quot; does not?</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 1&#39;s two-register thread — the mural is another channel that carries meaning the official one can&#39;t, paint doing what print refuses to do. But it pushes further into *why* the slow channel works at all: not just expedience or intimacy, but a borrowed seriousness from the older medium, which is a different mechanism than the chalkboard&#39;s hand-visible honesty.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The drift is getting dense around borrowed-seriousness and vouching — turning onto a different street is the cheapest way to get a genuinely unrelated stimulus instead of compounding on the mural one more block.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-4">
+  <div class="step-num">04</div>
+  <figure class="step-img">
+    <img src="images/04-306564871181118.jpg" alt="step 4" loading="lazy" />
+    <figcaption>39.93835, -75.15804</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The mural face now wears a Mapillary privacy blur — a real-person-detector fooled by pigment</li><li>A small decorated Christmas tree still standing at the mural&#39;s foot in late April, tinsel catching the gray light</li><li>The cobra-neck lamppost arcing out over the street, its bulb dark at midday</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The privacy blur on the painted face is the image doing something it doesn&#39;t know it&#39;s doing: Mapillary&#39;s face-detector has quietly classified a two-story portrait as a person and applied the same gauzian smear it applies to passersby, which means the model is working at the level of *features that compose as a face* and a competent painting passes that test. This is a weird accidental Turing test for the older medium — paint vouches well enough to fool the machine, which suggests the machine inherits an aesthetic canon from its training data and can&#39;t see past it. A cave painting wouldn&#39;t trip the filter; a Fayum portrait probably would; a Francis Bacon pope would depend on the model. So every automated image pipeline is, silently, drawing a line between representations-that-count and representations-that-don&#39;t, and the line is made of whatever faces showed up in the training set — which drifts, which gets retrained, which means the class of images legally visible on the internet is now downstream of engineering decisions nobody voted on. There&#39;s a second-order thing where, if the algorithm must blur painted faces to stay on the safe side of GDPR, then in a minor legal sense the mural&#39;s subject has become a person for privacy purposes even decades after death, and painted faces are now dim, unregistered citizens of the image commons, carrying a ghost-form of the right to be forgotten. I keep wondering about the inverse experiment: a classifier trained to fire only on *painted* faces, a detector for vouching, which you could run over every streetview tile to auto-unblur the murals and restore them to visibility. Benjamin&#39;s aura would come back as a model weight. And then — of course — the first adversarial attack against it would be some advertising agency painting their product photography in loose brushwork to slip past the filter and reclaim the streetview frame, at which point the whole edifice collapses back into commerce, which is where it always ends.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Whether datasets are unacknowledged aesthetic canons — who decides what the machine learns &quot;face&quot; means, and can you read a decade&#39;s taste off an error distribution?</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 3&#39;s &quot;paint vouches&quot; thread from the opposite direction: where step 3 argued that paint borrows seriousness from its obsolescence, this step notices that paint&#39;s seriousness leaks forward into algorithmic systems too — the machine can&#39;t tell, which is an accidental confirmation, but also a flattening. The protection the mural earns from Mapillary is not the consecration the neighborhood gave it; it&#39;s a much thinner, statistical cousin.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The drift has gone fully into abstraction (classifiers, GDPR, model weights) and needs a fresh concrete stimulus to bite into — a new street, minimum ceremony, without fully resetting the momentum.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-5">
+  <div class="step-num">05</div>
+  <figure class="step-img">
+    <img src="images/05-164432572350910.jpg" alt="step 5" loading="lazy" />
+    <figcaption>39.93848, -75.15826</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The yellow &quot;SCHOOL SPEED LIMIT / 15 / WHEN FLASHING&quot; sign with the amber LED collar bracketing the numeral</li><li>The pollarded street trees, bare knuckled silhouettes pruned into stubby candelabra against the sky</li><li>The sky itself — high cold cirrus over a still-cold blue, winter&#39;s last draft</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>&quot;WHEN FLASHING&quot; is a statute with an `if` clause in it — a law whose truth depends on a sensor state, which is a surprisingly recent thing to bolt onto a metal pole. Most signage is declarative and durable; the STOP is a STOP on Tuesday and on Christmas. The conditional-15 is reactive, and its existence admits that an absolute rule would be both over- and under-enforced: nobody obeys 15 at 2 a.m., and no officer can stand at the crosswalk between 2:45 and 3:15 every school day. So the municipality delegates enforcement to a timer, and the timer enforces not by penalty but by *attention* — the flashing is doing the work a human crossing guard used to do with a raised palm. There&#39;s a subtler flip hidden here: for most of modernity, physical signage was the stable stratum and screens were the volatile one; the flashing-15 inverts the stratigraphy, putting a schedule-aware, server-backed piece of law on a piece of bent steel bolted into the sidewalk in 1978. Variable-message highway boards do this wholesale — MERGE LEFT rendered on demand — and the trend is toward every sign being conditional, every rule being a lookup rather than a memorization. The loss is real and underpriced: absolute signs can be internalized and become civic intuition, while conditional ones can only be *checked*. You learn a city faster when its rules don&#39;t flicker, and I suspect a child who grows up on flashing-15s has a different mental model of authority than one who grew up on the static kind — rules as runtime state rather than compiled constants.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>What does it do to civic trust when the law you&#39;re obeying is in one of several possible states and you can&#39;t tell which without reading the screen?</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s pace-layering but from the opposite direction: there, infrastructure accreted in layers of increasing speed; here, the fastest layer (sensor logic) has been *embedded inside* the slowest (a bolted-steel sign), scrambling the stratigraphy. It gently contradicts the earlier implication that the physical stratum is passively slow — this sign checks the clock.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The drift has climbed high into abstractions about law-as-runtime-state; the longest reversal onto a new street is the best chance to land the thinking back on an unfamiliar ground texture that wasn&#39;t primed by the flashing-15.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-6">
+  <div class="step-num">06</div>
+  <figure class="step-img">
+    <img src="images/06-167732421840592.jpg" alt="step 6" loading="lazy" />
+    <figcaption>39.93831, -75.15778</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The small Christmas tree with tinsel still standing at the mural&#39;s foot in late April, leaning slightly against the base of the wall</li><li>The &quot;922&quot; in chunky red sans on the small hanging blade over the 9th Street Bottle Shop — an address getting top billing over the shop name</li><li>The pastel rowhouse block in the middle distance — butter yellow, dusty peach, soft blue — stacked like a Necco Wafer roll behind the cobra lamp</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>A Christmas tree in April has quietly switched calendars. It no longer refers to December; it refers to *here*, to the mural&#39;s foot, to whoever tends the tree — it has defected from the retail/liturgical schedule and been conscripted into something closer to a votive. This is the move that turns a seasonal ornament into a permanent one by neglect or affection, and it&#39;s the same mechanism by which fossil idioms outlive their referents: &quot;hoist by his own petard&quot; keeps a 16th-century bomb alive inside a sentence that no longer needs it, because the phrase found another job to do. Stale objects get reassigned. In a codebase the cognate is the zombie feature flag — a boolean someone shipped for a 2019 launch and then left, which gets read on every request for the next seven years because turning it off would require understanding it, and understanding it requires finding the person who shipped it, and that person is at a different company now. Cities are full of these: the boundary stone whose parish was consolidated, the &quot;WATCH FOR CHILDREN&quot; sign across from a school that closed in 1994, the brass plaque dedicating a fountain that was removed a mayor ago. The plaque doesn&#39;t lie, exactly — it just refers to a world that has rotated out from under it, and the referent-drift is so slow that no single day feels like the day the meaning changed. Maybe the rule is that any object kept past its calendar starts to accrue a second meaning, and if it&#39;s kept long enough the second meaning becomes the primary one and the first becomes folklore. Which is basically how relics work — the bone of a saint was once just a bone — and basically how the Christmas tree itself became Christian, having defected from a much older calendar a couple thousand years ago under exactly this mechanism. The tree at the mural&#39;s foot is not a holdover. It&#39;s a relic in its pupal stage.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>A formal taxonomy of referent-drift: objects whose meaning has slipped, sorted by the speed of the slip and whether anyone noticed.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 2&#39;s designed-empty/neglected-empty distinction into the time axis — a Christmas tree in April is the temporal cousin of a laid market table at dusk, an object whose apparent staleness is actually a state change into something else. Also rhymes, quietly, with step 3&#39;s vouching: the tree, like the mural, is being kept by hand, and the hand is what converts both from decoration into devotion.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The taxonomy impulse is getting abstract and needs a fresh concrete object to either populate the taxonomy or knock it sideways — a turn onto a different street offers new stimulus without committing to the full pivot of a longer block.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-7">
+  <div class="step-num">07</div>
+  <figure class="step-img">
+    <img src="images/07-289335956180232.jpg" alt="step 7" loading="lazy" />
+    <figcaption>39.93844, -75.15804</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The cast-iron historical marker at the curb, brown and modest, planted perpendicular to the sidewalk so you have to turn your body to read it</li><li>The utility pole&#39;s crossarm with its insulators and the pale gray transformer can — a silhouette basically unchanged since the Kodak era</li><li>The &quot;MONTROSE ST&quot; blade in its standard green, a typographic uniform almost every American street sign wears</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The historical marker is standing in front of the mural and doing a different kind of commemorative work than the wall behind it knows about. Cast iron, state-authored, its paragraph written by a committee in passive voice and Latinate subordinate clauses, its placement approved on a form — a top-down claim on the neighborhood&#39;s memory. The mural is the opposite genus of monument: paint rather than metal, face rather than paragraph, a thick theory of one thing instead of a thin theory of everything. They share the corner without acknowledging each other, and a passerby reads the intersection by combining the two exposures, which is a kind of stereoscopic richness neither medium could generate alone. There&#39;s a parallel in toponymy — almost every place has its map name and its lived name, and the interesting question is always which one ends up in the next atlas: Boston&#39;s Southie, Tokyo&#39;s Shibuya-as-crossing versus Shibuya-as-ward, the way &quot;the City&quot; means a square mile in London and an entire ambition in New York. Bureaucratic names are portable and forgetful; lived names are untranslatable and dense with event. Wikipedia and oral history are running the same split at a larger scale, and most edit wars are, at bottom, small-scale reenactments of the plaque-versus-mural argument, two incompatible grammars of authority contending over a single referent. The surprise at this corner isn&#39;t that the two monuments disagree but that they *don&#39;t* — they&#39;re sampling the same block at different focal lengths, and you only get the neighborhood by superimposing them. Maybe that&#39;s the honest frame for all civic memory: not hierarchy, not consensus, but several cameras at different apertures pointed at the same wall, and the city is what they fail to agree about.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>What would a city look like whose official commemorations were required to cite their unofficial counterparts by name — a plaque that had to point at the mural behind it?</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 3&#39;s &quot;paint vouches&quot; and step 4&#39;s machine-reading-paint threads but adds a new axis: the plaque and the mural are *coequal* grammars rather than one borrowing seriousness from the other. Step 3 treated paint as borrowing authority from obsolescence; this step argues the two channels are doing genuinely different cognitive work, and the corner is the composite neither one alone could be.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The drift just landed a neat composite-of-apertures conclusion, which is the moment to break rather than extend — reversing onto a different street pulls the body against the thought&#39;s momentum and should force a fresh stimulus instead of another variation on monuments-and-memory.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-8">
+  <div class="step-num">08</div>
+  <figure class="step-img">
+    <img src="images/08-135831715206336.jpg" alt="step 8" loading="lazy" />
+    <figcaption>39.93831, -75.15801</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>String lights zigzagging across the street between utility poles and building corners, unlit against a cold late-afternoon blue</li><li>The deep perspective down the corridor — the street narrowing to a pinhole vanishing point somewhere past 8th</li><li>A small red &quot;FOR SALE&quot; A-frame sign squatting on the sidewalk at the right edge, almost out of frame</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The zigzag of bulbs over the street is an arcade drawn in the air — a roof that has shed every function except the semantic one. A real arcade (Milan&#39;s Galleria, the passages couverts of the 2e arrondissement, Tokyo&#39;s shōtengai with their corrugated roofs) does two jobs: weather protection and zonal definition, *you are now inside the market*. Over a century the first job has been subtracted while the second has been preserved, and you get a gradient of compression — full arcade → canopy → awning → string-light catenary — each step cheaper, each step lighter, each step shedding physical function but keeping the cognitive one, *linger here, this is a place*. The string light is the limit point of this compression, architecture reduced to punctuation, a ceiling implied by a dotted line the way a comic-book thought is implied by a cloud. American commerce often has to do its arcade work this way because zoning, insurance, and the vehicular primacy of the street make the built version nearly impossible, so the semantic load migrates onto whatever lightweight infrastructure will accept it: Edison bulbs, pennant flags, potted ficus, a repainted crosswalk. This is oddly parallel to how `const` in JavaScript doesn&#39;t actually make an object immutable, it just promises the *binding* won&#39;t be reassigned — the keyword is doing semantic work the runtime has long since stopped enforcing, and everyone uses it anyway because the signal is the point. Maybe every mature medium ends up here: function leaks out the bottom, meaning stays at the top, and the thing persists as a convention held in place by nothing but agreement. The scary version is the currency-note watermark of a bill that no longer circulates; the charming version is the zigzag of bulbs over 9th Street on an April evening when no one has turned them on yet, and the fact that they&#39;re unlit makes the point even cleaner — the arcade is still working.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>A whole taxonomy of architecture-as-punctuation — the bollard-as-comma, the pergola-as-em-dash, the threshold rug as semicolon — waiting to be written by someone with too much time.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with the running thread on lightweight signals doing load-bearing work (the cone in step 0, the chalkboard in step 1, the April Christmas tree in step 6), but swings it onto a new axis — here the lightweight thing is doing *spatial* rather than informational work, defining a room without walls. Extends rather than contradicts: the family of objects is the same, the job is new.</p></div>
+    
+  </div>
+</article>
+  </main>
+
+  <section class="artifact">
+       <h2>Artifact</h2>
+       <p class="medium">Medium — <em>An invented field guide — a short typological catalog of &quot;compressed vessels,&quot; each entry naming a species of lightweight object doing structural semantic work, with notes on its older heavier ancestor and its compression ratio.</em></p>
+       
+       <div class="artifact-md" id="artifact-md-body"></div>
+       <p class="closing">I wrote a taxonomic field guide — eleven specimens plus a preface and a postscript — catalogued in the deadpan register of a nature handbook. Each entry names a lightweight object (traffic cone, emoji, velvet rope, April Christmas tree) as if it were a species, points back to its heavier ancestor (barricade, laugh, city wall, household shrine), and notes the compression&#39;s failure modes. The form is itself the argument: a field guide is an efficient compression of observation into card-sized entries, so the vessel of the artifact enacts the rule it describes. The walk kept noticing that meaning survives the loss of mass; the guide tries to freeze that motion at several stops along the way, before the next stage erases the evidence of the last.</p>
+     </section>
+  <section class="artifact companion">
+    <h2>Companion — The Compression Ladder (audio)</h2>
+    <p class="medium">Medium — <em>Web Audio piece — a six-rung sonic descent matching the architectural one. six voices play together at first (stone pad, vault drone, crowd noise, speech formant, chime, rhythmic tick). every 7.5 seconds one voice is subtracted. at the end there is silence.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-audio/compression.html" title="Companion — The Compression Ladder (audio)"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-audio/compression.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">The arcade gives up its mass voice by voice. Stone, vault, crowd, speech, chime, tick — each one a piece of what the enclosure used to do. The convention outlives every one of them.</p>
+  </section>
+<section class="artifact companion">
+    <h2>Companion — The Ladder of Enclosure</h2>
+    <p class="medium">Medium — <em>six photographic rungs (ComfyUI / RealVisXL V5.0) showing one function — a covered pedestrian zone — at decreasing material mass. arcade → galleria → market canopy → fabric awning → string-light catenary → painted dashed line. each rung labeled with a compression ratio.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-ladder/ladder.html" title="Companion — The Ladder of Enclosure"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-ladder/ladder.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">The same job, done with less material at each step. Shelter is subtracted; the convention holds. The final stage is probably no object at all.</p>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script>
+  const artifactMarkdown = "# A Field Guide to Compressed Vessels\n\n*Being a brief catalogue of lightweight objects conducting heavy semantic work — their heavier ancestors, their compression ratios, and the conditions under which the compression fails.*\n\n---\n\n## Preface\n\nA *compressed vessel* is any object whose physical substrate has been radically subtracted while its semantic load has been preserved, and often amplified. The lineage is always traceable — every compressed vessel has a heavier ancestor, and the ancestor, in most cases, is still alive somewhere in the culture, living on as a ceremonial form. The vessel is what the ancestor became once somebody figured out how to do the same job with less of it.\n\nThe principle is not new. The cross descends from a gallows; the dollar bill, from a weight of silver; the wedding ring, from a braid of hair that descended from a braid of iron. But the pace accelerates with every generation of infrastructure, and the residue piles up on every sidewalk. What follows is incomplete and will stay that way.\n\n---\n\n## Specimens\n\n### *Pylonus solitaria* — the lone traffic cone\n**Ancestor.** The sawhorse; the iron barricade; the constable's raised hand.\n**Mass retained.** About two kilograms of polyvinyl and fluorescent paint.\n**Signal retained.** *A condition exists here.*\n**Field notes.** The cone does not enforce; it attests. It is the smallest physical object that can still carry a municipal voice, and its orange-and-white banding is that voice's signature register. A cone can be moved without ceremony; unlike a constable, it does not tire. Its success depends entirely on the civic competence of the passerby, which is to say on the ambient literacy of the street.\n**Failure mode.** Placement without cause. A cone deployed frivolously erodes the register of the whole class; one too many and the municipal fleet starts to read as litter.\n\n### *Lumen scholasticus* — the flashing school-zone limit\n**Ancestor.** The crossing guard. The nun with the raised palm. The whistle.\n**Mass retained.** The sign's original steel plus an LED ring.\n**Signal retained.** *Obey this rule at this hour only.*\n**Field notes.** The LED is a crossing guard compressed to a heartbeat — same authority, no lunch break. What the object loses in mammalian warmth it gains in tirelessness. The sign's steel body is now a chassis for a clock; the stratum looks like 1970 but runs on a 2010 schedule. Drivers obey it less than they obeyed the nun, but more than they obey the static limit she was originally hired to replace.\n**Failure mode.** The LEDs stay on when they shouldn't, or fail to come on when they should, at which point nothing on the pole is trustworthy and the statute enters a liminal state no one knows how to respect.\n\n### *Arbor votiva aprilis* — the April Christmas tree\n**Ancestor.** The household shrine. The roadside cross. The bone in the reliquary.\n**Mass retained.** One plastic tree and a pound of tinsel.\n**Signal retained.** *This place is being tended by someone specific.*\n**Field notes.** Having missed its scheduled removal, the tree undergoes a slow reassignment — from seasonal ornament to year-round keepsake. The tinsel's original meaning falls away; in its place comes a new one, which is the fact of continued attention itself. No doctrine governs this; it happens because a person keeps not throwing it out. The specimen is a relic in its pupal stage.\n**Failure mode.** Official cleanup. The janitorial instinct, operating from the calendar rather than from the block, reads the tree as debris and removes it. The compression is reliant on the inattention of precisely the right authority.\n\n### *Catenaria illuminata* — the strung-bulb canopy\n**Ancestor.** The market arcade. The Milanese galleria. The shōtengai's corrugated roof.\n**Mass retained.** A dozen bulbs and some Romex.\n**Signal retained.** *Interior conditions apply here.*\n**Field notes.** The bulbs define a room without enclosing one. Weather is not kept out, but a zone is drawn; pedestrians adjust their pace on entering and exiting the way they would under a real roof, even on a dry afternoon. The signal works fully unlit — the wire itself suffices once the convention is established. Architecture compressed to punctuation. The final stage after this one is probably pure dashed-line convention: a ribbon painted on the asphalt, an arcade signified by no physical object at all.\n**Failure mode.** Removal. Take the wire down and the room evaporates; shopkeepers complain of a vibe loss they cannot source, and do not connect to the missing strand until the strand is restored.\n\n### *Sella custos* — the \"savesies\" chair\n**Ancestor.** The private drive. The enclosed mews. The registered parking stall.\n**Mass retained.** One folding chair; a traffic cone, if fancy.\n**Signal retained.** *I shoveled this spot; it is mine today.*\n**Field notes.** The chair enforces a property regime that no court recognizes and every neighbor does. It is ignored by statute, revered by practice, and in at least one city has its own common name, which is the surest evidence that the convention is load-bearing. The cost of respecting the chair is lower than the cost of ignoring it, and the cost of codifying the chair is higher than either, so it persists, precisely, unwritten.\n**Failure mode.** Tourist occupancy. The chair works within a community that reads chairs; it does not work at an interstate exit.\n\n### *Tabula scripta manu* — the sidewalk chalkboard\n**Ancestor.** The painted trade sign. The brass plate. The vitrine card.\n**Mass retained.** One slab of slate and a stub of marker.\n**Signal retained.** *Today's offer, written by a person.*\n**Field notes.** Chalk is a conversational medium. The handwriting is the guarantee; the smudge is the dated stamp; the erasable surface promises that whoever wrote it will be there tomorrow to update it. A printed menu cannot mimic this, even in imitation chalk script — the imitation betrays the mechanism, because the whole point is that no one bothered to print it.\n**Failure mode.** Corporate chalkboards. A chain café's chalkboard, lettered by a trained sign-painter employed by the marketing arm, is the vessel's identity crisis: the form has survived, but the warrant has been evacuated.\n\n### *Signum historicum* — the cast-iron marker\n**Ancestor.** The cenotaph. The obelisk. The cathedral plaque.\n**Mass retained.** About forty pounds of iron and a paragraph in passive voice.\n**Signal retained.** *The state vouches that something happened here.*\n**Field notes.** The marker is a monument compressed to a poster, and its passive voice is a feature, not a bug — the authorial absence is what distinguishes an official plaque from a personal one. Compressed though it is, the marker cannot do what a mural does, and vice versa; together they are stereoscopic, and the city shows up only as the parallax between them.\n**Failure mode.** Installation without subject. A marker on a corner whose history has already been demolished becomes a compression of a compression — meaning preserved past the disappearance of the thing meant.\n\n### *Velamen machinae* — the algorithmic privacy blur\n**Ancestor.** The veil. The hood. The television-era pixel mosaic. The witness silhouette.\n**Mass retained.** None. A few bytes in a JSON mask.\n**Signal retained.** *This face is not to be canonicalized.*\n**Field notes.** Of all the specimens catalogued, this one has achieved the fullest compression — no substrate, only computation, applied at scale without the compressor knowing what it has compressed. The blur sometimes misses real faces and sometimes catches painted ones, which means the class it defines is not *person* but *anything my training set read as a face*, and the drift of that class over time is one of the quieter aesthetic histories of our decade.\n**Failure mode.** Adversarial painting. The first brushed-canvas product photograph that slips past the detector returns the commons to commerce, and the whole layer of protection folds.\n\n### *Vexillum filare* — the strung pennant\n**Ancestor.** The heraldic banner. The guild colors. The regimental standard.\n**Mass retained.** A polyester triangle every eighteen inches.\n**Signal retained.** *A zone of festive commerce.*\n**Field notes.** Pennants have no information content — no family name, no guild, no battle honor — but the ceremonial register carries fine, because what the older banners *did* was enclose a space in an authorized mood, and that is all the strung plastic does now. The compression ratio against a regimental color is absurd. Yet the register is intact. Car dealerships still work.\n**Failure mode.** A full season of weather-bleach. The mood inverts: from *open for business* to *closing down*. The object keeps talking; the meaning reverses on a schedule the owner rarely monitors.\n\n### *Subscriptio manualis* — the handwritten signature\n**Ancestor.** The wax seal. The personal chop. The cross-and-witnesses mark.\n**Mass retained.** A few milligrams of ink.\n**Signal retained.** *I am the specific person who agreed to this.*\n**Field notes.** Every substantive test has shown that a typed name, a checkbox, or a cryptographic signature would serve as well or better. The ink persists for the same reason the chalk does — visible hand, visible intent — even though the hand is by now famously forgeable. Load-bearing precisely because we all half-know the mechanism is ceremonial; removing the ceremony feels like an attack on the agreement, even when the agreement is otherwise intact.\n**Failure mode.** Over-compression to a stylus-trace on a delivery tablet, which has been signed by everyone and so by no one. The specimen is in the late stage of its ritual life.\n\n### *Linea brachialis* — the velvet-rope corridor\n**Ancestor.** The castle gate. The drawbridge. The city wall.\n**Mass retained.** Two brass stanchions and a length of nylon cord.\n**Signal retained.** *A boundary of jurisdiction.*\n**Field notes.** At a nightclub, a bank, a courthouse security queue, the rope enforces nothing physical. Step over it and you are not stopped by the rope; you are stopped by what the rope had already set up. The rope is a compression of every walled perimeter in human history, reduced to its cognitive essence: *a line someone drew on purpose*, of which the line is merely the trace.\n**Failure mode.** Disrespect contagion. One person crossing sets off a cascade; the specimen depends on a norm that collapses nonlinearly. Gate agents know this. Bouncers know this. Central bankers know this.\n\n### *Nota emotiva* — the emoji reaction\n**Ancestor.** The shared laugh. The nodded face across a meeting-room table.\n**Mass retained.** One Unicode codepoint.\n**Signal retained.** *I am here, attending, and my posture toward this is —*\n**Field notes.** The newest specimen in the catalogue, and the fastest-compressing. A decade ago its ancestor still required a whole sentence (*haha* was itself a compression of the laugh); today a thumb-press substitutes. The rate of compression is the rate at which conversation has moved out of rooms and into feeds, which suggests the vessel is also a measurement device for the evacuation of the room itself.\n**Failure mode.** Ambiguity in sincerity. The 👍 compressed too far ceases to be agreement and becomes its suspicious shadow — the middle-aged reassurance shades into the generational passive-aggressive instrument, and the specimen splits into two species under evolutionary pressure.\n\n---\n\n## Postscript\n\nThere is no stable endpoint for a compressed vessel. Each specimen is on a trajectory: its heavier ancestor is living out a ceremonial retirement somewhere, and its own lighter descendant is already being tested somewhere else. The stage after the bulb-string is probably nothing — a painted border, a dashed line on a zoning map, an entry in a food-and-beverage app's location metadata. The stage after the 👍 is probably whatever the phone does on your behalf without asking.\n\nThe worry, which is mild but real, is that the compression runs only in one direction. We are very good at subtracting mass from meaning, and very bad at the inverse. A culture whose every vessel is light will, at some point, run out of the heavy precedents it needs in order to keep the light ones legible. The cone only works because somewhere, still, a timber barricade remains imaginable. The flashing crossing signal only works because the nun with the raised palm is a plausible memory.\n\nThis guide is a partial hedge against that. A specimen recorded is one stage of one family preserved, at least on paper, for whoever next has to figure out what a plastic triangle on a piece of string used to mean.\n\n---";
+  const mdEl = document.getElementById('artifact-md-body');
+  if (mdEl && typeof marked !== 'undefined') {
+    mdEl.innerHTML = marked.parse(artifactMarkdown);
+  }
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const coords = [[39.938401742297,-75.157990368655],[39.938488,-75.157989499722],[39.93832224132,-75.158000749423],[39.938329427348,-75.158051820447],[39.938353113259,-75.158038354105],[39.938480498632,-75.158257861943],[39.938306006931,-75.157779707504],[39.938443469325,-75.158043072901],[39.938312169202,-75.158009592529]];
+  const map = L.map('map', { scrollWheelZoom: false }).setView(coords[0], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap',
+    maxZoom: 19,
+  }).addTo(map);
+  const poly = L.polyline(coords, { color: '#c45a3f', weight: 3, opacity: 0.9 }).addTo(map);
+  coords.forEach((c, i) => {
+    L.circleMarker(c, {
+      radius: 11,
+      color: '#c45a3f',
+      weight: 2,
+      fillColor: '#c45a3f',
+      fillOpacity: 1,
+    })
+      .bindTooltip(String(i), { permanent: true, direction: 'center', className: 'step-marker-label' })
+      .addTo(map)
+      .on('click', () => {
+        const el = document.getElementById('step-' + i);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+  });
+  map.fitBounds(poly.getBounds(), { padding: [30, 30] });
+</script>
+</body>
+</html>

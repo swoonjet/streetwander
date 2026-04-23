@@ -1,0 +1,13 @@
+SEED:
+- "CASEIFICIO CLAUDIO" in chunky slab caps with a little olive-branch glyph tucked into the O
+- The Di Bruno Bros. banner announcing "A Philadelphia Tradition Since 1939" in a casual italic, with a tiny illustrated portrait of the two brothers between the phone number and the name
+- A handwritten chalkboard on the sidewalk that reads "NDUJA" in blocky marker — the kind of word you only write by hand
+
+WANDER:
+"Caseificio" is the tell. It's not a translation, it's a performance — a shop in South Philly using the Italian word for "cheesemaker" to signal something the English word can't, which is lineage. The sign beneath it says "CLAUDIO SPECIALTY FOODS" in a tidier, more Anglicized register, because that's the one that has to appear on the invoice and the insurance form; the Italian one is the one that has to appear in the customer's mouth. This is the same move a restaurant makes when it prints the menu in two columns and leaves *cacio e pepe* untranslated — you're being invited to pronounce it, and the pronunciation is half the meal. Every immigrant neighborhood runs on this two-register system, and you can read the demographic tide by watching which register is louder: when the Italian caseificio gets smaller than the English "SPECIALTY FOODS," the grandchildren have taken over and the customers are no longer mostly the cousins. Chinatowns do the inverse — the Chinese characters get bigger as the street becomes more of a destination and less of a residence, because now the characters are doing *atmosphere* rather than *information*. There's probably a third stage where the foreign word becomes pure ornament, drained of meaning, the way "café" sits on the awning of a place that sells drip coffee in paper cups. The NDUJA on the chalkboard resists this — it's still information, because most passersby genuinely do not know what nduja is, and the chalk itself is a kind of promise that whoever wrote it will be there to explain it. Chalk is a conversational medium; vinyl is a broadcast one. You can't chalk a lie, quite, because the hand is visible in the letter.
+
+BRANCH:
+The awning as a stratigraphic record — each generation repaints over the last and you can date a shop by peeling the signage like tree rings.
+
+ECHO:
+Extends step 0's thread about informal grammar being thicker than formal grammar — the cone and the chalkboard are cousins, both lightweight signals doing work that the official channel can't or won't. But this one opens a new axis: the *register-switching* one, where the informal thing isn't just expedient, it's the only channel that carries the meaning at all.

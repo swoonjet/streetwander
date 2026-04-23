@@ -1,0 +1,20 @@
+{
+  "walk_id": "walk-2026-04-23T13-45-28-philadelphia-9th-street",
+  "label": "philadelphia-9th-street",
+  "start_time_ms": 1776951931636,
+  "end_time_ms": 1776952767770,
+  "duration_ms": 836134,
+  "max_steps": 15,
+  "actual_steps": 9,
+  "termination_reason": "returned_home",
+  "total_distance_m": 146,
+  "distance_from_home_at_end_m": 10,
+  "start_image_id": "131662115586570",
+  "start_coords": {
+    "lat": 39.938401742297,
+    "lng": -75.157990368655
+  },
+  "artifact_medium": "An invented field guide — a short typological catalog of \"compressed vessels,\" each entry naming a species of lightweight object doing structural semantic work, with notes on its older heavier ancestor and its compression ratio.",
+  "artifact_md": "artifact/artifact.md",
+  "artifact_html": null
+}

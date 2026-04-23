@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>The Ladder of Enclosure — one function, six masses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0e0e10;
+    --panel: #14141a;
+    --ink: #e8e6df;
+    --dim: #8a857b;
+    --faint: #5a564f;
+    --line: #26262a;
+    --accent: #c9a962;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font: 12px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 40px 28px 56px; }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 32px;
+  }
+  header .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  header h1 {
+    font: italic 400 34px/1.1 "Playfair Display", Georgia, serif;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  header .sub { font-size: 12px; color: var(--dim); margin-top: 6px; }
+  header .n { text-align: right; font-size: 10px; color: var(--dim); letter-spacing: 0.14em; }
+  header .n strong { color: var(--ink); font-weight: 600; font-size: 22px; font-family: "Playfair Display", serif; display: block; }
+
+  .lede {
+    font: 13px/1.62 "IBM Plex Mono", monospace;
+    color: #c9c3b6;
+    margin: 0 0 36px;
+    max-width: 720px;
+  }
+  .lede em { font-style: italic; color: var(--accent); }
+
+  .rung {
+    display: grid;
+    grid-template-columns: 320px 60px 1fr;
+    gap: 28px;
+    align-items: stretch;
+    padding: 22px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .rung:last-of-type { border-bottom: none; }
+
+  .rung .img {
+    aspect-ratio: 1/1;
+    background: #0a0a0c;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    position: relative;
+  }
+  .rung .img img {
+    width: 100%; height: 100%;
+    display: block;
+    object-fit: cover;
+    filter: contrast(1.02) saturate(0.9);
+  }
+  .rung .img .stage-no {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font: 600 11px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    background: rgba(0,0,0,0.6);
+    padding: 6px 10px;
+    backdrop-filter: blur(3px);
+  }
+
+  .arm {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .arm::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(var(--line), var(--accent), var(--line));
+  }
+  .arm .ratio {
+    position: relative;
+    background: var(--bg);
+    padding: 10px 4px;
+    font: 600 10px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    text-align: center;
+    transform: rotate(90deg);
+    width: max-content;
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 6px 0;
+  }
+  .body .name {
+    font: 400 22px/1.12 "Playfair Display", serif;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    margin: 0;
+  }
+  .body .name em { font-style: italic; color: var(--accent); font-weight: 400; font-size: 14px; margin-left: 8px; }
+
+  .body dl {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 4px 14px;
+    margin: 0;
+    font-size: 11px;
+  }
+  .body dt {
+    color: var(--dim);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 9px;
+    padding-top: 3px;
+  }
+  .body dd {
+    margin: 0;
+    color: #cfc9bd;
+    line-height: 1.5;
+  }
+  .body dd em { font-style: italic; color: var(--ink); }
+
+  .body .note {
+    font: italic 13px/1.52 "Playfair Display", serif;
+    color: #cfc9bd;
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 12px;
+    margin: 6px 0 0;
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); }
+
+  @media (max-width: 820px) {
+    .rung { grid-template-columns: 1fr; gap: 14px; }
+    .arm { height: 40px; }
+    .arm::before { left: 0; right: 0; top: 50%; bottom: auto; height: 1px; width: auto; background: linear-gradient(90deg, var(--line), var(--accent), var(--line)); }
+    .arm .ratio { transform: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">FIELD GUIDE · COMPANION · TAXA OF ENCLOSURE</div>
+      <h1>The Ladder of Enclosure</h1>
+      <div class="sub">One function — a covered pedestrian zone — at six steps of decreasing mass.</div>
+    </div>
+    <div class="n"><strong>6</strong>rungs</div>
+  </header>
+
+  <p class="lede">
+    The same job, done with less material at each step. Shelter is subtracted; the convention holds. Every rung is a compression of the one above, and every rung still works — until it doesn't. <em>The final stage is probably pure convention, a dashed line on the asphalt or an entry in a mapping app's metadata.</em>
+  </p>
+
+  <article class="rung">
+    <div class="img">
+      <img src="philly_ladder1_arcade_00001_.jpg" alt="Roman arcade" />
+      <div class="stage-no">rung 01</div>
+    </div>
+    <div class="arm"><div class="ratio">1 : 1</div></div>
+    <div class="body">
+      <h3 class="name">The arcade <em>Arcus lapideus</em></h3>
+      <dl>
+        <dt>Material</dt><dd>tens of tonnes of dressed stone, engaged piers, semicircular arches</dd>
+        <dt>What it carries</dt><dd>weather · sound · the state's permission to pass</dd>
+        <dt>Era</dt><dd>Roman to Renaissance</dd>
+      </dl>
+      <p class="note">The heaviest ancestor. Every rung below is a reduction of this one — arches kept, mass dropped, at ever finer ratios.</p>
+    </div>
+  </article>
+
+  <article class="rung">
+    <div class="img">
+      <img src="philly_ladder2_galleria_00001_.jpg" alt="19th century galleria" />
+      <div class="stage-no">rung 02</div>
+    </div>
+    <div class="arm"><div class="ratio">1 : 12</div></div>
+    <div class="body">
+      <h3 class="name">The galleria <em>Vitrum ferreum</em></h3>
+      <dl>
+        <dt>Material</dt><dd>iron trusses · glass roof · marble floor</dd>
+        <dt>What it carries</dt><dd>weather · daylight · a commercial register</dd>
+        <dt>Era</dt><dd>19c industrial</dd>
+      </dl>
+      <p class="note">Iron replaces stone, glass replaces masonry. The arch survives the transition intact — the weight halves by an order of magnitude, and nobody misses anything.</p>
+    </div>
+  </article>
+
+  <article class="rung">
+    <div class="img">
+      <img src="philly_ladder3_canopy_00001_.jpg" alt="timber market canopy" />
+      <div class="stage-no">rung 03</div>
+    </div>
+    <div class="arm"><div class="ratio">1 : 200</div></div>
+    <div class="body">
+      <h3 class="name">The market canopy <em>Tegumentum lignum</em></h3>
+      <dl>
+        <dt>Material</dt><dd>timber posts · corrugated metal sheet · hanging strings of produce</dd>
+        <dt>What it carries</dt><dd>rain · sun · the market's schedule</dd>
+        <dt>Era</dt><dd>timeless vernacular</dd>
+      </dl>
+      <p class="note">No vault, no spring, no pretension. A covered pedestrian zone made by adding a flat plane above. The arcade's functional core, stripped of geometry.</p>
+    </div>
+  </article>
+
+  <article class="rung">
+    <div class="img">
+      <img src="philly_ladder4_awning_00001_.jpg" alt="fabric awning" />
+      <div class="stage-no">rung 04</div>
+    </div>
+    <div class="arm"><div class="ratio">1 : 2,000</div></div>
+    <div class="body">
+      <h3 class="name">The fabric awning <em>Tegumentum textile</em></h3>
+      <dl>
+        <dt>Material</dt><dd>canvas on retractable aluminum frame</dd>
+        <dt>What it carries</dt><dd>sun · an implied roomline · the café's hours</dd>
+        <dt>Era</dt><dd>20c urban</dd>
+      </dl>
+      <p class="note">Rain-shedding is given up. Sun and mood remain. The roof becomes seasonal, the roomline stays year-round.</p>
+    </div>
+  </article>
+
+  <article class="rung">
+    <div class="img">
+      <img src="philly_ladder5_string_00001_.jpg" alt="string-light catenary" />
+      <div class="stage-no">rung 05</div>
+    </div>
+    <div class="arm"><div class="ratio">1 : 40,000</div></div>
+    <div class="body">
+      <h3 class="name">The string-light catenary <em>Catenaria illuminata</em></h3>
+      <dl>
+        <dt>Material</dt><dd>a dozen bulbs on a wire between two posts</dd>
+        <dt>What it carries</dt><dd>nothing physical · a convention of interior conditions</dd>
+        <dt>Era</dt><dd>21c hospitality</dd>
+      </dl>
+      <p class="note">The bulbs define a room without enclosing one. Pedestrians adjust their pace on entering and leaving. The signal works fully unlit.</p>
+    </div>
+  </article>
+
+  <article class="rung">
+    <div class="img">
+      <img src="philly_ladder6_line_00001_.jpg" alt="painted dashed line" />
+      <div class="stage-no">rung 06</div>
+    </div>
+    <div class="arm"><div class="ratio">1 : ∞</div></div>
+    <div class="body">
+      <h3 class="name">The dashed line <em>Signum picturatum</em></h3>
+      <dl>
+        <dt>Material</dt><dd>a few grams of thermoplastic paint</dd>
+        <dt>What it carries</dt><dd>the same roomline · now coded in a single convention</dd>
+        <dt>Era</dt><dd>administrative</dd>
+      </dl>
+      <p class="note">The arcade has become a cartographic stroke. The physical substrate is gone; the agreement remains. The stage after this one is no object at all — a geofence, a polygon in a municipal planning layer.</p>
+    </div>
+  </article>
+
+  <footer>
+    <div>FIELD GUIDE COMPANION · "The Ladder of Enclosure" · 2026-04-23</div>
+    <div><em>a walk down 9th Street</em></div>
+  </footer>
+</div>
+</body>
+</html>
