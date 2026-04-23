@@ -64,10 +64,9 @@
   }
 
   a.walk {
-    display: grid;
-    grid-template-columns: 180px 1fr;
+    display: flex;
     gap: 28px;
-    align-items: stretch;
+    align-items: flex-start;
     padding: 28px 0;
     border-bottom: 1px solid var(--line);
     color: inherit;
@@ -77,16 +76,23 @@
   a.walk:first-of-type { border-top: none; }
   a.walk:hover { background: #f4efe3; margin: 0 -16px; padding: 28px 16px; }
   a.walk .thumb {
+    flex: 0 0 200px;
+    width: 200px;
+    height: 150px;
     position: relative;
-    aspect-ratio: 4/3;
     background: #000;
     border: 1px solid var(--line);
     overflow: hidden;
   }
   a.walk .thumb img {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     display: block;
+  }
+  a.walk .meta {
+    flex: 1 1 auto;
+    min-width: 0;
   }
   a.walk .thumb .date {
     position: absolute;
@@ -146,8 +152,8 @@
 
   @media (max-width: 640px) {
     header.top h1 { font-size: 48px; }
-    a.walk { grid-template-columns: 1fr; gap: 14px; }
-    a.walk .thumb { aspect-ratio: 16/9; }
+    a.walk { flex-direction: column; gap: 14px; }
+    a.walk .thumb { flex: 0 0 auto; width: 100%; height: auto; aspect-ratio: 16/9; }
   }
 </style>
 </head>
