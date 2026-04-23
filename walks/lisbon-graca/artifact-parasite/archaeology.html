@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>A Parasite Archaeology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0e0e10;
+    --panel: #14141a;
+    --ink: #e8e6df;
+    --dim: #8a857b;
+    --faint: #5a564f;
+    --line: #26262a;
+    --accent: #c9a962;
+    --parasite: #c45a3f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font: 12px/1.5 "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 28px 56px; }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 32px;
+  }
+  header .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  header h1 {
+    font: italic 400 34px/1.1 "Playfair Display", Georgia, serif;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  header .sub {
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  header .count {
+    text-align: right;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.14em;
+  }
+  header .count strong { color: var(--ink); font-weight: 600; font-size: 22px; font-family: "Playfair Display", serif; display: block; }
+
+  .lede {
+    font: 13px/1.6 "IBM Plex Mono", monospace;
+    color: #c9c3b6;
+    margin: 0 0 36px;
+    max-width: 680px;
+  }
+  .lede em { font-style: italic; color: var(--accent); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  article.case {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 18px;
+  }
+
+  .diagram {
+    width: 96px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .diagram svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .body { display: flex; flex-direction: column; }
+
+  .title {
+    font: 400 19px/1.15 "Playfair Display", serif;
+    color: var(--ink);
+    margin: 0 0 2px;
+  }
+  .title em { font-style: italic; color: var(--parasite); font-weight: 400; }
+  .domain {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 10px;
+  }
+
+  .arc {
+    font: 11px/1.5 "IBM Plex Mono", monospace;
+    margin: 6px 0 10px;
+    color: #c9c3b6;
+  }
+  .arc .y {
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    margin-right: 8px;
+  }
+  .arc .host { color: var(--ink); }
+  .arc .parasite { color: var(--parasite); }
+  .arc .arrow { color: var(--faint); margin: 0 8px; }
+
+  .verdict {
+    font: italic 12.5px/1.5 "Playfair Display", serif;
+    color: #cfc9bd;
+    margin-top: auto;
+  }
+  .verdict strong {
+    font-style: normal;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid var(--accent);
+    margin-right: 8px;
+    font-weight: 600;
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); }
+
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+    article.case { grid-template-columns: 72px 1fr; }
+    .diagram { width: 72px; height: 96px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">NP-0 · COMPANION NOTE · §3</div>
+      <h1>A Parasite Archaeology</h1>
+      <div class="sub">Bolt-ons that became the brand.</div>
+    </div>
+    <div class="count"><strong>8</strong>cases</div>
+  </header>
+
+  <p class="lede">
+    The feature added in year five is the feature the thing is known for by year fifty. The original spec is almost never the surface that defines the thing at steady state. <em>Parasites graduate.</em> Below, eight cases where the bolt-on became the portrait.
+  </p>
+
+  <div class="grid">
+
+    <article class="case">
+      <div class="diagram">
+        <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="16" y="50" width="48" height="40" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <polygon points="16,50 40,30 64,50" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <line x1="40" y1="30" x2="40" y2="6" stroke="#c45a3f" stroke-width="2.5" />
+          <polygon points="36,10 40,2 44,10" fill="#c45a3f" />
+          <text x="52" y="16" fill="#c45a3f" font-size="8" font-family="IBM Plex Mono, monospace" font-weight="600">1859</text>
+        </svg>
+      </div>
+      <div class="body">
+        <h3 class="title">Notre-Dame + <em>Viollet-le-Duc's spire</em></h3>
+        <div class="domain">Architecture · Paris</div>
+        <div class="arc">
+          <span class="y">1163</span><span class="host">nave</span><span class="arrow">→</span><span class="y">1859</span><span class="parasite">spire added</span>
+        </div>
+        <p class="verdict"><strong>Iconic</strong>When it burned in 2019 the world grieved a twelfth-century building. It was a nineteenth-century pastiche.</p>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="diagram">
+        <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="12" y="86" width="56" height="4" fill="#5a564f" />
+          <polygon points="18,86 26,14 40,14 40,86" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <polygon points="40,14 54,14 62,86 40,86" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <text x="20" y="98" fill="#c45a3f" font-size="8" font-family="IBM Plex Mono, monospace" font-weight="600">→ permanent</text>
+        </svg>
+      </div>
+      <div class="body">
+        <h3 class="title">Eiffel Tower + <em>not coming down</em></h3>
+        <div class="domain">Architecture · Paris</div>
+        <div class="arc">
+          <span class="y">1889</span><span class="host">expo pavilion</span><span class="arrow">→</span><span class="y">1909</span><span class="parasite">radio antenna kept it</span>
+        </div>
+        <p class="verdict"><strong>Portrait</strong>Meant to be dismantled after twenty years. A military radio antenna bolted to the top made it too useful to remove. The parasite saved the host and became the city's signature.</p>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="diagram">
+        <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="12" y="24" width="56" height="58" rx="4" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <rect x="18" y="32" width="44" height="5" fill="#5a564f" />
+          <rect x="18" y="42" width="36" height="3" fill="#3a352c" stroke="#5a564f" stroke-width="0.5" />
+          <rect x="18" y="50" width="40" height="3" fill="#3a352c" stroke="#5a564f" stroke-width="0.5" />
+          <rect x="24" y="58" width="38" height="20" fill="#c45a3f" stroke="#c45a3f" stroke-width="0.5" />
+          <rect x="27" y="62" width="30" height="2" fill="#fff" fill-opacity="0.3" />
+          <rect x="27" y="68" width="24" height="2" fill="#fff" fill-opacity="0.3" />
+          <rect x="27" y="74" width="28" height="2" fill="#fff" fill-opacity="0.3" />
+        </svg>
+      </div>
+      <div class="body">
+        <h3 class="title">Slack + <em>threads</em></h3>
+        <div class="domain">Software · SaaS · 2013–</div>
+        <div class="arc">
+          <span class="y">2013</span><span class="host">team chat</span><span class="arrow">→</span><span class="y">2017</span><span class="parasite">threads</span>
+        </div>
+        <p class="verdict"><strong>Canon</strong>Originally resisted — would fragment the feed. Shipped reluctantly. By year ten, the verb every Slack replacement has to answer for.</p>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="diagram">
+        <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="12" y="20" width="56" height="60" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <path d="M 18 40 L 22 36 L 26 42 L 30 38 L 34 44 L 38 36" stroke="#8a857b" stroke-width="1.5" fill="none" />
+          <circle cx="50" cy="50" r="3" fill="#c45a3f" />
+          <circle cx="56" cy="58" r="3" fill="#c9a962" />
+          <circle cx="44" cy="64" r="3" fill="#6a9cc4" />
+          <line x1="50" y1="50" x2="52" y2="48" stroke="#c45a3f" stroke-width="1" />
+          <line x1="56" y1="58" x2="58" y2="56" stroke="#c9a962" stroke-width="1" />
+          <line x1="44" y1="64" x2="46" y2="62" stroke="#6a9cc4" stroke-width="1" />
+        </svg>
+      </div>
+      <div class="body">
+        <h3 class="title">Figma + <em>multiplayer cursors</em></h3>
+        <div class="domain">Software · Design tools · 2012–</div>
+        <div class="arc">
+          <span class="y">2012</span><span class="host">vector pen in a browser</span><span class="arrow">→</span><span class="y">2016</span><span class="parasite">live cursors</span>
+        </div>
+        <p class="verdict"><strong>Canon</strong>The pen was the pitch; the cursors were the retention. Every subsequent tool has had to answer "can we see each other?" first, and "do you have bezier handles?" second.</p>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="diagram">
+        <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="50" r="30" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <path d="M 30 45 Q 40 30, 50 45 L 50 60 Q 40 72, 30 60 Z" fill="#c45a3f" />
+          <circle cx="40" cy="48" r="3" fill="#fff" fill-opacity="0.85" />
+          <path d="M 40 52 L 40 58" stroke="#fff" stroke-opacity="0.7" stroke-width="1" />
+        </svg>
+      </div>
+      <div class="body">
+        <h3 class="title">Spotify + <em>the algorithm</em></h3>
+        <div class="domain">Software · Music · 2008–</div>
+        <div class="arc">
+          <span class="y">2008</span><span class="host">curated playlists</span><span class="arrow">→</span><span class="y">2015</span><span class="parasite">Discover Weekly</span>
+        </div>
+        <p class="verdict"><strong>Canon</strong>The editorial team was the founding story. By year ten the brand is a vector of listening behaviors, and Discover Weekly is the onboarding demo.</p>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="diagram">
+        <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="28" width="52" height="44" rx="3" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <text x="20" y="48" fill="#8a857b" font-size="10" font-family="IBM Plex Mono, monospace">post</text>
+          <text x="20" y="62" fill="#c45a3f" font-size="12" font-family="IBM Plex Mono, monospace" font-weight="600">#RT @</text>
+        </svg>
+      </div>
+      <div class="body">
+        <h3 class="title">Twitter + <em>RT, @, #</em></h3>
+        <div class="domain">Software · Social · 2006–</div>
+        <div class="arc">
+          <span class="y">2006</span><span class="host">status update</span><span class="arrow">→</span><span class="y">2007–09</span><span class="parasite">user-invented grammar</span>
+        </div>
+        <p class="verdict"><strong>Canon</strong>The retweet, the @-mention, the hashtag — all invented by users and written over commodity text, then absorbed into the product. The parasites became the syntax.</p>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="diagram">
+        <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="16" y="28" width="48" height="56" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <rect x="12" y="26" width="8" height="60" fill="#c45a3f" />
+          <rect x="60" y="26" width="8" height="60" fill="#c9a962" />
+          <line x1="24" y1="38" x2="56" y2="38" stroke="#6a9cc4" stroke-width="2" />
+          <line x1="24" y1="50" x2="56" y2="50" stroke="#6a9cc4" stroke-width="2" />
+          <line x1="24" y1="62" x2="56" y2="62" stroke="#6a9cc4" stroke-width="2" />
+        </svg>
+      </div>
+      <div class="body">
+        <h3 class="title">Pompidou + <em>guts on the outside</em></h3>
+        <div class="domain">Architecture · Paris · 1977</div>
+        <div class="arc">
+          <span class="y">1971</span><span class="host">art museum brief</span><span class="arrow">→</span><span class="y">1977</span><span class="parasite">services exterior by design</span>
+        </div>
+        <p class="verdict"><strong>Iconic</strong>Rogers and Piano pre-empted the parasite by making the retrofit the facade. The building cannot be tattooed by its own infrastructure because it already is.</p>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="diagram">
+        <svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="16" y="48" width="48" height="40" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <polygon points="16,48 40,32 64,48" fill="#3a352c" stroke="#5a564f" stroke-width="1" />
+          <line x1="20" y1="52" x2="60" y2="52" stroke="#c45a3f" stroke-width="1" />
+          <line x1="24" y1="52" x2="24" y2="88" stroke="#c45a3f" stroke-width="1" />
+          <line x1="36" y1="52" x2="36" y2="88" stroke="#c45a3f" stroke-width="1" />
+          <line x1="48" y1="52" x2="48" y2="88" stroke="#c45a3f" stroke-width="1" />
+          <line x1="56" y1="52" x2="56" y2="88" stroke="#c45a3f" stroke-width="1" />
+          <text x="10" y="16" fill="#c45a3f" font-size="7" font-family="IBM Plex Mono, monospace" font-weight="600">1880s</text>
+          <text x="10" y="98" fill="#8a857b" font-size="7" font-family="IBM Plex Mono, monospace">"medieval"</text>
+        </svg>
+      </div>
+      <div class="body">
+        <h3 class="title">Bavarian village + <em>the half-timber revival</em></h3>
+        <div class="domain">Architecture · Europe</div>
+        <div class="arc">
+          <span class="y">800s–1600s</span><span class="host">timber framing, structural</span><span class="arrow">→</span><span class="y">1880s</span><span class="parasite">revival pastiche, decorative</span>
+        </div>
+        <p class="verdict"><strong>Portrait</strong>The "ancient" Bavarian streetscape most people picture is a late-19th-century revival. The parasite displaced the host in memory — functionally, it became what the thing had always been.</p>
+      </div>
+    </article>
+
+  </div>
+
+  <footer>
+    <div>NP-0 · Companion · "A Parasite Archaeology" · §3 structural slack</div>
+    <div><em>a walk through Graça</em></div>
+  </footer>
+</div>
+</body>
+</html>

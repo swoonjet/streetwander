@@ -1,0 +1,20 @@
+{
+  "walk_id": "walk-2026-04-22T23-49-00-lisbon-graca",
+  "label": "lisbon-graca",
+  "start_time_ms": 1776901742700,
+  "end_time_ms": 1776902950464,
+  "duration_ms": 1207764,
+  "max_steps": 15,
+  "actual_steps": 15,
+  "termination_reason": "max_steps",
+  "total_distance_m": 351,
+  "distance_from_home_at_end_m": 44,
+  "start_image_id": "1210563839373904",
+  "start_coords": {
+    "lat": 38.715066041916,
+    "lng": -9.1310492223029
+  },
+  "artifact_medium": "An invented spec — a fake design-system primitive, written as a dry technical document, called \"Native Parameters: A Context Declaration for Designed Forms.\"",
+  "artifact_md": "artifact/artifact.md",
+  "artifact_html": null
+}

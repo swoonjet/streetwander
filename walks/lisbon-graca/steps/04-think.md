@@ -1,0 +1,13 @@
+SEED:
+- the bubble-letter throw-up on the left wall, glossy black outline, thick and fast, sitting on a stucco that's already been streaked by brown water-stains from somewhere above the cornice
+- the round traffic sign on its thin pole, centered in the slot of the street like a period at the end of the block
+- the rank of parked cars tight against the curb, their mirrors folded in against the narrowness of the calçada
+
+WANDER:
+The throw-up is the interesting thing — not because it's good (it's fine, a standard bulbous face-piece in black-on-cream, maybe ninety seconds of work) but because its *form* is a fossil of a clock. Bubble-letter style came out of mid-70s New York specifically because cops — writers couldn't sit with a rail car long enough to do a full piece, so the throw-up evolved as a two-color, high-speed, maximum-coverage compression of the gesture. Every curve in that outline encodes an assumption about how many seconds you have before someone turns the corner. This is true of a lot of forms: bebop phrasing was partly a negotiation with the 78rpm side length, the sonnet with courtly patience, the tea ceremony with 16th-century political risk. A form is a physics of its enforcement context. Which makes me want to ask what product design's enforcement context even is — because mostly there isn't one, no rail car arriving, no cop, no 78rpm cutoff, just a sprint deadline that everyone negotiates away. So our forms bloat. The settings panel with nineteen tabs and the onboarding with six screens are what you get when no clock enforces the shape. The writer on this wall has better constraint hygiene than most SaaS designers, but I want to undermine myself immediately — the writer is also working for an audience of maybe fifty people who can read the signature, and narrow forms are narrow for a reason, and SaaS is bloated partly because its audience is actually broad, and maybe you don't get to have constraint-discipline and breadth in the same product. The honest reading is that you have to pick your clock. Stripe picked one — performance budgets as a near-physical law — and their UI is what falls out of that pressure. Most teams don't name a clock, and then wonder why their shape is soft.
+
+BRANCH:
+"Name your clock" as a design-system artifact — alongside tokens, a declared enforcement constraint (time, budget, attention, risk) that the forms must fit through.
+
+ECHO:
+Extends step 3's catenary — both are form-found from a force rather than drawn from taste, but the throw-up's force is enforcement rather than gravity, a human law rather than a natural one. Same move, different physics: let the situation draw the shape before you draw the shape.

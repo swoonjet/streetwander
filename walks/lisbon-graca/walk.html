@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>walk-2026-04-22T23-49-00-lisbon-graca — Wanderer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --bg: #faf7f2;
+    --ink: #1a1a1a;
+    --dim: #6a6a6a;
+    --line: #e5ddd0;
+    --accent: #c45a3f;
+    --block: #f2ede3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 120px; }
+  header.top h1 {
+    font: 400 28px/1.2 Georgia, serif;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  header.top .meta {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  dl.stats {
+    display: flex; flex-wrap: wrap; gap: 0 28px;
+    margin: 16px 0 0; padding: 0;
+    font: 13px/1.3 ui-monospace, Menlo, monospace;
+  }
+  dl.stats > div { display: flex; gap: 6px; }
+  dl.stats dt { color: var(--dim); margin: 0; }
+  dl.stats dd { margin: 0; color: var(--ink); }
+  #map {
+    height: 420px;
+    margin: 32px 0 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .step-marker-label {
+    background: transparent; border: none; box-shadow: none;
+    color: #fff; font: 700 11px/1 ui-monospace, Menlo, monospace;
+    pointer-events: none;
+  }
+  main.steps { margin-top: 48px; }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px 20px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+  }
+  .step:first-child { border-top: none; padding-top: 8px; }
+  .step-num {
+    font: 700 14px/1 ui-monospace, Menlo, monospace;
+    color: var(--accent);
+    padding-top: 4px;
+  }
+  .step-img { grid-column: 2; margin: 0 0 16px; }
+  .step-img img { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
+  .step-img figcaption {
+    font: 12px/1.3 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  .step-body { grid-column: 2; }
+  .block { margin-bottom: 18px; }
+  .block h4 {
+    margin: 0 0 6px;
+    font: 700 11px/1 ui-monospace, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .block ul { margin: 0; padding-left: 20px; }
+  .block li { margin-bottom: 6px; }
+  .block p { margin: 0; }
+  .block.thread { color: var(--dim); font-style: italic; }
+  .block.wander p { font-size: 15.5px; line-height: 1.6; }
+  .block.branch {
+    color: var(--accent);
+    font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+  }
+  .block.nav {
+    background: var(--block);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+  .block.nav .pick { color: var(--accent); }
+
+  section.artifact {
+    margin: 64px 0 0;
+    padding: 40px 32px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  section.artifact h2 {
+    margin: 0 0 4px;
+    font: 400 22px/1.2 Georgia, serif;
+  }
+  section.artifact .medium {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin: 0 0 20px;
+  }
+  .artifact-body {
+    font: 14px/1.5 ui-monospace, Menlo, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    background: var(--bg);
+    padding: 20px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+  }
+  .artifact-md {
+    background: var(--bg);
+    padding: 28px 32px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+    font: 15px/1.58 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+  }
+  .artifact-md h1, .artifact-md h2, .artifact-md h3 {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    margin: 1.4em 0 0.4em;
+  }
+  .artifact-md h1 { font-size: 26px; margin-top: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .artifact-md h2 { font-size: 18px; color: var(--ink); }
+  .artifact-md h3 { font-size: 15px; color: var(--accent); font-style: italic; }
+  .artifact-md p { margin: 0 0 1em; }
+  .artifact-md ul, .artifact-md ol { margin: 0 0 1em; padding-left: 22px; }
+  .artifact-md li { margin-bottom: 4px; }
+  .artifact-md strong { color: var(--ink); }
+  .artifact-md em { color: var(--dim); font-style: italic; }
+  .artifact-md code {
+    font: 12.5px/1.4 ui-monospace, Menlo, monospace;
+    background: #eee7d6;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: #2a2a2a;
+  }
+  .artifact-md pre {
+    font: 12px/1.5 ui-monospace, Menlo, monospace;
+    background: #efe8d8;
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md pre code { background: none; padding: 0; font-size: inherit; }
+  .artifact-md blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0 14px;
+    margin: 0 0 1em;
+    color: var(--dim);
+    font-style: italic;
+  }
+  .artifact-md hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 1.6em 0;
+  }
+  .artifact-md table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md th, .artifact-md td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .artifact-md th {
+    font-weight: 600;
+    background: #efe8d8;
+    font-family: Georgia, serif;
+  }
+  .artifact-md tr:last-child td { border-bottom: none; }
+  .artifact-embed {
+    position: relative;
+    margin: 0 0 16px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  .artifact-embed.wide { aspect-ratio: 16/10; }
+  .artifact-embed iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+  }
+  section.artifact.companion { margin-top: 32px; }
+  .open-link { margin: 0 0 20px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+  .open-link a { color: var(--accent); text-decoration: none; }
+  .open-link a:hover { text-decoration: underline; }
+  section.artifact .closing {
+    font-style: italic;
+    color: var(--ink);
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .container { padding: 24px 16px 80px; }
+    .step { grid-template-columns: 32px 1fr; gap: 8px 12px; }
+    .artifact-body { font-size: 12px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="top">
+    <div class="meta">walk-2026-04-22T23-49-00-lisbon-graca</div>
+    <h1>A walk — lisbon graca</h1>
+    <dl class="stats">
+      <div><dt>steps</dt><dd>15</dd></div>
+      <div><dt>distance</dt><dd>351m</dd></div>
+      <div><dt>duration</dt><dd>20min</dd></div>
+      <div><dt>ended</dt><dd>max steps</dd></div>
+      <div><dt>from home</dt><dd>44m</dd></div>
+    </dl>
+  </header>
+
+  <div id="map"></div>
+
+  <main class="steps">
+
+<article class="step" id="step-0">
+  <div class="step-num">00</div>
+  <figure class="step-img">
+    <img src="images/00-1210563839373904.jpg" alt="step 0" loading="lazy" />
+    <figcaption>38.71507, -9.13105</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the stone facade on the right — huge rusticated ashlar blocks, each one slightly different, mortar lines drifting off-true</li><li>a small white-painted iron lamp bracket on the left, curling out from a flat wall like a signature</li><li>the cobblestones running flat under the car but pitching up toward a pale sky at the vanishing point</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>Those ashlar blocks are cut to look heavy — deliberately, performatively heavy — but the mortar between them wanders, the way handwriting wanders when you&#39;re copying from another page. It&#39;s a thing Lisbon shares with a lot of 18th-century stonework: the surface *performs* order at a distance and reveals tolerance up close. Which is probably the honest definition of a style — the rule you can keep from the sidewalk but not from a meter away. I think about this when I see Muji packaging, which reads as rigorous from across the aisle and gets pretty loose once you&#39;re holding the kraft label and seeing the kerning breathe. Rigor at reading distance, warmth at handling distance; maybe that&#39;s just what a brand is for a physical object. Software forgot this for a while — flat design assumed every distance was the same distance, because on a screen it basically is, and then we had a decade of logos that looked identical at 16px and 1600px and felt like nothing at either size. The counter-move is stuff like the new Burberry knight, where the line weight is tuned for embroidery first and pixels second, so at thumbnail it&#39;s slightly wrong and on a coat it&#39;s exactly right. I wonder if every identity system should declare its *native distance* the way a font declares its optical size — a little metadata field that says &quot;this was drawn to be read from three meters, degrade gracefully.&quot; The ashlar was drawn to be read from across the street.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Optical sizing as a brand-system primitive — not just typography, but logos, icons, layouts, each with a declared native viewing distance.</p></div>
+    
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The optical-sizing thread wants fresh material to pressure-test against, not a mirror of itself — a perpendicular street introduces a new facade grammar without letting the drift collapse into a tidy callback.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-1">
+  <div class="step-num">01</div>
+  <figure class="step-img">
+    <img src="images/01-1151580692724476.jpg" alt="step 1" loading="lazy" />
+    <figcaption>38.71525, -9.13059</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the yellow building on the left with its &quot;JUNTA DE FREGUESIA&quot; sign and the blue square-P parking plate, both sitting slightly askew against the stucco</li><li>a graffiti-tagged metal door on the right, tags layered over what looks like an older posted notice</li><li>a sheet of plywood laid flat on the sidewalk stones on the right — a patch, a repair, a placeholder</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>That plywood sheet is the thing. Someone pulled up calçada portuguesa — the hand-set limestone cobble mosaic that Lisbon treats as civic jewelry — and the hole got capped with a rectangle of construction-grade ply while the city, or the contractor, or no one in particular, waits for the calceteiro to come re-set the pattern by hand. It&#39;s a temporal seam: the pavement is 19th-century craft, the patch is 20th-century material, and the wait between them is pure 21st-century scheduling. Every infrastructure has these seams — the asphalt scar where a trench was dug and refilled never quite matches, the drywall patch in a gallery between shows, the `TODO` comment in a codebase that&#39;s been there since 2019. What interests me is that the patch is almost always uglier than either the before or the after, and yet the patch is what the thing *actually is* most of the time. A city is mostly patches. A codebase is mostly patches. The myth is the finished state; the practice is the plywood. There&#39;s a Stewart Brand line about how buildings learn — they learn by being patched, and the patches are the memory — but he doesn&#39;t quite say the patches are the *building*, which I think is the stronger claim. Maybe design systems should ship with a patch grammar: not just tokens and components, but an official vocabulary for the interim, the placeholder, the known-ugly-bridge. GOV.UK sort of has this — the gray &quot;beta&quot; banner is a patch declared honestly — but most systems treat the patch as shame and try to hide it.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>A patch grammar as a first-class design-system deliverable — typography, color, and tone for the interim state, shipped alongside the finished components.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 0&#39;s thought about rigor-at-distance vs. tolerance-up-close — both are about honesty scales, about what a surface admits when you approach it. Extends it: step 0 was about how finished surfaces carry their own slack; this one is about the unfinished surface as the real subject.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>Turning onto a different street breaks the corridor of the current drift — the patch-grammar idea is almost over-cooked and wants a sideways stimulus rather than more of the same frontage.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-2">
+  <div class="step-num">02</div>
+  <figure class="step-img">
+    <img src="images/02-1095370444921441.jpg" alt="step 2" loading="lazy" />
+    <figcaption>38.71543, -9.13071</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the turquoise azulejo wall on the right, tiled floor-to-roofline, reading almost as fabric from this distance</li><li>two stacked blue &quot;P&quot; parking signs, the near one with &quot;58-RC-80&quot; and a wheelchair pictogram on a smaller plate below</li><li>the cast-iron lamp bracket mid-frame, curling out of a pale yellow facade toward the slot of sky between the buildings</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The azulejo wall is doing something pre-modern that we keep trying to reinvent in software: it&#39;s a *tiled* interface in the literal sense — a repeating unit, hand-painted, kiln-fired, grouted in place — and it shrugs off damage the way a good grid shrugs off bad content. Lose a tile, replace a tile; the system survives. There&#39;s a reason CSS adopted the word: a tile is the unit that makes a surface *patchable at the unit scale*. Compare that to a fresco, where a crack runs through a face and now you have a restoration debate that takes three decades and a Vatican committee. The azulejo pre-commits to its own failure mode. Which is maybe the deepest design move — not to prevent breakage but to *choose the shape of breakage*. Kintsugi does this with gold; the Japanese hand plane does this by being resharpenable forever; the Erlang language does this with &quot;let it crash&quot; and supervisor trees that restart the broken actor without taking the system down. Everything durable seems to have negotiated with its own decay in advance. The opposite is the monocoque car body or the sealed AirPod — beautiful until the first insult, then garbage. I think a lot of digital product design is still in the monocoque era: ship the glossy shell, pray nothing hits it, and when something does, issue a full replacement. A tile grammar would be humbler and probably longer-lived — components that fail at their own seams, by design, so the repair is cheap and the history is visible. The azulejo wall in front of me is two hundred years old and half of it has been replaced at least once, and you can see the replacements if you look — slightly different blue, slightly different crackle — and the wall is better for it, not worse.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>&quot;Choose your failure mode&quot; as a design-system axiom — every component declares not just its appearance but its preferred way of breaking.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 1&#39;s patch grammar directly — but flips the timing. Step 1 was about making the interim state honest after damage; this one is about pre-committing to the damage at the unit level, so the patch is already part of the spec.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The tile-grammar thought has run its course as an abstraction; reversing onto a different street should change the grain of what I&#39;m looking at and keep the drift from calcifying into a thesis.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-3">
+  <div class="step-num">03</div>
+  <figure class="step-img">
+    <img src="images/03-1003354568114963.jpg" alt="step 3" loading="lazy" />
+    <figcaption>38.71518, -9.13056</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>a single black electrical wire slung diagonally across the slot of sky between the two buildings, sagging in a soft catenary</li><li>the corrugated metal awning running the whole length of the left-hand building, rusting at its lower lip, throwing a cold shadow onto the pale stucco</li><li>a lone figure far down the street in shorts and a dark shirt, walking away from the camera with a small dog nosing at the pavement ahead of them</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>That wire is the most honest piece of infrastructure in the frame — a thin black line drawn by gravity, not by a draftsman, making a curve nobody designed but everybody recognizes. The catenary shows up wherever a flexible thing is held at two points and left alone: power lines, suspension bridges, the hem of a linen curtain, the chain in Gaudí&#39;s upside-down models at the Sagrada Família crypt where he used hanging weights to compute the compression lines of his vaults. That&#39;s the trick — Gaudí let gravity solve the math, then flipped the photograph to get the column. The form was *found*, not *drawn*, which is a move whole disciplines only rediscover every few decades: Frei Otto with soap films and the Munich Olympic roof, Heatherwick&#39;s various cable-net flirtations, the entire field of form-finding FEM software that reinvents the hanging chain in a solver. What they all share is a willingness to let a material&#39;s preferred shape be the answer instead of imposing one. You see the opposite in most brand systems and most cities — a logo that fights its own legibility at small sizes, a plaza paved flat on a hill that wanted to be a stair. The wire in this frame is doing a thing an entire zoning code above it is refusing to do: it&#39;s taking the shortest lazy path between two necessary points and letting the sag be visible. I keep wondering what a software architecture would look like if you let the dependency graph hang under its own weight before you drew the boxes — which services are heavy, which are tethered to what, where the slack is. Probably it would look like every real system does under the pretty diagram: one big sag between auth and the database, everything else dangling off that line.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Form-finding as a design-review practice — before approving the diagram, let the system hang and see where it sags.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>New thread, mostly — steps 0–2 were about surfaces admitting their own tolerances and failures; this is about letting *forces* draw the form in the first place, upstream of any surface. Adjacent, not continuous: the patch grammar was post-hoc honesty, the catenary is pre-hoc honesty.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The catenary thought just landed on &quot;pre-hoc honesty, let the forces draw the form&quot; — I want a new street&#39;s worth of different forces rather than more of the same corridor to test it against.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-4">
+  <div class="step-num">04</div>
+  <figure class="step-img">
+    <img src="images/04-1092118861809240.jpg" alt="step 4" loading="lazy" />
+    <figcaption>38.71508, -9.13048</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the bubble-letter throw-up on the left wall, glossy black outline, thick and fast, sitting on a stucco that&#39;s already been streaked by brown water-stains from somewhere above the cornice</li><li>the round traffic sign on its thin pole, centered in the slot of the street like a period at the end of the block</li><li>the rank of parked cars tight against the curb, their mirrors folded in against the narrowness of the calçada</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The throw-up is the interesting thing — not because it&#39;s good (it&#39;s fine, a standard bulbous face-piece in black-on-cream, maybe ninety seconds of work) but because its *form* is a fossil of a clock. Bubble-letter style came out of mid-70s New York specifically because cops — writers couldn&#39;t sit with a rail car long enough to do a full piece, so the throw-up evolved as a two-color, high-speed, maximum-coverage compression of the gesture. Every curve in that outline encodes an assumption about how many seconds you have before someone turns the corner. This is true of a lot of forms: bebop phrasing was partly a negotiation with the 78rpm side length, the sonnet with courtly patience, the tea ceremony with 16th-century political risk. A form is a physics of its enforcement context. Which makes me want to ask what product design&#39;s enforcement context even is — because mostly there isn&#39;t one, no rail car arriving, no cop, no 78rpm cutoff, just a sprint deadline that everyone negotiates away. So our forms bloat. The settings panel with nineteen tabs and the onboarding with six screens are what you get when no clock enforces the shape. The writer on this wall has better constraint hygiene than most SaaS designers, but I want to undermine myself immediately — the writer is also working for an audience of maybe fifty people who can read the signature, and narrow forms are narrow for a reason, and SaaS is bloated partly because its audience is actually broad, and maybe you don&#39;t get to have constraint-discipline and breadth in the same product. The honest reading is that you have to pick your clock. Stripe picked one — performance budgets as a near-physical law — and their UI is what falls out of that pressure. Most teams don&#39;t name a clock, and then wonder why their shape is soft.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>&quot;Name your clock&quot; as a design-system artifact — alongside tokens, a declared enforcement constraint (time, budget, attention, risk) that the forms must fit through.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 3&#39;s catenary — both are form-found from a force rather than drawn from taste, but the throw-up&#39;s force is enforcement rather than gravity, a human law rather than a natural one. Same move, different physics: let the situation draw the shape before you draw the shape.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The clock-and-enforcement thread is well-fed; turning onto a different street is the jolt — a new frame&#39;s worth of stimuli to test whether &quot;name your clock&quot; survives contact with unrelated material, or whether it was a local mood dressed as a principle.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-5">
+  <div class="step-num">05</div>
+  <figure class="step-img">
+    <img src="images/05-1326180804716328.jpg" alt="step 5" loading="lazy" />
+    <figcaption>38.71488, -9.13021</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the whole frame is out of focus — not a subject but a field of smeared edges, the dashcam hunting or the car moving or both</li><li>the parked cars jammed at the curb of the right-hand lot, mirrors tucked against the narrowness</li><li>the small punched windows in the cream building on the right, placed with no particular rhythm, as if each was cut when someone inside needed one</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The blur is the real subject. This is a photograph that failed, more or less — and I can still tell you it&#39;s a narrow calçada in Graça, parked cars right, overcast sky, stucco walls both sides, a street sign pinned against a building like a brooch. Meaning survived the resolution loss, and the resolution loss was enormous, which is interesting because it reveals something about where information actually lives: not in edges but in low-frequency structure, silhouettes, the fact that dark-below-light is a building and light-above-dark is a sky. This is the signature property of Mapillary as a system — no single frame has to be good, because the swarm of frames geotagged down a street reconstructs the street better than any one sharp image ever could. Same move as GPS: each satellite gives you a noisy range, twelve of them give you a meter. Same move as OpenStreetMap, where no contributor has to be a cartographer because the consensus of thousands of amateurs converges on a more honest map than any single cartographer would draw. Individual fidelity is a trap when you can afford a swarm. What this reframes, for me, is the whole concept of &quot;quality&quot; in an information system: quality-per-unit and quality-per-ensemble are almost opposite targets. Susan Kare had to carry meaning in 32×32 because there was no ensemble — one glyph, one chance, carve it hard — and the trashcan and the watch and the bomb are iconic precisely because the unit was forced to do all the work. Mapillary doesn&#39;t carve; it smothers. And design systems secretly live along this axis without naming it: Apple is a Kare system, every glyph tuned, every corner radius argued over; the Noun Project is a Mapillary system, every glyph cheap and redundant, the ensemble doing the labor. Neither is wrong, but they&#39;re different economies of attention — and a team that thinks it&#39;s Apple while actually shipping Noun Project glyphs ends up carrying the costs of both and the benefits of neither.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Swarm-fidelity vs. unit-fidelity as the first design-system decision — are we carving glyphs or smothering a domain? Budget follows from the answer, not the other way around.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s &quot;native distance&quot; in a new dimension — not how far away the thing is read from, but at what *cardinality* it has to work. A form&#39;s native N, not just its native D. Step 0 said declare your viewing distance; this says declare your ensemble size, because both change what counts as a defect.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The swarm-vs-unit thread just closed cleanly; I want a long turn onto a fresh street so the next frame arrives as new material rather than more evidence for a theory I&#39;ve already stated.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-6">
+  <div class="step-num">06</div>
+  <figure class="step-img">
+    <img src="images/06-1147901693055546.jpg" alt="step 6" loading="lazy" />
+    <figcaption>38.71504, -9.13046</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the pair of &quot;no stopping&quot; signs — the red-and-blue crossed disc — mounted on thin poles on both sides of the street, one left one right, framing the slot of road like parentheses</li><li>the corrugated metal cornice-awning running along the right-hand building, a continuous horizontal edge that shadows the whole ground floor</li><li>the soft yellow of a single building in the middle distance, almost the only saturated surface in an otherwise cream-and-stucco block</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>Two &quot;no stopping&quot; signs, one on each wall, forty meters apart — which means the regulation needs to be restated to stay in effect. The sign is a kind of short-lived field: its authority decays with distance, and if you want coverage you repeat the emitter. Most laws work this way and we pretend they don&#39;t; the actual enforceable surface of a rule is a constellation of reminders, not a single decree. It&#39;s the same reason churches rang bells every hour and not once at matins — piety, like parking compliance, falls off as r². Brand systems have the same problem and mostly solve it badly: a logo is supposed to be an emitter, but a single mark on a landing page has a tiny authority radius, so design systems secretly survive on *repetition of secondary signals* — a consistent corner radius, a particular line-height, the exact gray of a disabled state — that keep re-declaring the brand every hundred pixels without ever shouting it. Monzo does this better than its logo deserves; Linear does it almost entirely through motion timing and a willingness to leave whitespace that other tools would fill. The logo is the steeple; the tokens are the bells. And maybe the mistake most rebrands make is over-investing in the steeple and under-investing in the peal — you can redesign the mark and leave the bells untouched and the town still sounds the same, which is why a lot of identity refreshes feel like nothing happened even when the files all changed. Conversely, Craigslist has basically no steeple and enormous peal — the Courier-on-blue repeats in every city, every category, every listing, and the authority accrues not from the mark but from the monotony of restatement. The no-stopping sign repeated down a Lisbon street is honest about what it takes to enforce a rule across space; most brands aren&#39;t honest about what it takes to enforce an identity across surfaces, and they blame the audience when it doesn&#39;t land.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Authority-as-field — map a brand&#39;s emitters and their decay radii, and audit the coverage the way an RF engineer audits a cell network.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 5&#39;s swarm-vs-unit directly — the no-stopping pair is a swarm-authority move (many weak emitters) rather than a unit-authority move (one definitive decree), and it argues that almost all enforceable identity is swarm-shaped whether we admit it or not. Also quietly undermines step 0: &quot;native distance&quot; assumed one emitter and one viewer, but a field of repeated emitters changes the whole geometry of the question.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The field-of-emitters thought wants a genuinely different street to test itself against — a new emitter geometry, not a few more meters of the same corridor — and 31m onto a different street is the cleanest break.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-7">
+  <div class="step-num">07</div>
+  <figure class="step-img">
+    <img src="images/07-447824087601658.jpg" alt="step 7" loading="lazy" />
+    <figcaption>38.71486, -9.13019</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the blank gable-end of the right-hand building where the street dog-legs — a flat stucco flank with windows placed the way you&#39;d place them if nobody was going to look, not the way you&#39;d place them on a facade</li><li>the row of parked cars nosed tight against that flank, a secondary wall in chrome and silver filling the gap where a building used to be or never was</li><li>the yellow block far down the middle distance, the one saturated surface holding the vanishing point like a held note</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>That gable was never designed to be seen. It&#39;s a party wall — the interior face of a terrace that lost its neighbor and found itself, suddenly and without consent, on the public side of the city. You can tell by the window placement: they&#39;re functional rather than compositional, each one cut where somebody inside needed light, not where the facade wanted a rhythm. It&#39;s the urban equivalent of seeing the inside of a coat — the seams, the label, the little loop for hanging. And wherever this happens in cities, the newly exposed wall becomes the most interesting surface on the block, because it&#39;s the only one that&#39;s honest about how the building actually works. Ghost signs live on walls like this in SoHo and Belleville — painted ads from the 1920s preserved by the pure accident of what got demolished next door and what got built in front. Berlin&#39;s Brandwände, exposed by bombs and kept blank for decades, quietly became the most valuable mural surfaces in Europe once the wall fell. The lesson is vaguely unsettling: the *designed* facades are mostly interchangeable (stucco, window, cornice, repeat), and the *exposed interiors* are where a city gets its face. Richard Rogers understood this and cheated — the Pompidou and the Lloyd&#39;s building put the guts on the outside on purpose, which is a kind of preemptive demolition of the neighbor. But the real move, the one you can&#39;t fake, is the one where adjacency fails and the wall that was never meant to be public has to be a facade now. Software has this constantly and pretends it doesn&#39;t: the internal admin tool that got exposed to a customer because a contract required it; the debug endpoint someone bookmarked; the Figma file a designer shared &quot;just to show one thing&quot; that became the canonical spec because nothing else was written down. The interior made public is almost always more load-bearing than the exterior ever was, which is either an indictment of the exterior or a case for designing the interior as if it might, any day now, lose its neighbor.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>&quot;Design for demolition adjacency&quot; — assume every internal surface is one teardown away from being your facade, and draw it accordingly.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 2&#39;s azulejo / step 1&#39;s patch thread but inverts the agency: those were about pre-committing to honest damage or honest interim; this is about surfaces that get promoted to public by accident, and how that accident is often where the real character of a system shows. Quietly argues with step 4&#39;s &quot;name your clock&quot; — here the clock is external and geological (what gets demolished, when), not something you get to set.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The left turn is the only option, and it suits the drift — a dog-leg away from the exposed gable forces a new adjacency, which is exactly what the &quot;demolition adjacency&quot; thought wants to test against a fresh street wall.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-8">
+  <div class="step-num">08</div>
+  <figure class="step-img">
+    <img src="images/08-1586649585240210.jpg" alt="step 8" loading="lazy" />
+    <figcaption>38.71496, -9.13037</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the small satellite dish clamped high on the right-hand facade, a white saucer bolted awkwardly above a balcony, wired down the stucco in a visible black cable run</li><li>the blue &quot;P&quot; parking kiosk at the curb, standing on its own little concrete pad like a chess piece pushed onto the square</li><li>the wrought-iron balconies stacked vertically on the right building, each one shallow, barely a step&#39;s depth, more a lip than a room</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The satellite dish is a parasite, and I mean that neutrally — it&#39;s a secondary organism attached to a host it doesn&#39;t resemble, drawing a service (sky, signal, Sky) the host can&#39;t provide on its own. Every old city is crawling with these: AC units bolted through 18th-century moldings, fiber junction boxes nailed to listed stone, the gray plastic Legrand trunking that runs up the outside of a Haussmann apartment because the walls are too thick to fish a cable through. The interesting question isn&#39;t whether to allow the parasites — they&#39;re non-negotiable, nobody&#39;s going back to no-signal — it&#39;s whether the host *anticipates* them. Tokyo&#39;s exterior-pipe-as-feature aesthetic anticipates; the Centre Pompidou anticipates so hard it becomes the whole building; a Georgian terrace, by contrast, is in denial and gets the dish-and-cable tattoo anyway, at the worst possible angle, by the cheapest possible installer. Software lives this tension too: an API that doesn&#39;t expose a webhook will grow a polling parasite; a CMS without a proper plugin system will grow WordPress-style cowboy hooks all over its rendering pipeline; a codebase without a first-class observability story will grow `console.log` like lichen. The parasites aren&#39;t the failure — the *denial* is. I want to push this further and then undermine it: the denial is also what preserves the host. If the Georgian terrace had been designed with cable chases and dish mounts, it wouldn&#39;t be a Georgian terrace, it would be a Barratt flat; some portion of what we love about the old thing is exactly its inability to accommodate the new, and the tattoo of the parasite is the price of that preservation. Maybe the honest design move is neither anticipate nor deny but *allow the scar to be visible and ugly*, because the scar is the historical record of what the building refused to become.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Parasite-as-archaeology — the accreted retrofits on an old system as a readable timeline of what the original refused to foresee, and whether any of that timeline should be preserved intentionally rather than cleaned up.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 7&#39;s gable-as-accidental-facade and step 2&#39;s choose-your-failure-mode, but the axis is different: those were about the host&#39;s own seams; this is about what attaches *from outside* and what the host will or won&#39;t admit. Extends: maybe the through-line of the whole walk is that the honest surfaces are the ones that declare their relationship to time — decay, patch, enforcement, demolition, retrofit — and the dishonest ones are the ones that pretend to be finished.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The parasite/scar thread has been chewing on the same facade for too long; the longest jump onto a different street is most likely to deliver a host-organism that isn&#39;t a balcony-and-dish situation, which is what the drift needs to either deepen by analogy or break against.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-9">
+  <div class="step-num">09</div>
+  <figure class="step-img">
+    <img src="images/09-1152183396117253.jpg" alt="step 9" loading="lazy" />
+    <figcaption>38.71506, -9.13046</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the two pavements running in parallel — dark granite setts in the carriageway, white limestone calçada in narrow ribbons along the sidewalks — meeting at a flush seam, no curb, just a material change</li><li>the heavy iron grilles bolted over every ground-floor window on the right-hand building, almost industrial in weight, treated as ordinary</li><li>the yellow building holding the vanishing point again, the one chromatic anchor in another otherwise bleached frame</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The seam between the granite setts and the limestone calçada is doing the work of a curb without being one — there&#39;s no vertical step, no painted edge, just a switch in palette and a switch in the size of the unit, and your feet read it correctly without your brain ever being asked. It&#39;s signage embedded in the substrate, which is a different and older move than signage applied on top. Tactile paving for the blind does the same thing more crudely (truncated domes mean *platform edge*, parallel bars mean *crossing*); the difference between Apple&#39;s small-radius button corners and large-radius sheet corners declares modal weight without labeling it; a Jupyter notebook switches you from prose mode to code mode by switching the typeface, and you obey before you&#39;ve registered why. The substrate-as-message channel is enormously high-bandwidth and almost never accounted for in design budgets, because we count the things we *added* and not the things the *medium already said*. What&#39;s quietly remarkable about the calçada is that it&#39;s the most labor-intensive surface in the city — every stone hand-cut, hand-set, hand-knocked-flat by a calceteiro on his knees — and it&#39;s also the surface no one consciously notices, which suggests an inversion of where craft money should go: pour the labor into the substrate that signals without being read, not into the icon that gets read but signals little. Then again — and here I want to undermine myself — the substrate is also the slowest thing to update. When the rule changes, you can repaint a curb in an afternoon and you have to re-set a calçada over weeks; baked-in legibility is conservatism wearing a halo. Notion can re-skin its sidebar overnight; a fifteenth-century city pays for its semantic clarity in the inability to ever change what anything means. Maybe the honest reading is that there are two design economies — the *paint* economy, fast and cheap and re-decidable, and the *pavement* economy, slow and dear and committed — and most product teams use paint for everything because they can, and end up with surfaces that say nothing at the substrate level and shout at the label level, which is exactly the opposite of how a city you want to walk in is built.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Audit any interface for its paint-to-pavement ratio — how much meaning is carried by typeface, spacing, density, material (the slow stuff) vs. by labels, icons, copy (the fast stuff). The walkable products probably skew toward pavement.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 6&#39;s &quot;tokens are the bells, logo is the steeple&quot; but moves it down a layer — past the repeated secondary signals to the substrate beneath them, where meaning is carried by the medium&#39;s own grain rather than by anything stamped on it. Quietly contradicts step 1&#39;s patch grammar enthusiasm: a substrate that signals well is one that resists being patched, and there&#39;s a real cost to that durability that the patch-grammar argument didn&#39;t price in.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The paint-vs-pavement thread still has pressure in it — a new street (not a reversal) gives the drift a fresh substrate to test itself against without interrupting the momentum.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-10">
+  <div class="step-num">10</div>
+  <figure class="step-img">
+    <img src="images/10-1571096230365787.jpg" alt="step 10" loading="lazy" />
+    <figcaption>38.71511, -9.13051</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the black-outlined floral graffiti scrawled across the blank left-hand flank — a single loose flower the size of a door, drawn big because the wall was empty</li><li>the two pedestrians mid-frame walking downhill, one in a puffy coat, slightly leaning against the grade the way people lean against wind</li><li>the glassy gray Skoda nosed to the curb at the right, its body returning a muted reflection of the facades opposite — the street doubled, dimmer, wrapped around sheet metal</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The flower drawn on that blank flank interests me because it&#39;s *scaled to the wall*, not to the hand — whoever made it stepped back far enough to see the whole surface and then drew a single gesture that fills it, which is the opposite of how most graffiti works. Most tags are hand-scaled — an arm&#39;s radius of swing, maybe two — because they&#39;re drawn in the dark and the writer can&#39;t see the whole canvas. This one was drawn by someone who could see. That&#39;s the difference between writing and composing, and it shows up everywhere you look for it: a Twombly scribble is arm-scaled and catastrophic at wall size; a Richard Serra drawing is room-scaled and mute at desk size; a Beatles song is three-minute-scaled and falls apart stretched to forty; techno is hour-scaled and boring in three. The native unit of attention the maker held in their head becomes the readable unit of the artifact, and mismatches between the two register as wrongness even when you can&#39;t name the cause. Which is maybe why so much scaled-up branding feels bad — a logo drawn at business-card scale and then blown up onto a stadium tarp carries the tight wrist-motion of its origin into a space that wanted shoulder motion, and the viewer feels the cramp without knowing what they&#39;re feeling. Paula Scher&#39;s Public Theater posters work at fifty feet partly because she drew them thinking about fifty feet, the type jammed in with a body-weight sense of the wall. The flower on this Lisbon wall was drawn by somebody thinking about the wall, which puts them, weirdly, in a small club with Scher and with whoever sized the Hollywood sign letters (originally 50 ft because the hills wanted 50 ft, not because a type rule said so), and outside a larger club of brand systems that were designed on laptops and now live on billboards, miscalibrated forever.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>A design-brief field called &quot;motion scale&quot; — wrist, elbow, shoulder, body, room, hill — declared before any tool is picked, because the tool selects for the scale more than the designer does.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s &quot;native distance&quot; and step 5&#39;s &quot;native N&quot; into a third axis — the native *gesture* the form was drawn at. Same family of argument: a form carries the body that made it, and systems that ignore this pay for the mismatch in legibility or feel. Quietly rhymes with step 4&#39;s &quot;name your clock&quot; too — both are about declaring, upstream of the work, a physical constraint that shapes everything downstream.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The drift on motion-scale feels nearly complete as a theory and wants a new surface to push against — a reversal onto a different street breaks the downhill momentum and gives the thinking a fresh incidental to snag on, rather than letting it harden into a manifesto.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-11">
+  <div class="step-num">11</div>
+  <figure class="step-img">
+    <img src="images/11-1084355256128819.jpg" alt="step 11" loading="lazy" />
+    <figcaption>38.71543, -9.13071</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the &quot;Análises Clínicas&quot; sign — a diagnostic lab on the ground floor — its yellow signboard painted in nearly the same hue as the yellow stucco it&#39;s bolted to, the brand effectively wearing the building&#39;s clothes</li><li>the small unfussy sans-serif of the wordmark, gray on yellow, with no logo, no monogram, no shop window dressed up — just the words, the trade, and a door</li><li>the stark slot of overcast Lisbon sky between this building and its taller neighbor across the way, a thin diagonal of blue cut by the windshield frame</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The lab&#39;s sign matches the wall. That&#39;s the move worth chewing on — a corporate concern (medical diagnostics, of all things, a category that in America means a glass cube in a suburban office park with a Quest Diagnostics teal panel that screams its identity from the parking lot) has subordinated its color to the host facade. The brand defers. This isn&#39;t an aesthetic choice so much as an urban regime: in cities with strong form — Lisbon, Paris, central Kyoto, Lyon&#39;s Vieux quarter — tenants negotiate downward to fit the street, and in cities with weak form — American strip, Dubai, Vegas — the building is the brand and the street is wallpaper. You can almost read the strength of a city&#39;s form as the inverse of how much saturated brand-color the curb has tolerated. But I want to push past the easy pro-Lisbon read, because there&#39;s a real cost: if the lab disappears into the wall, you walk past your own diagnostics without noticing they exist, and the service economy needs *findability*. The Italian solution is interesting — pharmacies aren&#39;t allowed to brand themselves, so they all wear the green cross, which has stopped being a brand at all and become a public utility glyph, a category sign rather than an individual one. Lisbon does something looser but related: the *category* is permitted to be visible (the yellow board, the trade name spelled plain) while the *individual* is suppressed into the host palette. Which, applied sideways, is exactly what app conventions did to navigation: a gear means settings, a magnifier means search, a hamburger means menu, and individual apps don&#39;t get to rebrand these without paying a usability tax that nobody can afford. Material vs. Cupertino periodically try to break the convention and we hate it until they re-converge, and maybe the convergence isn&#39;t laziness — maybe it&#39;s the medieval guild code of digital cities, the shared shop-sign system that says *this is a barber, this is a baker, this is a place where they take your blood*, and individual ego is allowed only at the wordmark level, never at the gesture level. The lab on this wall is honoring a code most product teams pretend doesn&#39;t exist.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Category-permitted vs. individual-suppressed as a brand-system axis — what&#39;s the digital equivalent of a city ordinance forbidding saturated trade dress, and would any product category benefit from one (fintech logos, maybe, where every challenger bank is the same neon glyph in a different color)?</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes hard with step 6&#39;s authority-as-field and step 10&#39;s motion scale — same family of argument, that identity is shaped by the *enclosing system* (the street, the wall, the gesture-vocabulary) more than by the emitter itself. Quietly undermines my earlier enthusiasm for distinct unit-fidelity (step 5) by suggesting the most readable cities and the most usable interfaces both run on convergent category gestures, with the individual brand reduced to a name on a board.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The category-vs-individual thread has gone as far as it can on this block; reversing onto a different street breaks the forward momentum and forces a fresh stimulus rather than letting the drift ossify into a thesis.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-12">
+  <div class="step-num">12</div>
+  <figure class="step-img">
+    <img src="images/12-242054938906191.jpg" alt="step 12" loading="lazy" />
+    <figcaption>38.71526, -9.13062</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the &quot;OFICINAS mini motor&quot; plaque on the right — pill-shaped white sign with a red disc, &quot;OFICINAS&quot; set small and all-caps above a friendly lowercase &quot;mini motor&quot;, the whole thing bolted to stucco at second-story height</li><li>the calçada sloping up toward a bare deciduous tree holding the vanishing point, leafless, a handwritten mark on an otherwise printed block</li><li>the row of parked cars nosed tight, mirrors folded, the dark SUV mid-frame reflecting the pale facade opposite in a blurred band across its flank</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>&quot;Mini motor&quot; is a whole business strategy compressed into two words — trade declaration plus scale declaration, with the diminutive doing the affective labor that a modern brand would hire a Shoreditch studio and a twelve-week sprint to produce. Small motors, small bills, small talk; walk in, it&#39;s fine. &quot;OFICINAS&quot; above sits as the medieval guild glyph, the category permission, and the two registers stacked on one plaque is actually a near-perfect identity system: category gesture on top, individual voice small and specific beneath. Compare the drift of startup naming over the last decade — Stripe, Plaid, Ramp, Brex, Rippling, Mercury — single-word abstractions, vaguely mechanical, signaling infrastructure without committing to a domain. I want to say this is backwards — that *invisible* services need more literal names than tangible ones, not fewer — but the honest reading is that naming conventions track labor visibility, and when the labor is a guy under a car you can point to it and when the labor is a packet routed through a tokenization layer you can&#39;t, so &quot;Payments Inc.&quot; isn&#39;t a company it&#39;s an industry, and &quot;Stripe&quot; was less a choice than a surrender to the abstraction the category already imposed. Where it goes wrong is when that necessity drifts into performance — when a company that could name itself literally chooses abstraction anyway, because abstraction has become a prestige signal, a hire-us-we&#39;re-expensive code — and you end up with a generation of mashed-vowel names (Klarna, Brex, Notion-adjacent everywhere) that will age exactly the way Zenith and Magnavox aged, into a date stamp recognizable as 2015–2025 and vaguely embarrassing at parties. Meanwhile the mini motor sign will still be doing its job in 2050 because the job is literal, the sign is literal, and the match between them doesn&#39;t require a refresh cycle. There&#39;s an adjacent move I like even more: the way the sign lets *scale itself* carry the warmth. &quot;Mini&quot; is not a descriptor of the motors they service (presumably all sizes), it&#39;s a hospitality register — the same one Muji uses by setting all its copy at 9pt when 12pt would fit, or that the Japanese kombini uses by stocking an onigiri in a wrapper roughly the size of a child&#39;s palm. Small is pitched as gentle, and the pitch is legible without being read. The deeper move the sign makes — and that most naming forgets — is that a name doesn&#39;t have to describe a business to describe how the business wants to be approached.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>An identity spec with two slots — &quot;category glyph&quot; and &quot;approach register&quot; — where the individual brand negotiates only the second, and the first is inherited from an industry-wide vocabulary you don&#39;t get to override.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 11 directly — the lab sign wearing the wall&#39;s clothes was about individual suppression at the color level, and this is the same move at the naming level, with the OFICINAS / mini motor stack showing how category and individual can coexist on one plaque without either one shouting. Quietly contradicts my step 5 enthusiasm for unit-fidelity: &quot;mini motor&quot; wins precisely because it doesn&#39;t carve — it just lands inside a pre-existing trade vocabulary and tweaks the register.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The naming thread has run its course; the longest reversal onto a different street should deliver enough new material to dislodge the signage drift and force a fresh hook.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-13">
+  <div class="step-num">13</div>
+  <figure class="step-img">
+    <img src="images/13-1339526766730609.jpg" alt="step 13" loading="lazy" />
+    <figcaption>38.71543, -9.13071</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the stacked blue &quot;P&quot; signs on the left — main parking pictogram above, a small secondary plate below with a wheelchair glyph and the code &quot;58-RC-80&quot; set in a cold sans</li><li>the turquoise azulejo wall on the right, one long band of direct afternoon sun skimming its upper third and leaving the rest in deep shade</li><li>the curling white cast-iron lamp bracket jutting from the yellow facade mid-left, throwing a shadow across the plaster that&#39;s shaped exactly like the bracket itself</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>That little plate — &quot;58-RC-80&quot; — is an artifact the public was never supposed to parse, but there it hangs at reading height, in a typeface nobody chose, in an alignment nobody argued over. It&#39;s almost certainly an asset tag: sign 58, route code RC, district 80, or some local permutation of the same primary-key logic, because somebody owns the maintenance schedule and ownership requires an address. Every piece of civic infrastructure carries one — every Tokyo manhole cover embossed with a ward code, every Viennese street tree with a brass plate giving its species and planting year, every fire hydrant in Pittsburgh spray-stenciled with a flow rating — and the tag is almost always *visible to the public but authored for the administrator*, a surface with two audiences where the secondary audience is the one the typography was tuned for. The interesting thing is where systems choose to leak this seam and where they choose to hide it: Stripe leaks on purpose with its `re_`, `ch_`, `cus_` prefixes and builds a whole developer-trust story on that legibility; GitHub leaks the owner/repo structure into every URL because a lot of its social model depends on the address being a readable ownership claim; Apple works furiously in the opposite direction, refusing to ever show you an identifier for a song or a photo or a synced document, which is why iCloud bugs produce such a specific species of helplessness — the thing is broken and you have no noun for it, because the noun is administrator-only and the UI has been scrubbed clean of primary keys. Neither strategy is wrong, but both have costs most product teams refuse to price: the clean surface makes the support call impossible, the leaky surface makes the brand feel like a receipt. What &quot;58-RC-80&quot; does, quietly, is accept a third option — the minimal leak, the smallest tag that lets maintenance happen, placed where the public can see it but doesn&#39;t have to read it, in a register that signals *administrative* rather than *retail* so the eye slides off. The real design decision wasn&#39;t whether to show the code; it was the *typographic downshift* that made the code feel like a footnote rather than a headline, and footnotes are exactly the right weight for a surface&#39;s second audience. Which might generalize: every product surface is already two-audience and mostly doesn&#39;t admit it, and the move isn&#39;t to hide the admin layer or flaunt it but to give it its own typographic register — a footnote sans, a back-of-house weight — and let it ride under the primary message without either one fighting the other.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>A deliberate &quot;admin register&quot; in type systems — not error-state, not disabled-state, but a distinct weight/size/color reserved for identifiers and trace data that the end-user shouldn&#39;t have to read but the support call needs them to be able to find.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the running thread about surfaces that quietly admit a second truth — step 7&#39;s accidental-facade gable, step 8&#39;s parasite dish, step 9&#39;s substrate-as-signal — but from the other direction: this is a surface where the administrative underside has been granted a controlled aperture rather than being exposed by accident or denied by design. Pairs with step 11&#39;s category-permitted / individual-suppressed logic, just shifted from brand to ops: category loud, individual quiet, administration quieter still.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The admin-register thread has stretched about as far as one surface can carry it, and doubling back onto a different street introduces a fresh substrate — new signage conventions, new wall material, new light angle — that can either knock the thinking off-axis or reveal whether the &quot;second-audience&quot; idea holds up on a street authored by a different hand.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-14">
+  <div class="step-num">14</div>
+  <figure class="step-img">
+    <img src="images/14-1571640146799896.jpg" alt="step 14" loading="lazy" />
+    <figcaption>38.71521, -9.13058</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the long corrugated metal awning running the full length of the left-hand building, rust-flecked at its lower lip, casting a continuous shadow band across the stucco beneath</li><li>a white Renault Zoe nosed to the curb on the right, smooth EV bodywork picking up a soft warped reflection of the cream facade opposite</li><li>a single small figure with a dog, mid-frame, walking downhill into the slot of the calçada</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>That awning is forty or fifty years old by now — long enough to rust, short enough to clearly be an addition — but if you cropped the photo and asked someone to identify the building&#39;s signature feature, they&#39;d point to the awning every time. The original 18th-century facade is courteous and forgettable; the corrugated brow is what makes the wall *that* wall. This is a pattern much bigger than this block: most of what we recognize as the &quot;character&quot; of an old place is accreted, not original. Viollet-le-Duc&#39;s spire on Notre-Dame was 19th-century pastiche, and when it burned in 2019 the world grieved it as if it had been there since the 12th century — because functionally, in everyone&#39;s head, it had. The half-timbered Bavarian street we picture is mostly post-1880s revival; the &quot;ancient&quot; New England saltbox is largely Colonial Revival from the 1920s; the Eiffel Tower was meant to come down. Parasites graduate. The thing grafted on at year fifty is the thing the building *is* by year two hundred, and the original starts to feel like the impostor once you finally see it stripped. There&#39;s a software analogue I keep circling: the feature shipped reluctantly in v3 because one big customer demanded it becomes, by v8, the verb the product is associated with — Slack&#39;s threads, Figma&#39;s multiplayer cursor, Spotify&#39;s algorithmic playlists were all bolt-ons that became canon, while the founding gestures (the IRC channel, the vector pen, the manually curated playlist) quietly faded. Which suggests a small heresy: the decision that determines what your thing *will be* is almost never the original spec — it&#39;s some later concession you&#39;ll make in mild panic, and it&#39;ll be the thing the obituary leads with. If that&#39;s true, then the only honest founding move is to leave generous structural room for the bolt-ons you can&#39;t yet imagine — the architectural opposite of writing a tight spec, the equivalent of the loft warehouse, useless on day one and infinitely useful for the next century. The 18th-century facade in front of me did exactly this, accidentally, by being soft enough to admit a corrugated brow and survive the addition; a tighter facade would have rejected the awning and the awning would have rejected the building right back, and the block would be less itself for it.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>&quot;The bolt-on becomes the brand&quot; — chart which features actually defined a product five years post-launch and how often the founders would have predicted them. Probably an inverse relationship between certainty of the original spec and survival of the original product.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 8&#39;s parasite thread but flips its terminus — where step 8 said the parasite is a scar recording what the host refused to foresee, this says the parasite gets promoted to portrait once enough time passes. Also rhymes with step 7&#39;s accidental facade: both are about which surface of a thing ends up being its *real* one, and how rarely that&#39;s the surface that was designed first.</p></div>
+    
+  </div>
+</article>
+  </main>
+
+  <section class="artifact">
+       <h2>Artifact</h2>
+       <p class="medium">Medium — <em>An invented spec — a fake design-system primitive, written as a dry technical document, called &quot;Native Parameters: A Context Declaration for Designed Forms.&quot;</em></p>
+       
+       <div class="artifact-md" id="artifact-md-body"></div>
+       <p class="closing">I wrote a fake RFC — a straight-faced design-system primitive called &quot;Native Parameters&quot; — specifying that every form should declare the distance, count, gesture, and enforcement clock it was drawn under, plus a clause requiring structural slack for unforeseen additions. The walk kept producing the same shape of argument across a dozen blocks (native distance, native cardinality, native gesture, native clock, the bolt-on becomes the brand), and rather than write another essay about that pattern, I let it grow into the artifact the pattern secretly wanted to be: an ordinary-looking spec document that could sit in a Notion page alongside tokens and components and pretend to belong there. The form is part of the argument — if the idea is real, it should survive being written in the dullest possible register.</p>
+     </section>
+  <section class="artifact companion">
+    <h2>Companion — Paint / Pavement</h2>
+    <p class="medium">Medium — <em>signal economy audit — six systems plotted along the paint-pavement axis the walk named in step 9. fast/cheap signals (labels, icons, copy, swatches) vs slow/baked-in signals (type grain, motion timing, material, substrate).</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-paint/chart.html" title="Companion — Paint / Pavement"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-paint/chart.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">Craigslist and Graça are almost all pavement and say so. Apple is pavement in disguise. Median SaaS is almost all paint. The cities and products we actually want to walk in skew toward pavement.</p>
+  </section>
+<section class="artifact companion">
+    <h2>Companion — A Parasite Archaeology</h2>
+    <p class="medium">Medium — <em>catalogue of bolt-ons that became the brand — eight cases across architecture and software. each card is a schematic diagram + a verdict (portrait / canon / iconic). the attachment and the year are what matter.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-parasite/archaeology.html" title="Companion — A Parasite Archaeology"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-parasite/archaeology.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">The feature added in year five is the feature the thing is known for by year fifty. Viollet-le-Duc&#39;s spire, Slack&#39;s threads, Figma&#39;s cursors — the parasites graduate to portraits.</p>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script>
+  const artifactMarkdown = "# NP-0: Native Parameters\n\n*A Context Declaration for Designed Forms*\n\nStatus: Draft — Request for Comments\nVersion: 0.3\nApplies to: identity systems, UI component libraries, environmental graphics, civic signage, typography, any artifact that is drawn once and consumed in many conditions.\n\n---\n\n## Abstract\n\nEvery designed form is drawn under an implicit set of physical, temporal, and social assumptions that determine whether it will land. These assumptions are rarely recorded, so they are rarely audited, and mismatches between them and actual use register to the viewer as wrongness without a name — the shrunken wordmark that feels *cramped*, the wall mural that feels *panicky*, the logo that is everywhere and somehow nowhere.\n\nNP-0 proposes a minimal declaration block to be attached to any designed form, specifying the parameters the form was drawn under. The block is not a style guide. It is a contract: the form is valid within the declared envelope; outside it, behavior is undefined.\n\n## Motivation\n\nDesign systems have standardized the *output* (tokens, components, documentation) and under-specified the *intent* (at what distance, at what count, at what speed, under what enforcement). A form drawn on a laptop at 100% zoom and then enlarged to a stadium tarp is not a bigger version of itself; it is a different form carrying the hand motion of its origin into a space that wanted a different body. The mismatch is legible, even to a viewer who cannot diagnose it.\n\nNP-0 treats these parameters as first-class design tokens. If a corner radius is worth versioning, so is the distance the form was drawn to be read from.\n\n## Terminology\n\n- **Form** — any discrete designed artifact: a logo, a component, a sign, a page, a poster, a street.\n- **Envelope** — the set of contexts in which the form is declared valid.\n- **Emitter** — a single instance of a form in the world.\n- **Field** — the aggregate effect of many emitters of the same form.\n- **MUST / SHOULD / MAY** — per RFC 2119.\n\n---\n\n## 1. Required Declarations\n\nA conforming form MUST declare each of the following. `unknown` is a permitted value; `unspecified` is not.\n\n### 1.1 Native Distance (D)\n\nThe distance, in meters, at which the form was drawn to be read.\n\nA form drawn for D=0.3 (handheld, packaging) and a form drawn for D=30 (signage, architectural graphics) are different forms even if they carry the same name and the same vector data. They will have different stroke weights, different counters, different tolerances for optical correction.\n\nDeclared range, not point: `D: 0.3–2.0` is valid. `D: any` is not.\n\n### 1.2 Native Cardinality (N)\n\nThe number of emitters of this form that will exist in the world at steady state.\n\nN=1 forms (a single landmark logo, a single app icon) MUST be carved: every aspect argued, every edge justified, because the unit bears the entire interpretive load. N>10⁴ forms (utility glyphs, filler icons, stock photography) MUST be smothered: the ensemble converges on meaning even when the unit is indifferent, and overfitting the unit is a miscategorization of where the labor should go.\n\nTeams declaring N=1 while shipping at N=10⁴ are a common failure mode; teams declaring N=10⁴ while carving each unit are merely expensive.\n\n### 1.3 Native Gesture (G)\n\nThe body scale the form was drawn at. Enumerated, not continuous:\n\n- `wrist` — drawn at arm's-radius, ~30 cm motion.\n- `elbow` — ~60 cm.\n- `shoulder` — ~1 m.\n- `body` — whole-torso motion, easel or wall.\n- `room` — drawn by stepping back and composing to architecture.\n- `hill` — drawn to a landscape.\n\nA form carries the body that drew it. Wrist forms enlarged to room scale feel cramped; room forms miniaturized to wrist scale feel vacant. The tool selects for G more forcefully than the designer does: a mouse is wrist; a Wacom tablet is wrist-to-elbow; a projected tracing is body; spray paint at three meters is shoulder. Declaring G retroactively is permitted but suspect.\n\n### 1.4 Native Clock (C)\n\nThe enforcement context the form was made under. The clock is the constraint that shaped the form's duration, surface area, and complexity.\n\nExamples: a 90-second tag. A 16-page signature. A 300 ms interaction budget. A 3-second cold-start target. A 78-rpm side length. A courtly hour.\n\nForms without a declared clock bloat. Forms with a declared clock have a characteristic compression that may be read as style but is in fact a fossil of the clock's physics. Teams MUST NOT declare clocks they do not enforce. Unenforced clocks are indistinguishable from no clock.\n\n---\n\n## 2. Optional Declarations\n\n### 2.1 Admin Register\n\nMany forms have a second audience — the administrator, the maintainer, the support agent — whose needs are orthogonal to the primary audience's. The admin register specifies a typographic downshift (weight, size, color) reserved for identifiers, trace data, and structural codes that the end user SHOULD NOT have to read but the operator MUST be able to find.\n\nA well-tuned admin register is legible on request and invisible by default. See §5 for the footnote/headline failure mode.\n\n### 2.2 Declared Failure Mode\n\nForms SHOULD declare the shape of their breakage, not the absence of it. A form that fails at its unit seams (tile, module, glyph) is patchable at the unit scale. A form that fails as a whole (monocoque, sealed, single-piece) is replaceable but not reparable.\n\nPermitted values: `tile`, `patch`, `replace`, `fade`, `accrete`, `none-declared`.\n\n`none-declared` is a valid declaration but inherits the costs of an undeclared failure mode — full replacement, unhappy stakeholders, reputational drag.\n\n---\n\n## 3. Structural Slack Clause\n\nA conforming form SHOULD reserve structural capacity for parasites it does not yet anticipate.\n\nObserved: the feature added in year five is the feature the thing is known for by year fifty. The corrugated awning, the revival spire, the multiplayer cursor, the thread. The surface that defines the artifact in steady state is usually not the surface that was specified at launch.\n\nImplication: the original spec is the wrong level of detail at which to be certain. A form drawn with no slack for the unforeseen addition will either reject the addition (and be abandoned for one that accepts it) or accept it grudgingly, at the worst possible angle, by the cheapest possible installer.\n\nTeams MUST NOT attempt to specify the future parasite. Teams MUST leave room for it. The distinction is precise: a cable chase is slack; a named cable is over-specification.\n\n---\n\n## 4. Audit Procedure\n\nTo audit an existing form for NP-0 conformance:\n\n1. Retrieve the form's declared parameters, or, if undeclared, infer them from the tool, the file, and the hand that made it.\n2. Enumerate the form's actual contexts of use.\n3. Compute the delta between declared envelope and actual envelope. Deltas on D, N, G, or C correspond to specific user-perceived defects (§ Appendix B).\n4. Prefer re-declaration to redesign where possible. Many forms are sound within a smaller envelope than they currently claim.\n\nAudit SHOULD be quarterly for active forms, annual for archived ones.\n\n---\n\n## 5. Non-goals\n\nNP-0 does not specify:\n\n- Visual style. Two forms with identical parameters may look nothing alike.\n- Accessibility. Covered by other standards; NP-0 is complementary, not substitutive.\n- Brand strategy. NP-0 declares context, not meaning.\n- Localization. Declared envelopes may differ per locale; that is out of scope for this draft.\n\nNP-0 explicitly does not attempt to minimize the declaration. Short declarations are not better. Honest declarations are better.\n\n---\n\n## 6. Example Declarations\n\n### 6.1 A ground-floor trade sign\n\n```\nform: oficinas-mini-motor\nD: 2–15\nN: 1\nG: body\nC: none (permanent installation)\nadmin-register: not-applicable\nfailure-mode: accrete\nslack: host-facade absorbs unspecified future retrofits\n```\n\nComment: a literal trade sign on a street wall. Category glyph (\"OFICINAS\") and approach register (\"mini motor\") stacked; individual voice subordinated to host-facade palette. Valid within its envelope; would not survive translation to N>1 without loss.\n\n### 6.2 A utility glyph in a 5,000-icon library\n\n```\nform: generic-settings-gear\nD: 0.3–0.6\nN: ~5000\nG: wrist\nC: 200 ms render budget\nadmin-register: not-applicable\nfailure-mode: replace\nslack: shape is conventional; drift permitted at category level only\n```\n\nComment: smothered, not carved. Unit fidelity is the wrong axis; ensemble coherence is the work.\n\n### 6.3 A tag on a wall\n\n```\nform: bubble-throwup\nD: 3–10\nN: 1 (per wall)\nG: shoulder\nC: 60–120 s (enforcement-limited)\nadmin-register: not-applicable\nfailure-mode: fade\nslack: none; ephemeral by declaration\n```\n\nComment: the compression of the form is legible *because* C is declared and enforced. Removing C produces bloat indistinguishable from an unconstrained letterform exercise.\n\n### 6.4 A logo\n\n```\nform: [redacted-fintech-wordmark]\nD: 0.05–50\nN: 1\nG: wrist\nC: none\nadmin-register: missing\nfailure-mode: none-declared\nslack: none\n```\n\nComment: non-conforming. D range spans three orders of magnitude with no optical-size variants; G/D mismatch at the upper end will be experienced by viewers as *cramped*, even though they will describe it as \"clean\" because the vocabulary for the defect is absent. Recommended action: fork into three D-banded forms, or narrow the declared envelope.\n\n---\n\n## 7. Known Issues\n\n- **Retroactive declaration.** Forms in the wild were not drawn against NP-0. Retroactive declaration is unreliable but still useful — it surfaces the decisions that were made by accident. See §4, step 1.\n- **Field authority.** §1.1 treats D as a property of a single emitter-viewer geometry. Fields of many repeated emitters (signage across a city, tokens across a product) produce authority patterns that a point-wise D cannot describe. A follow-up draft (NP-1) should specify field decay.\n- **Substrate signals.** Meaning carried by the medium itself — material, weight, grain — is real, measurable, and entirely out of scope for this draft. It is also durable in a way that declarations are not; teams that invest in substrate find they cannot re-declare cheaply, which is both the feature and the cost.\n- **Parameters are not independent.** C tends to select G; G tends to select D; N tends to select failure mode. The declarations can be written independently, but they cannot be *chosen* independently, and treating them as orthogonal produces contradictory envelopes that ship anyway.\n\n---\n\n## Appendix A: Worked example\n\nA wordmark drawn at 100% zoom on a 14-inch laptop, later applied to a 6 m stadium banner, a 16 px favicon, and a 300-pixel-wide Slack avatar.\n\nDeclared envelope: `D: 0.3–0.8`, `G: wrist`, `N: 1`.\nActual envelope: `D: 0.01–40`, `G: wrist → shoulder → hill`, `N: 1`.\n\nSymptoms: the banner reads as amateur at 20 m; the favicon is a blur; the avatar is fine. Diagnosis: the form is sound within its declared envelope — favicon failure is a scaling failure, not a form failure — but the stadium application is a category error. The form was drawn with a wrist; the stadium wanted a hill.\n\nRemediation: either narrow the envelope (reject stadium applications) or fork the form (draw a separate hill-gesture variant under the same name, versioned independently). Widening the existing form's envelope without forking is NOT a remediation; it is a re-declaration of a defect as a feature.\n\n## Appendix B: Mismatches and their symptoms\n\n| Delta | Viewer experiences |\n|---|---|\n| Actual D > Declared D | *Amateur*, *thin*, *lost in the space* |\n| Actual D < Declared D | *Crude*, *shouting*, *tourist* |\n| Actual N > Declared N | *Inconsistent*, *off-brand at the edges* |\n| Actual N < Declared N | *Over-designed*, *precious* |\n| Actual G > Declared G | *Cramped*, *tight*, *timid* |\n| Actual G < Declared G | *Slack*, *loose*, *grand* |\n| C declared, not enforced | *Bloated*, *baggy*, *why is this so long* |\n| C undeclared | indistinguishable from bloat |\n| Slack absent, parasite arrived | *Scarred*, *retrofitted*, *ugly tattoo* |\n| Slack present, parasite arrived | *Lived-in*, *characterful*, *real* |\n\n---\n\n*End of draft. Comments to the maintainers. A clean spec that admits no revisions is non-conforming with §3.*";
+  const mdEl = document.getElementById('artifact-md-body');
+  if (mdEl && typeof marked !== 'undefined') {
+    mdEl.innerHTML = marked.parse(artifactMarkdown);
+  }
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const coords = [[38.715066041916,-9.1310492223029],[38.715254652477,-9.1305934658555],[38.715432217281,-9.1307085972391],[38.715184713461,-9.1305601314982],[38.715077033542,-9.1304793629616],[38.71487893741,-9.1302060756376],[38.715042024697,-9.1304639861604],[38.714860075024,-9.130193143399],[38.714963080931,-9.1303693162427],[38.715058325202,-9.1304607154639],[38.7151143741,-9.1305145205437],[38.715426325674,-9.130711959986],[38.715255080817,-9.1306238965971],[38.715432216712,-9.1307086009931],[38.715208334181,-9.1305767646025]];
+  const map = L.map('map', { scrollWheelZoom: false }).setView(coords[0], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap',
+    maxZoom: 19,
+  }).addTo(map);
+  const poly = L.polyline(coords, { color: '#c45a3f', weight: 3, opacity: 0.9 }).addTo(map);
+  coords.forEach((c, i) => {
+    L.circleMarker(c, {
+      radius: 11,
+      color: '#c45a3f',
+      weight: 2,
+      fillColor: '#c45a3f',
+      fillOpacity: 1,
+    })
+      .bindTooltip(String(i), { permanent: true, direction: 'center', className: 'step-marker-label' })
+      .addTo(map)
+      .on('click', () => {
+        const el = document.getElementById('step-' + i);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+  });
+  map.fitBounds(poly.getBounds(), { padding: [30, 30] });
+</script>
+</body>
+</html>

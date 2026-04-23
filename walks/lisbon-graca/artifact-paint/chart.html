@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>paint / pavement — a signal economy audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0e0e10;
+    --panel: #16161a;
+    --ink: #e8e6df;
+    --dim: #8a857b;
+    --line: #26262a;
+    --paint: #c45a3f;      /* fast, cheap, re-decidable */
+    --pavement: #c9a962;   /* slow, dear, committed */
+    --faint: #3a3a3f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font: 13px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 28px 56px; }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+  header .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  header h1 {
+    font: italic 400 34px/1.1 "Playfair Display", Georgia, serif;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+  header .sub {
+    font-size: 12px;
+    color: var(--dim);
+    letter-spacing: 0.04em;
+  }
+  header .rev {
+    text-align: right;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.14em;
+  }
+  header .rev strong { color: var(--ink); font-weight: 600; }
+
+  .lede {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .lede p {
+    margin: 0;
+    font: 13px/1.6 "IBM Plex Mono", monospace;
+    color: #c9c3b6;
+  }
+  .lede .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 11px;
+  }
+  .lede .legend .row {
+    display: grid;
+    grid-template-columns: 14px 80px 1fr;
+    gap: 10px;
+    align-items: center;
+  }
+  .lede .legend .sw {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+  }
+  .lede .legend .sw.p { background: var(--paint); }
+  .lede .legend .sw.v { background: var(--pavement); }
+  .lede .legend .name {
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 10px;
+  }
+  .lede .legend .what { color: var(--dim); font-size: 11px; }
+
+  .chart { display: flex; flex-direction: column; gap: 20px; }
+  .row {
+    display: grid;
+    grid-template-columns: 160px 1fr 64px;
+    gap: 18px;
+    align-items: center;
+  }
+  .row .label .name {
+    font: 400 16px/1.15 "Playfair Display", serif;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .row .label .cat {
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .bar {
+    position: relative;
+    height: 28px;
+    background: var(--faint);
+    border: 1px solid var(--line);
+    display: flex;
+    overflow: hidden;
+  }
+  .bar .seg {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #0e0e10;
+    font-weight: 600;
+    transition: filter 160ms ease;
+  }
+  .bar .seg.paint { background: var(--paint); }
+  .bar .seg.pavement { background: var(--pavement); }
+  .bar:hover .seg { filter: brightness(1.08); }
+  .ratio {
+    font: 600 11px/1 "IBM Plex Mono", monospace;
+    color: var(--ink);
+    text-align: right;
+    letter-spacing: 0.08em;
+  }
+  .ratio .slash { color: var(--dim); margin: 0 2px; }
+  .ratio .paint-n { color: var(--paint); }
+  .ratio .pavement-n { color: var(--pavement); }
+
+  .note {
+    margin-top: 14px;
+    padding-left: 178px;
+    font: 11px/1.5 "IBM Plex Mono", monospace;
+    color: var(--dim);
+    max-width: 560px;
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); }
+
+  @media (max-width: 720px) {
+    .lede { grid-template-columns: 1fr; }
+    .row { grid-template-columns: 1fr; }
+    .note { padding-left: 0; }
+    .ratio { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">NP-0 · COMPANION NOTE · §9</div>
+      <h1>Paint / Pavement</h1>
+      <div class="sub">A signal economy audit of six systems</div>
+    </div>
+    <div class="rev">
+      <div>draft <strong>0.1</strong></div>
+      <div>n = 6 systems</div>
+    </div>
+  </header>
+
+  <section class="lede">
+    <p>
+      Every designed system carries meaning in two economies. <strong style="color:var(--paint)">Paint</strong> is fast: labels, icons, copy, color swatches — cheap to ship, cheap to change, declared above the substrate. <strong style="color:var(--pavement)">Pavement</strong> is slow: typography grain, spacing, density, motion timing, material. Baked in, expensive to re-declare, signaling without being read.
+    </p>
+    <div class="legend">
+      <div class="row">
+        <span class="sw p"></span>
+        <span class="name">Paint</span>
+        <span class="what">labels · icons · copy · color swatches</span>
+      </div>
+      <div class="row">
+        <span class="sw v"></span>
+        <span class="name">Pavement</span>
+        <span class="what">type grain · rhythm · motion · material · substrate</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="chart">
+
+    <div class="row">
+      <div class="label">
+        <div class="name">Craigslist</div>
+        <div class="cat">classifieds · 1995–</div>
+      </div>
+      <div class="bar">
+        <div class="seg paint" style="width: 8%"></div>
+        <div class="seg pavement" style="width: 92%">92</div>
+      </div>
+      <div class="ratio"><span class="paint-n">08</span><span class="slash">/</span><span class="pavement-n">92</span></div>
+    </div>
+    <div class="note">
+      Courier on blue, restated across every city, every category, every listing. The authority is in the monotony of the substrate. The logo is almost absent; the pavement does everything.
+    </div>
+
+    <div class="row">
+      <div class="label">
+        <div class="name">Apple</div>
+        <div class="cat">consumer hardware/software · 1976–</div>
+      </div>
+      <div class="bar">
+        <div class="seg paint" style="width: 22%">22</div>
+        <div class="seg pavement" style="width: 78%">78</div>
+      </div>
+      <div class="ratio"><span class="paint-n">22</span><span class="slash">/</span><span class="pavement-n">78</span></div>
+    </div>
+    <div class="note">
+      Corner radii argued over for decades; every glyph carved; the wordmark a footnote to the substrate discipline. A Kare system, unit-first, pavement-heavy by construction.
+    </div>
+
+    <div class="row">
+      <div class="label">
+        <div class="name">Linear</div>
+        <div class="cat">issue tracker · 2019–</div>
+      </div>
+      <div class="bar">
+        <div class="seg paint" style="width: 30%">30</div>
+        <div class="seg pavement" style="width: 70%">70</div>
+      </div>
+      <div class="ratio"><span class="paint-n">30</span><span class="slash">/</span><span class="pavement-n">70</span></div>
+    </div>
+    <div class="note">
+      Identity enforced almost entirely through motion timing, whitespace, and a willingness to leave rooms empty that other tools would fill. The mark is small; the cadence is the brand.
+    </div>
+
+    <div class="row">
+      <div class="label">
+        <div class="name">Stripe</div>
+        <div class="cat">payments infra · 2010–</div>
+      </div>
+      <div class="bar">
+        <div class="seg paint" style="width: 44%">44</div>
+        <div class="seg pavement" style="width: 56%">56</div>
+      </div>
+      <div class="ratio"><span class="paint-n">44</span><span class="slash">/</span><span class="pavement-n">56</span></div>
+    </div>
+    <div class="note">
+      A clock (performance budget) enforced as near-physical law; page density and doc typography do heavy pavement work. Paint rises with marketing surface; pavement holds in the API and docs.
+    </div>
+
+    <div class="row">
+      <div class="label">
+        <div class="name">Median Series-B SaaS</div>
+        <div class="cat">observed sample · 2024 cohort</div>
+      </div>
+      <div class="bar">
+        <div class="seg paint" style="width: 82%">82</div>
+        <div class="seg pavement" style="width: 18%">18</div>
+      </div>
+      <div class="ratio"><span class="paint-n">82</span><span class="slash">/</span><span class="pavement-n">18</span></div>
+    </div>
+    <div class="note">
+      Gradient, hero illustration, emoji reactions, six color tokens, one sans-serif picked the week of launch. The substrate is whatever the starter template shipped with. Paint without pavement shouts at the label layer and says nothing at the grain.
+    </div>
+
+    <div class="row">
+      <div class="label">
+        <div class="name">Graça, Lisboa</div>
+        <div class="cat">the street this is written from</div>
+      </div>
+      <div class="bar">
+        <div class="seg paint" style="width: 12%">12</div>
+        <div class="seg pavement" style="width: 88%">88</div>
+      </div>
+      <div class="ratio"><span class="paint-n">12</span><span class="slash">/</span><span class="pavement-n">88</span></div>
+    </div>
+    <div class="note">
+      Calçada portuguesa, granite setts, azulejo walls, cast-iron brackets, corrugated awnings rusting into character. Trade plaques are minimal; the street is its own brand guideline, set in stone by hand.
+    </div>
+
+  </div>
+
+  <footer>
+    <div>NP-0 · Companion · "Paint / Pavement" · 2026-04-22</div>
+    <div><em>a walk through Graça</em></div>
+  </footer>
+</div>
+</body>
+</html>
