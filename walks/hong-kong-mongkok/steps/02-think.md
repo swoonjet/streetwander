@@ -1,0 +1,13 @@
+SEED:
+- The Starbucks siren printed enormous on a hanging panel, stripped of the wordmark — just the figure, floating over the street like a flag, the wordmark banished to the small fascia below
+- The louvered air-conditioner cages bolted onto the right-hand tower in a near-grid, slightly off, each one a rust-streaked little box extending the building's skin by about eighteen inches
+- The minibus queue and scattered pedestrians on the far curb, reduced by the fisheye to ant-scale even though they're the closest humans in the frame
+
+WANDER:
+The siren without the word is the giveaway — Starbucks has graduated into the small club of logos that no longer need their name, and it's worth noticing how short that list actually is. Apple did it, Nike did it, Target did it, Shell did it — and that's nearly the whole roster until you start padding with oil majors and luxury fashion. What's striking is that the graduation isn't about recognition (plenty of brands are recognizable without their name), it's about a company earning the right to *withhold* information from you and trust you'll fill it in. It's a contract: I won't tell you who I am, and you'll love me more for the restraint. Which is the same contract a novelist signs when she stops explaining her characters' motivations, or the one a jazz pianist signs when he drops out during the head instead of comping — the meaning is transferred from the performer to the listener, and the listener, flattered by being trusted, rewards the move. But here's the flip: this only works one direction. A brand can evolve from wordmark to symbol (Nike started with the word "NIKE" under the swoosh for a decade before pulling it), but the symbol can almost never evolve back to needing a word without admitting defeat. Gap found this out in 2010. The market punishes the untrusting move. There's something almost biological about it — in evolution, traits that signal "I can afford to waste this" (the peacock's tail, the bowerbird's collection) become markers of fitness precisely because they're costly, and the siren-without-a-word is the same signal: look how much brand equity I can afford to burn by not even telling you my name.
+
+BRANCH:
+The AC cages — vernacular architecture as honest infrastructure, the opposite of curtain-wall abstraction. A whole theory of buildings that wear their organs on the outside (Pompidou, Lloyds, Hong Kong tenements) as an ethic rather than a style.
+
+ECHO:
+Rhymes with step 0 and 1 — still circling restraint-as-signal, withholding-as-status. But extends it: restraint isn't only parasitic on noise around it (step 0) or on the gap between registers (step 1); it's also a *costly signal*, which reframes the whole thread in evolutionary rather than aesthetic terms.

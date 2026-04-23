@@ -1,0 +1,13 @@
+SEED:
+- The CITY CHAIN storefront: two interlocking circles as a mark, the English name beside the Chinese 時間廊 ("time corridor"), both in the same cool white sans, set into a glossy black fascia
+- The orange municipal litter bin — a saturated, almost traffic-cone orange — parked at the head of a queue of maybe twenty people waiting at what looks like a minibus stop, nobody looking at anyone
+- The yellow pedestrian crossing stripes extending off the curb like piano keys that have been stretched across the asphalt
+
+WANDER:
+"City Chain / 時間廊" is a small poem hiding in plain sight: the English is a brand (chain of stores, implied vertical reach, industrial), the Chinese is a space (a corridor of time, something you walk down). Same business, two completely different metaphors of what a watch shop is — and the designer has decided not to reconcile them. This is a very Hong Kong move and it's also the central problem of bilingual branding everywhere: do you translate, transliterate, or re-invent? Coca-Cola famously chose 可口可樂 — "tasty happiness" — a total re-invention that's arguably better than the original. IKEA in China went 宜家, "suitable home," which is slyer than "IKEA" has ever been in any Latin alphabet. The interesting thing is that when you let the two names diverge, you get a kind of controlled ambiguity, a stereo effect where each language tells a slightly different story and the brand lives in the interference pattern between them. Compare this with what Apple did in the 2010s — just writing "Apple" in English on storefronts in Beijing, refusing the Chinese name entirely, which read as arrogance to some and as confidence to others, depending on which side of the interference you were standing on. There's a parallel in how musical groups get renamed across markets: the Beatles stayed the Beatles in Japan (ビートルズ, phonetic, neutral), but in mainland China for a while they were 披頭四, "four with hair draped over," which is basically a description of the look rather than the name. Translation as portraiture. Which makes me wonder whether the best brand names are the ones that survive this process with their meaning altered — not preserved — because the alteration is evidence the name had something to say in the first place.
+
+BRANCH:
+The queue: how do cities teach people to line up? Hong Kong's queue etiquette is famously rigorous — British residue, or Confucian residue, or something else? Orderliness as an infrastructure that doesn't appear on any map.
+
+ECHO:
+Extends step 0's thread about restraint-as-parasitic — here it's names-as-parasitic, each language feeding on what the other can't quite say. Both steps are circling the same idea: meaning happens in the gap between registers, not inside either one.

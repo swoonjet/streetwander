@@ -1,0 +1,20 @@
+{
+  "walk_id": "walk-2026-04-23T04-27-31-hong-kong-mongkok",
+  "label": "hong-kong-mongkok",
+  "start_time_ms": 1776918457417,
+  "end_time_ms": 1776919179510,
+  "duration_ms": 722093,
+  "max_steps": 15,
+  "actual_steps": 9,
+  "termination_reason": "returned_home",
+  "total_distance_m": 151,
+  "distance_from_home_at_end_m": 23,
+  "start_image_id": "371583270926237",
+  "start_coords": {
+    "lat": 22.31928427912,
+    "lng": 114.17168567207
+  },
+  "artifact_medium": "An invented field guide — a small illustrated typology of how objects encode their rules, written as paired entries along a single axis (declared vs. constituted).",
+  "artifact_md": "artifact/artifact.md",
+  "artifact_html": null
+}

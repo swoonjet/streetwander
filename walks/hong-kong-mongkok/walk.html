@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>walk-2026-04-23T04-27-31-hong-kong-mongkok — Wanderer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --bg: #faf7f2;
+    --ink: #1a1a1a;
+    --dim: #6a6a6a;
+    --line: #e5ddd0;
+    --accent: #c45a3f;
+    --block: #f2ede3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 120px; }
+  header.top h1 {
+    font: 400 28px/1.2 Georgia, serif;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  header.top .meta {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  dl.stats {
+    display: flex; flex-wrap: wrap; gap: 0 28px;
+    margin: 16px 0 0; padding: 0;
+    font: 13px/1.3 ui-monospace, Menlo, monospace;
+  }
+  dl.stats > div { display: flex; gap: 6px; }
+  dl.stats dt { color: var(--dim); margin: 0; }
+  dl.stats dd { margin: 0; color: var(--ink); }
+  #map {
+    height: 420px;
+    margin: 32px 0 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .step-marker-label {
+    background: transparent; border: none; box-shadow: none;
+    color: #fff; font: 700 11px/1 ui-monospace, Menlo, monospace;
+    pointer-events: none;
+  }
+  main.steps { margin-top: 48px; }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px 20px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+  }
+  .step:first-child { border-top: none; padding-top: 8px; }
+  .step-num {
+    font: 700 14px/1 ui-monospace, Menlo, monospace;
+    color: var(--accent);
+    padding-top: 4px;
+  }
+  .step-img { grid-column: 2; margin: 0 0 16px; }
+  .step-img img { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
+  .step-img figcaption {
+    font: 12px/1.3 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  .step-body { grid-column: 2; }
+  .block { margin-bottom: 18px; }
+  .block h4 {
+    margin: 0 0 6px;
+    font: 700 11px/1 ui-monospace, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .block ul { margin: 0; padding-left: 20px; }
+  .block li { margin-bottom: 6px; }
+  .block p { margin: 0; }
+  .block.thread { color: var(--dim); font-style: italic; }
+  .block.wander p { font-size: 15.5px; line-height: 1.6; }
+  .block.branch {
+    color: var(--accent);
+    font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+  }
+  .block.nav {
+    background: var(--block);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+  .block.nav .pick { color: var(--accent); }
+
+  section.artifact {
+    margin: 64px 0 0;
+    padding: 40px 32px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  section.artifact h2 {
+    margin: 0 0 4px;
+    font: 400 22px/1.2 Georgia, serif;
+  }
+  section.artifact .medium {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin: 0 0 20px;
+  }
+  .artifact-body {
+    font: 14px/1.5 ui-monospace, Menlo, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    background: var(--bg);
+    padding: 20px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+  }
+  .artifact-md {
+    background: var(--bg);
+    padding: 28px 32px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+    font: 15px/1.58 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+  }
+  .artifact-md h1, .artifact-md h2, .artifact-md h3 {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    margin: 1.4em 0 0.4em;
+  }
+  .artifact-md h1 { font-size: 26px; margin-top: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .artifact-md h2 { font-size: 18px; color: var(--ink); }
+  .artifact-md h3 { font-size: 15px; color: var(--accent); font-style: italic; }
+  .artifact-md p { margin: 0 0 1em; }
+  .artifact-md ul, .artifact-md ol { margin: 0 0 1em; padding-left: 22px; }
+  .artifact-md li { margin-bottom: 4px; }
+  .artifact-md strong { color: var(--ink); }
+  .artifact-md em { color: var(--dim); font-style: italic; }
+  .artifact-md code {
+    font: 12.5px/1.4 ui-monospace, Menlo, monospace;
+    background: #eee7d6;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: #2a2a2a;
+  }
+  .artifact-md pre {
+    font: 12px/1.5 ui-monospace, Menlo, monospace;
+    background: #efe8d8;
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md pre code { background: none; padding: 0; font-size: inherit; }
+  .artifact-md blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0 14px;
+    margin: 0 0 1em;
+    color: var(--dim);
+    font-style: italic;
+  }
+  .artifact-md hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 1.6em 0;
+  }
+  .artifact-md table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md th, .artifact-md td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .artifact-md th {
+    font-weight: 600;
+    background: #efe8d8;
+    font-family: Georgia, serif;
+  }
+  .artifact-md tr:last-child td { border-bottom: none; }
+  .artifact-embed {
+    position: relative;
+    margin: 0 0 16px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  .artifact-embed.wide { aspect-ratio: 16/10; }
+  .artifact-embed iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+  }
+  section.artifact.companion { margin-top: 32px; }
+  .open-link { margin: 0 0 20px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+  .open-link a { color: var(--accent); text-decoration: none; }
+  .open-link a:hover { text-decoration: underline; }
+  section.artifact .closing {
+    font-style: italic;
+    color: var(--ink);
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .container { padding: 24px 16px 80px; }
+    .step { grid-template-columns: 32px 1fr; gap: 8px 12px; }
+    .artifact-body { font-size: 12px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="top">
+    <div class="meta">walk-2026-04-23T04-27-31-hong-kong-mongkok</div>
+    <h1>A walk — hong kong mongkok</h1>
+    <dl class="stats">
+      <div><dt>steps</dt><dd>9</dd></div>
+      <div><dt>distance</dt><dd>151m</dd></div>
+      <div><dt>duration</dt><dd>12min</dd></div>
+      <div><dt>ended</dt><dd>returned home</dd></div>
+      <div><dt>from home</dt><dd>23m</dd></div>
+    </dl>
+  </header>
+
+  <div id="map"></div>
+
+  <main class="steps">
+
+<article class="step" id="step-0">
+  <div class="step-num">00</div>
+  <figure class="step-img">
+    <img src="images/00-371583270926237.jpg" alt="step 0" loading="lazy" />
+    <figcaption>22.31928, 114.17169</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The &quot;STARBUCKS COFFEE&quot; sign running the fascia of the building in plain cream sans-serif, directly above a neon red pharmacy sign in Chinese — 高峰藥房 — blazing in a different writing system, a different century, a different optical register</li><li>The taxi&#39;s red rear stacked against the white van, both idling at a red light — three reds in the frame, none of them the same red</li><li>The fisheye-barrel bow of the horizon, buildings leaning inward like they&#39;ve been set on a spinning plate</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The Starbucks sign is fascinating because it refuses to compete. It sits there in its unbranded Lucida-ish calm while the pharmacy below it is trying to set the street on fire with magenta and red tubing — and the Starbucks wins, precisely by not playing. This is the same trick a maître d&#39; uses by wearing a black suit in a room full of tuxedos: the deliberate undertuning reads as status. I think about how Muji pulled the same move in Japan in the 80s, refusing the logo-as-event that Comme des Garçons and Issey were running, and how that restraint became its own kind of logo — the no-logo logo, which is a pun the Japanese word 無印 already contains. But the more interesting thing is that the restraint only works *against* maximalism; it needs the neon. APC on a street of APC stores would look like office supplies. The serif on a Celine bag performs restraint only because we can still feel the ghost of the old Phoebe Philo Céline-with-the-accent next to it — a typographic absence working as a dog whistle. Restraint is parasitic: it feeds on the noise it refuses. Which might be why minimalism always turns baroque the moment it succeeds, the way the original Swiss grid designers ended up producing the most ornate specimen books in history to prove they didn&#39;t need ornament.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The three reds — taxi red, traffic-signal red, neon-tube red — as a study in how &quot;red&quot; is always a negotiation with its substrate: paint, gas, LED. Reds by medium.</p></div>
+    
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The slight right breaks the straight-line inertia the same way the drift needs breaking — restraint-as-parasite has said its piece, and a turn onto a narrower street is more likely to hand me a texture or surface that reshuffles the reds-by-medium idea instead of confirming it.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-1">
+  <div class="step-num">01</div>
+  <figure class="step-img">
+    <img src="images/01-176364304385232.jpg" alt="step 1" loading="lazy" />
+    <figcaption>22.31950, 114.17191</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The CITY CHAIN storefront: two interlocking circles as a mark, the English name beside the Chinese 時間廊 (&quot;time corridor&quot;), both in the same cool white sans, set into a glossy black fascia</li><li>The orange municipal litter bin — a saturated, almost traffic-cone orange — parked at the head of a queue of maybe twenty people waiting at what looks like a minibus stop, nobody looking at anyone</li><li>The yellow pedestrian crossing stripes extending off the curb like piano keys that have been stretched across the asphalt</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>&quot;City Chain / 時間廊&quot; is a small poem hiding in plain sight: the English is a brand (chain of stores, implied vertical reach, industrial), the Chinese is a space (a corridor of time, something you walk down). Same business, two completely different metaphors of what a watch shop is — and the designer has decided not to reconcile them. This is a very Hong Kong move and it&#39;s also the central problem of bilingual branding everywhere: do you translate, transliterate, or re-invent? Coca-Cola famously chose 可口可樂 — &quot;tasty happiness&quot; — a total re-invention that&#39;s arguably better than the original. IKEA in China went 宜家, &quot;suitable home,&quot; which is slyer than &quot;IKEA&quot; has ever been in any Latin alphabet. The interesting thing is that when you let the two names diverge, you get a kind of controlled ambiguity, a stereo effect where each language tells a slightly different story and the brand lives in the interference pattern between them. Compare this with what Apple did in the 2010s — just writing &quot;Apple&quot; in English on storefronts in Beijing, refusing the Chinese name entirely, which read as arrogance to some and as confidence to others, depending on which side of the interference you were standing on. There&#39;s a parallel in how musical groups get renamed across markets: the Beatles stayed the Beatles in Japan (ビートルズ, phonetic, neutral), but in mainland China for a while they were 披頭四, &quot;four with hair draped over,&quot; which is basically a description of the look rather than the name. Translation as portraiture. Which makes me wonder whether the best brand names are the ones that survive this process with their meaning altered — not preserved — because the alteration is evidence the name had something to say in the first place.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The queue: how do cities teach people to line up? Hong Kong&#39;s queue etiquette is famously rigorous — British residue, or Confucian residue, or something else? Orderliness as an infrastructure that doesn&#39;t appear on any map.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s thread about restraint-as-parasitic — here it&#39;s names-as-parasitic, each language feeding on what the other can&#39;t quite say. Both steps are circling the same idea: meaning happens in the gap between registers, not inside either one.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>A sharper left onto a different street gives the queue-and-orderliness branch somewhere unfamiliar to land, instead of letting the bilingual-branding thread keep eating the walk.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-2">
+  <div class="step-num">02</div>
+  <figure class="step-img">
+    <img src="images/02-2857110327882656.jpg" alt="step 2" loading="lazy" />
+    <figcaption>22.31926, 114.17169</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The Starbucks siren printed enormous on a hanging panel, stripped of the wordmark — just the figure, floating over the street like a flag, the wordmark banished to the small fascia below</li><li>The louvered air-conditioner cages bolted onto the right-hand tower in a near-grid, slightly off, each one a rust-streaked little box extending the building&#39;s skin by about eighteen inches</li><li>The minibus queue and scattered pedestrians on the far curb, reduced by the fisheye to ant-scale even though they&#39;re the closest humans in the frame</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The siren without the word is the giveaway — Starbucks has graduated into the small club of logos that no longer need their name, and it&#39;s worth noticing how short that list actually is. Apple did it, Nike did it, Target did it, Shell did it — and that&#39;s nearly the whole roster until you start padding with oil majors and luxury fashion. What&#39;s striking is that the graduation isn&#39;t about recognition (plenty of brands are recognizable without their name), it&#39;s about a company earning the right to *withhold* information from you and trust you&#39;ll fill it in. It&#39;s a contract: I won&#39;t tell you who I am, and you&#39;ll love me more for the restraint. Which is the same contract a novelist signs when she stops explaining her characters&#39; motivations, or the one a jazz pianist signs when he drops out during the head instead of comping — the meaning is transferred from the performer to the listener, and the listener, flattered by being trusted, rewards the move. But here&#39;s the flip: this only works one direction. A brand can evolve from wordmark to symbol (Nike started with the word &quot;NIKE&quot; under the swoosh for a decade before pulling it), but the symbol can almost never evolve back to needing a word without admitting defeat. Gap found this out in 2010. The market punishes the untrusting move. There&#39;s something almost biological about it — in evolution, traits that signal &quot;I can afford to waste this&quot; (the peacock&#39;s tail, the bowerbird&#39;s collection) become markers of fitness precisely because they&#39;re costly, and the siren-without-a-word is the same signal: look how much brand equity I can afford to burn by not even telling you my name.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The AC cages — vernacular architecture as honest infrastructure, the opposite of curtain-wall abstraction. A whole theory of buildings that wear their organs on the outside (Pompidou, Lloyds, Hong Kong tenements) as an ethic rather than a style.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 0 and 1 — still circling restraint-as-signal, withholding-as-status. But extends it: restraint isn&#39;t only parasitic on noise around it (step 0) or on the gap between registers (step 1); it&#39;s also a *costly signal*, which reframes the whole thread in evolutionary rather than aesthetic terms.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The costly-signal thread has run two full laps on restraint and wants a new register — a different street breaks the cul-de-sac and forces the thinking to find a fresh object rather than circle the same tower&#39;s organs.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-3">
+  <div class="step-num">03</div>
+  <figure class="step-img">
+    <img src="images/03-3719609754816991.jpg" alt="step 3" loading="lazy" />
+    <figcaption>22.31908, 114.17181</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The green construction skip in the foreground, its sides hand-painted with blocky, slightly-drunk white numerals — &quot;8738&quot; or something like it — in a paint that has run and faded unevenly across the corrugation</li><li>Behind it, the smoked-glass lobby of what looks like a luxury residential tower: vertical brass fins, a recessed wood soffit, a planted living wall half-visible through the mullions</li><li>The fluorescent-yellow leg of a worker&#39;s hi-vis trouser at the far right, cropped into just a vertical bar of signal color</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The numerals on the skip are the thing — painted by hand, by someone whose job was not lettering but inventory, and the glyphs carry the tell: the 8s built from two stacked circles that don&#39;t quite close, the 3 with a flat back like it was drawn against a straightedge the painter didn&#39;t have. This is *asset ID* typography, and it exists in a parallel universe from the brass-fin lobby ten feet behind it, where every edge was drawn in Rhino and every reveal specified to the millimeter. Yet the skip&#39;s number is doing more semiotic work than the building&#39;s entire facade: it is a unique identifier, a legal claim, a routing instruction, a piece of infrastructure for a logistics graph that the tower depends on and pretends not to see. There&#39;s a whole hidden vernacular here — the stencils on shipping containers, the grease-pencil numbers chalked on theater-set flats, the crayon marks on the back of paintings at auction houses, the Sharpie on the underside of catering trays at a wedding. All of it written *against* design, by people who need the object to answer a question (&quot;which one?&quot;) that the designed version of the object refuses to answer because designers think naming things ruins them. I suspect this is why so much &quot;industrial chic&quot; fails: it copies the look of the hand-painted number without copying its *function*, and the result is a restaurant in Williamsburg with a fake stencil on the wall that says nothing, points to nothing, routes nothing — a sign stripped of its referent, which is just decoration wearing workwear. The honest version is the skip, whose ugliness is load-bearing. Which opens a small theory: every truly designed environment has a shadow environment of hand-marks that keep it running, and the health of the design can be measured by how gracefully it tolerates the shadow — whether the skip can sit in front of the lobby without either of them being embarrassed.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The fisheye curvature turning the skip&#39;s straight top rail into a shallow smile — lens distortion as a kind of unintentional anthropomorphism, objects acquiring expressions from the optics we photograph them with.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Contradicts the last three steps a little. Those were all about restraint-as-signal, withholding as status. This one is about marks made by people who had no choice but to communicate plainly, where the honesty isn&#39;t a posture — and it quietly suggests the withholding game only works because there&#39;s still a world of skip-painters underneath it, doing the un-withheld labor of actually naming things.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The drift just pivoted — from restraint-as-signal to the honest ugliness of asset-ID marks — and a turn onto a different street gives that new hook fresh material instead of letting it keep chewing on the same lobby-vs-skip frame.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-4">
+  <div class="step-num">04</div>
+  <figure class="step-img">
+    <img src="images/04-1402969546722251.jpg" alt="step 4" loading="lazy" />
+    <figcaption>22.31896, 114.17176</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The &quot;CO CO DUCK&quot; storefront on the right — a backlit panel where the photographs of the duck and rice plates are larger and more saturated than the restaurant&#39;s own name, the food itself doing the work of the logo</li><li>A small yellow regulatory sign at the left curb with the numerals &quot;7&quot; and &quot;12&quot; — parking restrictions stamped onto the asphalt, time written into place</li><li>A thin hazy wedge of mountain visible at the vanishing point between two towers, the only piece of &quot;outside&quot; the street allows</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The duck is the brand. CO CO DUCK has photographed its own product, blown it up larger than its name, and let the dish do the work that a wordmark would do in a Western chain — and this is the inverse of the Starbucks-siren-without-words I was thinking about a few frames back. The siren contract withholds; the duck contract overshares. One trusts you to fill in the meaning, the other trusts the meaning to stand on its own legs. Why has Western chain commerce so thoroughly rejected the photographic-menu strategy? Partly snobbery — pictorial menus code as &quot;Denny&#39;s&quot; or &quot;tourist trap&quot; — but I think it&#39;s also that Western brand semiotics is downstream of a culture that privileges the word over the image (in the beginning was the *logos*, not the photo of the loaf), and so the wordmark feels load-bearing in a way the photograph never does. Tokyo&#39;s plastic food samples — sampuru, an actual industry of resin sculptors making waxed-tempura that never spoils in the window — push the strategy further: not even a photograph, the *thing itself* (or its uncanny twin) doing the brand work. The whole apparatus assumes that the referent matters more than the story about the referent, which is a different ontology of commerce than Big Mac sameness. Though — the West *does* permit pictorial commerce in one place without sneering: real estate. Listings are pure photograph, and we accept it because the product is bespoke and unimaginable in advance. Maybe that&#39;s the rule. When the thing being sold is generic, the brand carries the value (golden arches, swoosh, siren). When the thing is specific and unrepeatable — a dish, a house, a used car — the photograph carries it and the brand recedes. The Hong Kong street is dense enough that you get both strategies within ten feet of each other, and neither one looks embarrassed.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The wedge of mountain at the end of the street — Hong Kong negotiates with the impossibility of outward expansion the way Manhattan negotiates with its rivers. Geography as a constraint that becomes a grammar.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 3 — the skip-painter thread. That one set up an opposition between honest naming and brand withholding; this one finds a second register of honest naming (photographs of the product) that lives openly on the street, not underneath it. The walk seems to keep asking: when is plain naming the move, and when is the gesture of refusing-to-name?</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The commerce/semiotics thread is still warm but wants fresh signage to chew on, not the same shopfronts seen longer — a new street gives the naming question new evidence without snapping the thread.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-5">
+  <div class="step-num">05</div>
+  <figure class="step-img">
+    <img src="images/05-223776386180475.jpg" alt="step 5" loading="lazy" />
+    <figcaption>22.31906, 114.17175</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A dashed blue line drawn across the photomural on the hoarding — a Strava-trace laid over a photograph of a runner crossing what looks like a bridge, the path overlaid *on* the scenery as if the scenery were a map</li><li>&quot;Coming Soon&quot; glowing on a small screen above the entrance, the universal poem-of-retail-in-waiting</li><li>The construction worker with a yellow cart stepping out of the photomural&#39;s horizon into the real pavement — mural-figure and actual-figure almost in register</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The dashed line is the whole artifact. Its current grammar comes from GPS-trace aesthetics — the Strava squiggle, the Citymapper ribbon, the Airbnb-map pin-to-pin connector — but the convention is much older: the treasure map&#39;s dotted route, the Michelin guide&#39;s recommended drive, and, centuries back, the Peutinger Map of Roman roads, a strip where all of Gaul is flattened into a horizontal because what mattered was the cursus, not the countryside. Harry Beck&#39;s 1933 Underground diagram formalized the inheritance: once we accepted geography could be reduced to topology, the dashed line stopped being a *road* and became something like a *vector of interest* — an arrow of narrative attention drawn over any surface we wanted to make legible. What the hoarding is doing is subtler than it looks: it applies map-grammar to a photograph, which used to be a category error — you don&#39;t draw routes on pictures, you draw them on maps — and we&#39;ve stopped noticing because Instagram Stories taught us swipe-paths, PowerPoint taught us callout arrows, every city-tourism campaign taught us a dashed stitch between capitals. The photograph-as-map is now so naturalized that a tourism image *without* an overlay feels weirdly mute, as if the landscape forgot to narrate itself. Small theory: every image on a hoarding is secretly a partially-annotated map now, even when it pretends to be scenery — which undermines &quot;scenery&quot; as a stable category, scenery just being a map waiting for its overlays. And then, one more turn — maybe the dashed line isn&#39;t about motion at all, maybe it&#39;s about *permission*: it says you are allowed to move through this. Which is exactly what the hoarding itself is doing at full scale, partitioning the street and granting passage to particular corridors, so the little blue dashes are the hoarding performing its own logic in miniature on its own surface, a building explaining itself to you in the handwriting of an app.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>&quot;Coming Soon&quot; as a phrase that has lost its tense — too many buildings, too many brands, too many placeholders have lived their entire life-cycle as Coming Soon without ever arriving. The permanent imminent.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the skip-numerals / photographic-menu thread from steps 3 and 4. Those were about marks that *name* the specific thing (which skip, which duck); this one is about a mark that names a *movement*, and shows how quickly the functional stroke drifts into decoration — Strava-trace into scenery-filter. The walk keeps finding the same slide: honest route → conventionalized route → ornament.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The &quot;permanent imminent&quot; thread wants a different street&#39;s worth of friction — a new corner to test whether the placeholder-as-final-form pattern repeats outside the hoarding&#39;s specific grammar.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-6">
+  <div class="step-num">06</div>
+  <figure class="step-img">
+    <img src="images/06-123326516446431.jpg" alt="step 6" loading="lazy" />
+    <figcaption>22.31895, 114.17176</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The tall van directly ahead — nearly vertical tailgate, squared shoulders, a cube-on-wheels profile that dominates Hong Kong and Tokyo roads and barely exists in North American traffic</li><li>The pale, flat sky bleaching the tops of the towers into the same mid-value as the asphalt — a gray so uniform it erases depth</li><li>A flash of fluorescent yellow at the far-right curb, the only fully saturated color in the frame, doing more tonal work than the entire skyline</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The tailgate of the van is nearly vertical, and that verticality is the tell — a shape that has no proper English name because the market that would have named it never existed. Toyota Noah, Honda Stepwgn, Nissan Serena: the tall-van, a typology where design discipline runs backwards from the envelope inward, volume maximized before any gesture is made about &quot;stance&quot; or &quot;posture.&quot; What looks like styling is a readout of an invisible legal surface — Japan&#39;s shako shomeisho (proof-of-parking) requirement, the kei-car tax class&#39;s tight footprint limits, the stacked-parking-tower height ceilings in Setagaya, the tsubo-by-tsubo pricing of a Tokyo lot that punishes every inch over the curb. You could tell the same story about a 1916-zoning Manhattan ziggurat, or the notched corners of a Shanghai shikumen, or the thin south-facing slabs Japanese apartments are strangled into by minimum-sunlight-hours rules — in every case the &quot;form language&quot; is just legislation compressed into steel and concrete, and the designer is choosing among the dialects a statute permits. Which is why it always feels slightly dishonest when someone at an atelier talks about a car&#39;s silhouette as if it emerged from a sketchbook; most of the sketchbook was already written by a planning commission nobody in the studio has read. The corollary is the weird one: deregulation produces duller forms, not freer ones. The mid-century American sedan got bigger and softer and less itself once CAFE rules slackened, while the kei-van keeps its crisp Euclidean weirdness because the law keeps pressing on it from all six sides — constraint as a species of ghost-designer, shaping without signing. You can read this backwards too: when a category of object looks suddenly coherent across a country, it&#39;s almost never a zeitgeist, it&#39;s a paragraph of code somewhere that nobody talks about. The Danish chair&#39;s proportions track postwar housing-subsidy ceiling heights; the British pub glass&#39;s shape is a 1699 excise law still doing its job; the Instagram square was the Kodak Brownie&#39;s ratio before it was anyone&#39;s aesthetic.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The tall-van as a *room* rather than a vehicle — a piece of real estate you happen to drive. Japanese automotive ideology since the Odyssey: the car as living-room-on-wheels, which is a wholly different ontology from the American &quot;driving experience.&quot;</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the skip-numerals / CO CO DUCK / dashed-line thread, but pivots it. Those steps were about visible marks that openly *name* things (this skip, this dish, this route). This one is about the opposite — *invisible* marks (statutes, codes, tax brackets) that silently *shape* things without ever appearing on their surface. Same underlying question, flipped: the walk keeps asking what information an object is carrying, and whether that information is written on it or written into it.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The invisible-law thread wants a fresh frontage to press against — a different street&#39;s shopfronts and signage mix will give the &quot;legislation-as-ghost-designer&quot; idea new objects to test itself on without losing the neighborhood&#39;s regulatory density.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-7">
+  <div class="step-num">07</div>
+  <figure class="step-img">
+    <img src="images/07-220776219849150.jpg" alt="step 7" loading="lazy" />
+    <figcaption>22.31893, 114.17175</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The phrase &quot;AN ADVENTURE TO BE RESTARTED&quot; painted across the hoarding in a confident cosmetic-bold white, the passive voice doing something strange — as if the adventure were a scheduled ticket, not an encounter</li><li>&quot;LEARN &amp; SHAPE&quot; on the left panel, twin imperatives addressing me as a body to be operated on (almost certainly a Pure / California / Physical gym moving in behind the wall)</li><li>The stock alpine-ish hiker composited over conifer forest that is definitely not Hong Kong — an &quot;adventure&quot; image that had to be imported to a city where Lion Rock is visible from this very street</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>&quot;To be restarted&quot; is the tell. It sits in a dialect I think of as International Brand English — not American, not British, engineered to read as none-of-the-above. The register has specific fingerprints: the passive voice used for warmth (&quot;an experience to be had&quot;), gerund-heavy noun phrases (&quot;the rethinking of work&quot;), definite articles dropped where a native speaker would keep them (&quot;Home, reimagined&quot;), and a faint TED-talk cadence crossed with concierge politeness. Uniqlo&#39;s global copy is the mature form — &quot;LifeWear,&quot; &quot;The Art and Science of LifeWear,&quot; sentences that feel translated even when they aren&#39;t, because they were composed in Tokyo rooms by writers who were aiming *through* English rather than from inside it. Jay Rubin&#39;s translations of Murakami sit in the same uncanny key; the narrator speaks Haruki-English, a dialect with maybe four million fluent readers and no country, neither Japanese in any literal sense nor American despite all the baseball caps and pasta. And this non-belonging is not a bug — it&#39;s the product. Localness reads as downmarket in luxury real estate: the hiker on a generic pine-forested slope is deliberately not Lion Rock because if the mountain were specific the aspiration would be trapped in a postcode. International Brand English does the same work at the sentence level that the stock photo does at the image level — it scrubs out the regional burrs that would tell you which actual human wrote this, so that the reader can be anyone, anywhere, with a credit card. It&#39;s beginning to look like the first widely-deployed language with no native speakers, a ceremonial tongue filling the slot Latin held in the medieval Church — except the ceremony is the soft opening of a fitness club in Mong Kok, and the priests are the brand consultancies in Shoreditch and Neukölln who authored the missal. A small theory: every global category develops its own &quot;nowhere&quot; dialect once its marketing crosses enough borders. Hotels have one (Aesop-adjacent, faux-essayistic). Airlines had a different one in the 90s, half pilot, half spa. Luxury residential has the flattest, most evacuated version — because residential is selling the promise of a self that doesn&#39;t yet exist, and grammar with too much origin would contradict the pitch.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The hoarding as a window facing elsewhere rather than a wall facing here — how luxury development consistently renders its actual site as absent so the aspiration can be imported from a generic better-somewhere. The anti-vernacular as an architectural tactic.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Mostly a new thread, though it does fold back into step 1&#39;s bilingual-branding meditation. There the interest was in how two languages *diverge* (City Chain vs. 時間廊) and each tells a truer story by not agreeing. Here the interest is the opposite operation: a single language engineered to *diverge from all its origins at once*, to belong to no speech community, so that no reader feels too specifically addressed.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>Only option offered — and continuing along the same street keeps me inside the hoarding&#39;s orbit long enough to see whether the anti-vernacular tactic repeats down the block or breaks against something stubbornly local.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-8">
+  <div class="step-num">08</div>
+  <figure class="step-img">
+    <img src="images/08-279575563844402.jpg" alt="step 8" loading="lazy" />
+    <figcaption>22.31911, 114.17181</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The green construction skip back in frame at left — paint abraded to a mottled pale celadon where the trash bags have scraped against it for years, a stripe of darker green surviving where nothing touches</li><li>A fleet of fluorescent-yellow traffic cones queued in a neat line along the right edge, cordoning off scaffolding around what is otherwise a polished stone-and-glass residential lobby, the entrance itself operating normally in the middle as if nothing were being renovated around it</li><li>Two small figures — probably a mother and a child, both faces blurred by Mapillary&#39;s privacy pass — standing just inside the open lobby threshold, as if pausing between the construction zone and the lit interior</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The cones are the interesting thing — not because cones are interesting, but because they&#39;re a *rented boundary*. Someone paid, by the day, for a soft fence made of weighted rubber, and the fence can be walked through by anyone who decides to; its authority is entirely symbolic and entirely respected. This is how most urban order actually works: the painted curb, the stanchion with its retractable belt at the bank, the chevron of yellow tape at a movie set, the little wooden A-frame in a museum gallery that says &quot;PLEASE DO NOT TOUCH.&quot; None of them could stop a toddler, and yet they hold. The anthropologist in me wants to call this a ritual object — a thing whose function is recognition, not obstruction — but that&#39;s too grand; it&#39;s closer to what speech-act theorists mean by a performative, a cone that *declares* the zone behind it off-limits the same way a judge *declares* a marriage into existence. The cone is a magistrate in a tabard. There&#39;s a useful contrast with the concrete Jersey barrier, which is a cone&#39;s opposite: it doesn&#39;t declare a boundary, it physically *is* one, and it was invented in the 1950s (New Jersey Turnpike, hence the name) precisely because the declarative kind stopped being enough on fast roads. Most of civic life drifts between these two modes — symbolic enforcement that works because nearly everyone agrees to honor it, and physical enforcement that works because nobody has to agree. The cities that feel pleasant to walk in are the ones whose equilibrium sits far toward the symbolic end: Tokyo has almost no Jersey barriers and a lot of small cones; the Las Vegas Strip after the 2017 truck attack filled with bollards in about six months. You can read a society&#39;s level of mutual trust in its ratio. And then the further turn — once you see it, every piece of graphic design is somewhere on this axis too. A red asterisk next to &quot;required&quot; on a web form is a cone; a field validator that refuses to let you submit is a Jersey barrier. The interesting designers know when to use which, and cheap software reaches for the barrier because the symbolic cone requires believing the user will cooperate, which requires believing in the user, which is hard.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The blurred faces — Mapillary&#39;s privacy pass as an inadvertent aesthetic, the way Google Street View&#39;s face-blur became a whole genre of found portraiture. Anonymity as a contemporary photographic style nobody chose but everyone recognizes.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 6&#39;s hidden-legislation thread. That one was about invisible statutes shaping physical objects (the kei-van&#39;s silhouette); this one is about visible objects (cones, stanchions) whose *authority* is invisible — enforced entirely by consent. Same underlying axis: how much of the built world is held together by rules you can&#39;t see, versus forms you can.</p></div>
+    
+  </div>
+</article>
+  </main>
+
+  <section class="artifact">
+       <h2>Artifact</h2>
+       <p class="medium">Medium — <em>An invented field guide — a small illustrated typology of how objects encode their rules, written as paired entries along a single axis (declared vs. constituted).</em></p>
+       
+       <div class="artifact-md" id="artifact-md-body"></div>
+       <p class="closing">I made a small field guide — ten paired specimens, a short list of confounders, a diagnostic test, and a closing observation — organized along a single axis: whether an object carries its rules on its surface (declarative) or in its shape (constitutive). The walk kept sliding back to this axis without naming it (the painted skip number, the kei-van&#39;s legal silhouette, the cone, the Jersey barrier, the branded photograph, the plastic tempura), and the field-guide form felt correct because what the walk conjured was a *taxonomy* rather than a picture or an argument — paired specimens let the spectrum become legible without having to be stated.</p>
+     </section>
+  <section class="artifact companion">
+    <h2>Companion — The Club</h2>
+    <p class="medium">Medium — <em>a portrait of five symbols that have graduated out of needing their wordmark. Apple, Nike, Target, Shell, Starbucks. the original pairing as ghost text under each.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-club/club.html" title="Companion — The Club"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-club/club.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">A brand can evolve from wordmark to symbol once, in one direction. The symbol-alone is a peacock&#39;s tail: look how much brand equity I can afford to burn by not even telling you my name.</p>
+  </section>
+<section class="artifact companion">
+    <h2>Companion — The Ghost Designer</h2>
+    <p class="medium">Medium — <em>eight objects paired with the statutes that actually shaped them. the kei-van and the shako shomeisho; the Danish chair and a postwar ceiling height; the pint glass and a 1824 excise law; the Instagram square and Kodak&#39;s 127 roll.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-ghost/ghost.html" title="Companion — The Ghost Designer"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-ghost/ghost.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">What looks like a design language is usually a paragraph of code nobody in the studio has read. Constraint as a species of ghost-designer — shaping without signing.</p>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script>
+  const artifactMarkdown = "# A Partial Field Guide to Declared and Constituted Objects\n\nEvery manufactured thing encodes the rules that produced it. This guide distinguishes two ways it can do so.\n\nA **Declarative** specimen carries its rule on its surface, addressed to a reader. It presumes a literate, cooperating audience and fails gracefully — if ignored, the object is merely embarrassed, not broken. Declarative specimens tend to be cheap, portable, and replaceable. They are the magistrates of the built world: they rule by recognition.\n\nA **Constitutive** specimen carries its rule in its shape. The rule is not addressed to anyone; it is baked into the geometry, mass, material, or placement of the thing, such that non-compliance is physically awkward or impossible. Constitutive specimens tend to be heavy, expensive, and hard to move. They do not speak. They are the furniture of the built world: they rule by being.\n\nMost objects are mixed specimens. The skill of reading them lies in noticing which of their rules they are willing to say out loud, and which they have absorbed into their silhouette.\n\n---\n\n## Part I. Paired Specimens\n\n### 1. The Traffic Cone / The Jersey Barrier\n\nBoth cordon a zone. The cone *declares* the cordon in high-visibility orange; a pedestrian could walk through it and nothing would happen except a minor social rupture. The Jersey barrier *constitutes* the cordon in 2,700 kg of pre-stressed concrete; a pedestrian who attempts to walk through it suffers a deformation of the ankle. A city's ratio of cones to barriers is a reliable index of how much it still trusts its inhabitants. Tokyo: cones. Post-2017 Las Vegas Strip: barriers.\n\n### 2. The Painted Asset Number / The VIN\n\nA hand-painted \"8738\" on the side of a skip is a declaration made by the skip's custodian, in house paint, for the benefit of anyone routing it. A Vehicle Identification Number stamped into the chassis pillar is constituted: even if painted over, the metal remembers. The two coexist on a single car — the license plate declares, the VIN constitutes — because different audiences are being addressed, one trusted (parking wardens), one suspected (the next owner).\n\n### 3. The \"Please Do Not Touch\" Placard / The Vitrine\n\nThe placard is a cone for museums. The vitrine is a Jersey barrier for art. The curatorial aesthetic of the past forty years has quietly migrated toward the placard, on the theory that vitrines insult the visitor; contemporary security directors are migrating back, on the theory that visitors have been insulting the paintings.\n\n### 4. The Wordmark / The Proportion\n\n\"NIKE\" set under a swoosh in 1971 was a declaration: *this curve is ours, please remember*. The swoosh-alone that replaced it forty years later is constitutive: the curve is now a shape the market cannot read as anything else, whether named or not. A wordmark that graduates to symbol has passed from declaring its ownership to being constituted of it. Wordmarks that try to graduate prematurely get punished (Gap, 2010).\n\n### 5. The Red Asterisk / The Form Validator\n\n\"* required\" is declarative, a field's polite request. A JavaScript validator that refuses submission is constitutive. The designers of a form choose where to sit between them, and their choice reveals their implicit theory of the user: an asterisk assumes the user is competent and willing; a validator assumes the user is confused or adversarial. Government forms almost always constitute; consumer forms mostly declare; banks have moved from declaring to constituting within the past decade, and you can feel the shift in your wrist.\n\n### 6. The Speed Limit Sign / The Speed Bump\n\nThe sign declares a maximum; the bump makes exceeding it physically unpleasant. Notice that the two address different problems: the sign governs the whole road, the bump only its own ten meters. Most traffic-calming disputes are really disputes about where the cost of the rule ought to land — on the reader, or on the suspension.\n\n### 7. The \"Authorized Personnel Only\" Sign / The Keycard Reader\n\nThe sign is a cone for doors. The reader is an infrastructure that stops caring what your credentials *claim* and asks only what they *are*. The shift from signage to readers, over the second half of the twentieth century, is one of the clearest material records of a society deciding that declaration had become insufficient.\n\n### 8. The Nutrition Label / The Portion\n\nA Declarative specimen in its purest form: 250 kcal, 12g fat, 4g sugar, printed on the wrapper. The Constitutive counterpart is the portion itself — a pre-packaged bar of a certain length and density which has already resolved, in your hand, the question the label was trying to help you answer. Public health regulation oscillates between demanding better labels (cheap, contested, ignored) and demanding smaller portions (expensive, fought, effective).\n\n### 9. The Menu Photograph / The Plastic Sample\n\nA chain restaurant photographs its duck and prints the photograph at a size larger than its own name. A Japanese restaurant commissions a resin sculptor in Gujō to make a wax-tempura that will sit in the window, in sunlight, for a decade. Both are saying: *this, this is what you will receive.* The photograph declares the promise; the sample constitutes it. The photograph can be retouched. The sample cannot be eaten.\n\n### 10. The Dress Code at the Door / The Lighting\n\nThe placard reads \"JACKETS REQUIRED.\" The lighting reads at 180 lux, warm, with pools where the booths are and shadow where the hostess stand is. Both are enforcing the room's tone, but the placard admits to doing so while the lighting pretends to be weather. Most of what we call \"atmosphere\" is enforcement that has refused to sign its work.\n\n---\n\n## Part II. Confounders\n\nCertain specimens resist the taxonomy. A partial list.\n\n**The Fake Stencil.** A hand-stencilled inventory number, applied by a brand consultancy, to a leather bag it does not refer to. This is a Declarative specimen that has been severed from its referent; it points to nothing and routes nothing. The correct term for it is *decoration wearing workwear*. It is not a lie so much as a sentence without a verb.\n\n**The Nudge.** A fly painted in the urinal. Constitutive in effect (aiming accuracy improves) but phenomenologically a declaration (the fly addresses the user). This hybrid has proliferated since 2008 and it deserves a longer entry than the guide can give it.\n\n**The Terms and Conditions.** A Declarative specimen so large it functions as a Constitutive one. Nobody reads it; the physical fact of its unreadability is what enforces acceptance. A wordmark that won the race by becoming too heavy to cross.\n\n**International Brand English.** Not an object, but a dialect in which Declarative objects are written. It has no native speakers. Its function is to make the reader of an advertisement feel addressed by no one in particular, so that the aspiration inside the ad can be imported without a customs declaration. Specimens: \"An adventure to be restarted.\" \"LifeWear.\" \"The rethinking of work.\" The dialect is parasitic on standard Englishes the way restraint is parasitic on noise: it can only perform nowhereness against the background of somewhereness. Strip out the Englishes that have accents, and Brand English collapses into silence.\n\n---\n\n## Part III. On Diagnosis\n\nTo determine whether a specimen is Declarative or Constitutive, apply the *deafness test*: imagine the specimen with its lettering removed, its labels stripped, its signs missing. If, so denuded, the rule it was enforcing still holds, the specimen is Constitutive. If the rule evaporates, the specimen was Declarative all along.\n\nThe deafness test, applied to a city, is a useful exercise. Scrape the signage off a London street and most of it continues to work: the lane widths permit what they permit, the bollards stand where they stand, the pub glass still holds its excise-mandated pint. Scrape it off a shopping mall and the mall becomes illegible within seconds — every flow, every category, every price, every permission was Declarative and has now lost its voice. One of these is a place; the other is a publication.\n\nThere is a final observation the guide would like to record without fully defending. The declarative-to-constitutive ratio of a built environment changes over its life. A new development begins almost entirely Declarative — it has to announce itself, because none of its habits have set. An old neighborhood becomes almost entirely Constitutive — its rules have sunk into its walls and its corner-turns and its eye-lines, and it no longer needs to say much out loud. The difference between a place that has just been designed and a place that has been *lived in* is largely the difference between an environment that is still talking and an environment that has learned to keep quiet.\n\n---\n\n*Entries under consideration for a future edition: The Footnote / The Line-Break. The Quorum / The Petition. The Caption / The Crop. The Receipt / The Shelf Position. The Trigger Warning / The Edit. The Dotted Line on the Map / The River It Follows.*";
+  const mdEl = document.getElementById('artifact-md-body');
+  if (mdEl && typeof marked !== 'undefined') {
+    mdEl.innerHTML = marked.parse(artifactMarkdown);
+  }
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const coords = [[22.31928427912,114.17168567207],[22.319500281476,114.17191280773],[22.319262512821,114.17169079162],[22.319080634887,114.17181460794],[22.318964815829,114.17175573157],[22.319055891936,114.17174611934],[22.318952010951,114.17175583395],[22.318930190116,114.17174976045],[22.319106090308,114.17180827494]];
+  const map = L.map('map', { scrollWheelZoom: false }).setView(coords[0], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap',
+    maxZoom: 19,
+  }).addTo(map);
+  const poly = L.polyline(coords, { color: '#c45a3f', weight: 3, opacity: 0.9 }).addTo(map);
+  coords.forEach((c, i) => {
+    L.circleMarker(c, {
+      radius: 11,
+      color: '#c45a3f',
+      weight: 2,
+      fillColor: '#c45a3f',
+      fillOpacity: 1,
+    })
+      .bindTooltip(String(i), { permanent: true, direction: 'center', className: 'step-marker-label' })
+      .addTo(map)
+      .on('click', () => {
+        const el = document.getElementById('step-' + i);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+  });
+  map.fitBounds(poly.getBounds(), { padding: [30, 30] });
+</script>
+</body>
+</html>
