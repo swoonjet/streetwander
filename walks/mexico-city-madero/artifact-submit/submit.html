@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Submit an Unbilled Transfer · Office of Unsent Invoices</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f3eedf;
+    --paper: #f8f3e4;
+    --ink: #1a1712;
+    --dim: #6a6152;
+    --faint: #b8ae97;
+    --line: #c9bfa6;
+    --stamp: #b03a2d;
+    --approved: #2d5a3a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body { font: 12.5px/1.55 "IBM Plex Serif", Georgia, serif; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 40px 28px 56px; }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    border-bottom: 2px double var(--ink);
+    padding-bottom: 18px;
+    margin-bottom: 32px;
+  }
+  header .dept {
+    font: 700 10px/1.3 "IBM Plex Mono", monospace;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  header h1 {
+    font: italic 400 30px/1.15 "Playfair Display", serif;
+    letter-spacing: -0.005em;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  header .sub { font-size: 11px; color: var(--dim); letter-spacing: 0.04em; font-family: "IBM Plex Mono", monospace; }
+  header .ref { text-align: right; font: 10px/1.5 "IBM Plex Mono", monospace; color: var(--dim); letter-spacing: 0.14em; }
+  header .ref strong { color: var(--ink); font-weight: 600; display: block; }
+
+  .lede {
+    font: italic 13.5px/1.62 "Playfair Display", serif;
+    color: var(--ink);
+    margin: 0 0 36px;
+    max-width: 720px;
+  }
+  .lede em { font-style: italic; color: var(--stamp); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  fieldset {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 24px 26px 22px;
+    position: relative;
+  }
+  fieldset::before {
+    content: "FORM UT-1";
+    position: absolute;
+    top: -9px;
+    left: 18px;
+    background: var(--bg);
+    padding: 0 8px;
+    font: 600 9px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.22em;
+    color: var(--dim);
+  }
+  legend {
+    padding: 0;
+    font: 400 19px/1.2 "Playfair Display", serif;
+    font-style: italic;
+    margin: 0 0 4px;
+  }
+  fieldset .help {
+    font-size: 11px;
+    color: var(--dim);
+    margin: 0 0 18px;
+    font-style: italic;
+  }
+
+  .field {
+    display: grid;
+    gap: 5px;
+    margin-bottom: 14px;
+  }
+  .field label {
+    font: 700 10px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .field label .req { color: var(--stamp); margin-left: 3px; }
+  .field input, .field textarea, .field select {
+    font: 12.5px/1.45 "IBM Plex Serif", serif;
+    background: #fff;
+    border: 1px solid var(--faint);
+    padding: 8px 10px;
+    color: var(--ink);
+    width: 100%;
+  }
+  .field textarea { min-height: 56px; resize: vertical; font-family: inherit; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: 2px solid var(--stamp); outline-offset: -2px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  button.primary {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font: 700 10px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  button.primary:hover { background: #2a2520; }
+  button.primary:disabled { opacity: 0.6; cursor: wait; }
+
+  .archive {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 24px 26px 22px;
+    position: relative;
+  }
+  .archive::before {
+    content: "DEPARTMENT ARCHIVE · REFERENCE LIBRARY";
+    position: absolute;
+    top: -9px;
+    left: 18px;
+    background: var(--bg);
+    padding: 0 8px;
+    font: 600 9px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.22em;
+    color: var(--dim);
+  }
+  .archive h2 {
+    font: 400 19px/1.2 "Playfair Display", serif;
+    font-style: italic;
+    margin: 0 0 4px;
+  }
+  .archive .help {
+    font-size: 11px;
+    color: var(--dim);
+    margin: 0 0 16px;
+    font-style: italic;
+  }
+
+  .counter {
+    font: 400 46px/1 "Playfair Display", serif;
+    font-style: italic;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .counter-label {
+    font: 600 10px/1.3 "IBM Plex Mono", monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 4px;
+    margin-bottom: 18px;
+  }
+
+  ul.filings {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 460px;
+    overflow-y: auto;
+    border-top: 1px dashed var(--faint);
+  }
+  ul.filings li {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--faint);
+    font-size: 11.5px;
+  }
+  ul.filings li.empty {
+    color: var(--dim);
+    font-style: italic;
+    padding: 16px 0;
+  }
+  ul.filings .row-top {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: baseline;
+    margin-bottom: 3px;
+  }
+  ul.filings .code {
+    font: 600 10px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.14em;
+    color: var(--dim);
+  }
+  ul.filings .dir {
+    font: 700 10px/1 "IBM Plex Mono", monospace;
+    color: var(--stamp);
+    letter-spacing: 0.12em;
+  }
+  ul.filings .dispose {
+    font: 600 9px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.14em;
+    color: var(--approved);
+    border: 1px solid var(--approved);
+    padding: 3px 6px;
+  }
+  ul.filings .title {
+    font: italic 400 14px/1.3 "Playfair Display", serif;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  ul.filings .desc {
+    color: var(--dim);
+    font-size: 11px;
+    font-family: "IBM Plex Serif", serif;
+  }
+
+  .flash {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--paper);
+    border: 1.5px solid var(--approved);
+    padding: 14px 22px;
+    font: 600 10px/1.4 "IBM Plex Mono", monospace;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--approved);
+    transition: transform 350ms ease, opacity 350ms ease;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .flash.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 2px double var(--ink);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-family: "IBM Plex Mono", monospace;
+  }
+  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); font-family: "Playfair Display", serif; }
+
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="dept">Office of Unsent Invoices · Public Intake</div>
+      <h1>Submit an Unbilled Transfer</h1>
+      <div class="sub">All submissions will be processed and filed without acknowledgement.</div>
+    </div>
+    <div class="ref">
+      <strong>FORM UT-1</strong>
+      Revised 2026-04<br />
+      Unlimited distribution
+    </div>
+  </header>
+
+  <p class="lede">
+    Welcome. You have observed a transaction of value between two parties for which no invoice has been issued, no licence granted, and no line item created. The Office will file your submission. <em>It will not act on it.</em> That is the point.
+  </p>
+
+  <div class="layout">
+
+    <fieldset>
+      <legend>Specimen intake.</legend>
+      <p class="help">Describe a flow of value — physical, attention, trust, capacity, labour — between parties, which is not presently on any ledger you know of.</p>
+
+      <div class="field">
+        <label>Short title <span class="req">*</span></label>
+        <input type="text" id="f-title" maxlength="80" placeholder="e.g., Plinth-as-break-room" />
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>Transferor <span class="req">*</span></label>
+          <input type="text" id="f-from" maxlength="60" placeholder="e.g., Heritage façade" />
+        </div>
+        <div class="field">
+          <label>Transferee <span class="req">*</span></label>
+          <input type="text" id="f-to" maxlength="60" placeholder="e.g., Couriers on shift" />
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>Direction</label>
+          <select id="f-dir">
+            <option value="↓ Public → Private">↓ Public → Private</option>
+            <option value="↑ Private → Public">↑ Private → Public</option>
+            <option value="↔ Private ↔ Private">↔ Private ↔ Private (mediated)</option>
+            <option value="↑↓ Public ↔ Public">↑↓ Public ↔ Public (inter-dept)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Notional value (annualised)</label>
+          <input type="text" id="f-value" maxlength="20" placeholder="e.g., Indeterminate" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Description <span class="req">*</span></label>
+        <textarea id="f-desc" maxlength="320" placeholder="A flat rim of masonry along the building's ground level, used in daylight hours by courier operatives as informal rest furniture."></textarea>
+      </div>
+
+      <button class="primary" id="submit">File submission</button>
+    </fieldset>
+
+    <div class="archive">
+      <h2>Department archive.</h2>
+      <p class="help">A single hard copy of each submission is held, unindexed, in the Department's reference library. No call number is assigned.</p>
+      <div class="counter" id="counter">0</div>
+      <div class="counter-label">files held · unindexed · no action pending</div>
+      <ul class="filings" id="filings">
+        <li class="empty">No submissions yet. Files may be accessed by Departmental staff only, at the reference desk, between 10:00 and 15:00 on weekdays that are not public holidays.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <footer>
+    <div>OUI · INTAKE TERMINAL · <em>a walk through Centro Histórico</em></div>
+    <div>form is advisory · no response will be issued</div>
+  </footer>
+</div>
+
+<div class="flash" id="flash">Filed. No action will be taken.</div>
+
+<script>
+(() => {
+  const DEFAULT_FILINGS = [
+    { title: 'Pan-coupé', from: 'Private building corner', to: 'Pedestrian eddy', dir: '↑ Private → Public', desc: 'Ground-floor floor plate surrendered at the intersection corner to allow unblocked foot traffic around the turn.', value: '90,000/yr' },
+    { title: 'Plinth-as-break-room', from: 'Heritage façade', to: 'Platform-logistics couriers', dir: '↓ Public → Private', desc: 'A pilastered stone plinth is repurposed during daylight hours as rest furniture between courier runs.', value: 'Indeterminate' },
+    { title: 'Ficus canopy', from: 'Parks Division (past)', to: 'Corridor pedestrians (present)', dir: '↓ Public → Public', desc: 'A mature tree, planted c. 1970, provides approx. 2,100 m² of dappled jali-shade. Book value stands at $1,200.', value: 'Indeterminate' },
+  ];
+
+  const counterEl = document.getElementById('counter');
+  const filingsEl = document.getElementById('filings');
+  const submitBtn = document.getElementById('submit');
+  const flash = document.getElementById('flash');
+
+  const titleEl = document.getElementById('f-title');
+  const fromEl = document.getElementById('f-from');
+  const toEl = document.getElementById('f-to');
+  const dirEl = document.getElementById('f-dir');
+  const valueEl = document.getElementById('f-value');
+  const descEl = document.getElementById('f-desc');
+
+  let nextCode = 8;
+  let filings = [];
+
+  function render() {
+    counterEl.textContent = filings.length.toString().padStart(3, '0');
+    if (filings.length === 0) {
+      filingsEl.innerHTML = '<li class="empty">No submissions yet. Files may be accessed by Departmental staff only, at the reference desk, between 10:00 and 15:00 on weekdays that are not public holidays.</li>';
+      return;
+    }
+    filingsEl.innerHTML = filings.map((f) => `
+      <li>
+        <div class="row-top">
+          <span class="code">${f.code}</span>
+          <span class="dir">${f.dir}</span>
+          <span class="dispose">Closed — no action</span>
+        </div>
+        <div class="title">${escape(f.title)}</div>
+        <div class="desc">${escape(f.from)} → ${escape(f.to)}. ${escape(f.desc)}${f.value ? ` Notional value ${escape(f.value)}.` : ''}</div>
+      </li>
+    `).join('');
+  }
+
+  function escape(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function showFlash(msg) {
+    flash.textContent = msg;
+    flash.classList.add('show');
+    clearTimeout(showFlash._t);
+    showFlash._t = setTimeout(() => flash.classList.remove('show'), 2200);
+  }
+
+  function addSeed() {
+    for (const s of DEFAULT_FILINGS) {
+      filings.unshift({
+        code: `UT-${String(nextCode).padStart(2, '0')}.${Math.floor(Math.random() * 9) + 1}`,
+        ...s,
+      });
+      nextCode++;
+    }
+    render();
+  }
+
+  submitBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const title = titleEl.value.trim();
+    const from = fromEl.value.trim();
+    const to = toEl.value.trim();
+    const dir = dirEl.value;
+    const value = valueEl.value.trim();
+    const desc = descEl.value.trim();
+
+    if (!title || !from || !to || !desc) {
+      showFlash('Fields marked * are required.');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing';
+    setTimeout(() => {
+      const code = `UT-${String(nextCode).padStart(2, '0')}.${Math.floor(Math.random() * 9) + 1}`;
+      nextCode++;
+      filings.unshift({ code, title, from, to, dir, value, desc });
+      render();
+      titleEl.value = ''; fromEl.value = ''; toEl.value = ''; valueEl.value = ''; descEl.value = '';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'File submission';
+      showFlash(`Filed as ${code}. Closed — no action.`);
+    }, 800);
+  });
+
+  // start with a few seeded examples from the memo
+  addSeed();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>walk-2026-04-23T16-56-30-mexico-city-madero — Wanderer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --bg: #faf7f2;
+    --ink: #1a1a1a;
+    --dim: #6a6a6a;
+    --line: #e5ddd0;
+    --accent: #c45a3f;
+    --block: #f2ede3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 120px; }
+  header.top h1 {
+    font: 400 28px/1.2 Georgia, serif;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  header.top .meta {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  dl.stats {
+    display: flex; flex-wrap: wrap; gap: 0 28px;
+    margin: 16px 0 0; padding: 0;
+    font: 13px/1.3 ui-monospace, Menlo, monospace;
+  }
+  dl.stats > div { display: flex; gap: 6px; }
+  dl.stats dt { color: var(--dim); margin: 0; }
+  dl.stats dd { margin: 0; color: var(--ink); }
+  #map {
+    height: 420px;
+    margin: 32px 0 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .step-marker-label {
+    background: transparent; border: none; box-shadow: none;
+    color: #fff; font: 700 11px/1 ui-monospace, Menlo, monospace;
+    pointer-events: none;
+  }
+  main.steps { margin-top: 48px; }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px 20px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+  }
+  .step:first-child { border-top: none; padding-top: 8px; }
+  .step-num {
+    font: 700 14px/1 ui-monospace, Menlo, monospace;
+    color: var(--accent);
+    padding-top: 4px;
+  }
+  .step-img { grid-column: 2; margin: 0 0 16px; }
+  .step-img img { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
+  .step-img figcaption {
+    font: 12px/1.3 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  .step-body { grid-column: 2; }
+  .block { margin-bottom: 18px; }
+  .block h4 {
+    margin: 0 0 6px;
+    font: 700 11px/1 ui-monospace, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .block ul { margin: 0; padding-left: 20px; }
+  .block li { margin-bottom: 6px; }
+  .block p { margin: 0; }
+  .block.thread { color: var(--dim); font-style: italic; }
+  .block.wander p { font-size: 15.5px; line-height: 1.6; }
+  .block.branch {
+    color: var(--accent);
+    font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+  }
+  .block.nav {
+    background: var(--block);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+  .block.nav .pick { color: var(--accent); }
+
+  section.artifact {
+    margin: 64px 0 0;
+    padding: 40px 32px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  section.artifact h2 {
+    margin: 0 0 4px;
+    font: 400 22px/1.2 Georgia, serif;
+  }
+  section.artifact .medium {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin: 0 0 20px;
+  }
+  .artifact-body {
+    font: 14px/1.5 ui-monospace, Menlo, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    background: var(--bg);
+    padding: 20px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+  }
+  .artifact-md {
+    background: var(--bg);
+    padding: 28px 32px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+    font: 15px/1.58 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+  }
+  .artifact-md h1, .artifact-md h2, .artifact-md h3 {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    margin: 1.4em 0 0.4em;
+  }
+  .artifact-md h1 { font-size: 26px; margin-top: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .artifact-md h2 { font-size: 18px; color: var(--ink); }
+  .artifact-md h3 { font-size: 15px; color: var(--accent); font-style: italic; }
+  .artifact-md p { margin: 0 0 1em; }
+  .artifact-md ul, .artifact-md ol { margin: 0 0 1em; padding-left: 22px; }
+  .artifact-md li { margin-bottom: 4px; }
+  .artifact-md strong { color: var(--ink); }
+  .artifact-md em { color: var(--dim); font-style: italic; }
+  .artifact-md code {
+    font: 12.5px/1.4 ui-monospace, Menlo, monospace;
+    background: #eee7d6;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: #2a2a2a;
+  }
+  .artifact-md pre {
+    font: 12px/1.5 ui-monospace, Menlo, monospace;
+    background: #efe8d8;
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md pre code { background: none; padding: 0; font-size: inherit; }
+  .artifact-md blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0 14px;
+    margin: 0 0 1em;
+    color: var(--dim);
+    font-style: italic;
+  }
+  .artifact-md hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 1.6em 0;
+  }
+  .artifact-md table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md th, .artifact-md td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .artifact-md th {
+    font-weight: 600;
+    background: #efe8d8;
+    font-family: Georgia, serif;
+  }
+  .artifact-md tr:last-child td { border-bottom: none; }
+  .artifact-embed {
+    position: relative;
+    margin: 0 0 16px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  .artifact-embed.wide { aspect-ratio: 16/10; }
+  .artifact-embed iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+  }
+  section.artifact.companion { margin-top: 32px; }
+  .open-link { margin: 0 0 20px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+  .open-link a { color: var(--accent); text-decoration: none; }
+  .open-link a:hover { text-decoration: underline; }
+  section.artifact .closing {
+    font-style: italic;
+    color: var(--ink);
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .container { padding: 24px 16px 80px; }
+    .step { grid-template-columns: 32px 1fr; gap: 8px 12px; }
+    .artifact-body { font-size: 12px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="top">
+    <div class="meta">walk-2026-04-23T16-56-30-mexico-city-madero</div>
+    <h1>A walk — mexico city madero</h1>
+    <dl class="stats">
+      <div><dt>steps</dt><dd>15</dd></div>
+      <div><dt>distance</dt><dd>248m</dd></div>
+      <div><dt>duration</dt><dd>26min</dd></div>
+      <div><dt>ended</dt><dd>image fetch failed</dd></div>
+      <div><dt>from home</dt><dd>41m</dd></div>
+    </dl>
+  </header>
+
+  <div id="map"></div>
+
+  <main class="steps">
+
+<article class="step" id="step-0">
+  <div class="step-num">00</div>
+  <figure class="step-img">
+    <img src="images/00-833771435087891.jpg" alt="step 0" loading="lazy" />
+    <figcaption>19.43460, -99.13950</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The orange Rappi cube on the courier&#39;s back — almost architectural in how it rides above his shoulders.</li><li>A machined drain grate set precisely into a field of rough, hand-cut paving stone.</li><li>The deep ochre of a painted arch in the left-side building, half-blown by the morning light.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The Rappi backpack is almost exactly a cube, which is a weirder choice than it looks — nothing about carrying food demands a cube, and a soft duffel would insulate just as well. The cube is there because it reads as *volume*, as *commerce*, as a little warehouse riding a human spine. In 19th-century London the sandwich-board man was a derided figure, paid pennies to walk Oxford Street wearing two planks advertising patent medicine or theatrical runs, and commentators worried openly about a class of men reduced to the armature for a sign. The Rappi courier is the sandwich-board man reinvented with better ergonomics and an algorithm — only now he pays a deposit for the privilege of wearing the board, and the board is warmer and more semiotically dense. (This is how gig platforms extract a second rent: first from labor, then from the surface area of the laborer.) There&#39;s a lineage worth tracing from medieval guild signs hanging above a workshop door, to the shop itself, to the uniform, to the mobile uniform, to the cube — each step moves the brand closer to the body and further from the premises. The endpoint isn&#39;t hard to imagine: the premises dissolve entirely and what remains is a courier wearing the company, moving through a city that has outsourced its storefronts to residential kitchens. Which makes the real urban form of platform logistics not the dark kitchen but the courier himself — a walking, thermally-insulated franchise. Somewhere in here is the question of whether the cube is a *building* or a *suitcase*, and I don&#39;t think the answer is stable; it depends on whether you&#39;re looking at him from the sidewalk or from the order confirmation screen.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Guild signs → neon signs → Times-Square-scale spectacle → body-scale spectacle: the history of advertising as a slow migration of the sign from the architecture to the person.</p></div>
+    
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The sign-on-body drift has said its piece; a right turn off the main axis should drop the scale down a notch and give me a smaller street&#39;s worth of surface — doorways, thresholds, hand-lettered stuff — to knock the thinking sideways instead of letting it keep orbiting the courier.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-1">
+  <div class="step-num">01</div>
+  <figure class="step-img">
+    <img src="images/01-1601048726766199.jpg" alt="step 1" loading="lazy" />
+    <figcaption>19.43453, -99.13963</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The awning letters of &quot;EL SEMILLERO&quot; — individually cut, applied, and partially obscured near the middle where something (stickers? a second sign?) has been pasted over the central letters.</li><li>The wrought-iron transom grilles above the awning, three bays of florid ironwork set into a building whose shop-level has gone entirely utilitarian (rolled shutter, bike helmets, nighttime crowd).</li><li>The spray-painted &quot;68&quot; on the left pier — numeral, not word; probably an address or a route marker for the cyclists, hand-applied in white.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>&quot;El Semillero&quot; means &quot;the seedbed,&quot; and the word carries that agricultural-turned-metaphorical weight Spanish does so well — a place where young talent, or players, or ideas get germinated before transplant. Calling a bar or taquería *El Semillero* is a small act of poetry, the kind of self-deprecating grandiosity shopkeepers everywhere practice: the barber who names his two-chair basement *Emporium*, the noodle stall called *The Last Dynasty*. But what catches me isn&#39;t the name, it&#39;s the way the middle of the name has been defaced or covered — the letters clearly read at the edges and go to noise in the center. This is a specific failure mode of applied-letter signage: the ends are load-bearing for recognition, the middle is redundant, and anyone who has worked with logotypes knows the trick of occluding the middle of a word and watching legibility survive almost unharmed. Saul Bass used this in the title cards for *Anatomy of a Murder*, chopping letterforms into slabs that the eye reassembles; the Underground roundel works partly because the horizontal bar across &quot;LONDON&quot; forces you to complete the word from its silhouette. Reading, under pressure, runs on the bookends. Which is a stranger fact than it sounds — it implies that the act of reading a familiar word isn&#39;t really decoding, it&#39;s *pattern-matching against a stored envelope*, and the letters in the middle are there for redundancy, for handling the case where the pattern-match fails. This is the same architecture as a zip code&#39;s check digit, or the CRC at the end of a packet: most of the signal is the first few bytes, and the rest exists to catch error. Which in turn suggests that a word is already a small piece of error-correcting code running on your visual cortex, and a *shop sign* is that code re-embodied at building scale, and a defaced shop sign is an error-correction test in the wild. El Semillero passes.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The &quot;68&quot; hand-painted on the pier — address numbers as the oldest continuously-surviving type system in the city, outliving every shop that ever hung a sign above them.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Step 0 traced the sign&#39;s migration from architecture to the body (guild → shop → uniform → courier cube); this step stays at the architecture end of that same arc and asks a different question about it — not *where* the sign lives but *how the reader compresses it* once it&#39;s there. Related thread, different axis: one about the location of meaning, one about the parsing of it.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>A slight left gives the drift a small physical pivot — enough of a fresh frontage to break the straight-line momentum of the error-correction thread and let something new in, without the hard reset of a full turn.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-2">
+  <div class="step-num">02</div>
+  <figure class="step-img">
+    <img src="images/02-1669563050529155.jpg" alt="step 2" loading="lazy" />
+    <figcaption>19.43470, -99.13972</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The black-and-white &quot;no left turn&quot; regulatory disc mounted mid-pole, with its small white text placard bolted beneath — a stacked assembly of one absolute rule plus one qualifying footnote.</li><li>The yellow speed-bump strips in the foreground, not a single cast hump but a series of discrete reflective bars bolted into the asphalt, forming a bump by aggregation rather than by molding.</li><li>The pink jumpsuit of the woman walking on the right: a single saturated shape against the grey-ochre palette of the street, the only pure color in the frame.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The stacked sign — the universal crossed-arrow disc, then a little printed rectangle underneath in Spanish — is a beautiful piece of regulatory grammar, and one I don&#39;t think traffic engineers get enough credit for inventing. The top plate is the Vienna Convention pictogram, legible to anyone who has ever driven anywhere; the bottom plate is the local exception, the *except between 7–10am*, the *buses only*, the *Saturdays*. It&#39;s a two-tier system: a universal constant with a national variable bolted underneath, and structurally it is identical to how CSS cascades, or how the common law works, or how a Catholic missal handles feast-day readings — a fixed ordinary plus a proper that slots in below. Once you see it you see it everywhere: the airline safety card is a pictogram plus a seat-specific addendum, the pharmaceutical insert is a molecule diagram plus dosing by weight, the NDA is a boilerplate plus a schedule of exceptions. The interesting question is which tier gets to be the picture and which gets to be the prose, because that choice encodes a theory of who the reader is. Regulatory pictograms assume a driver who won&#39;t stop; legal prose assumes a reader who will. Put them in the same signpost and you are hedging — addressing two readers with two different tolerances for attention, stacked vertically, the slow one literally propping up the fast one. What&#39;s quietly radical about this is that the sign admits it cannot solve its own problem in a single register; it needs redundancy across modalities, picture *and* text, the way a good airport gate agent says the thing and points at the thing. Monolingual rulemaking is a fantasy; every rule is already bilingual, even when it&#39;s written in one language, because it&#39;s translating between two speeds of reading.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The speed-bump-as-aggregation-of-bolted-bars vs. a cast concrete hump — modular traffic calming as a kind of field-upgradeable firmware, swappable one strip at a time.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 1&#39;s thread about reading-under-pressure: that drift was about how a familiar word&#39;s middle letters are redundant because the eye pattern-matches the envelope; this one is about how a sign carrying two different *kinds* of reader has to stack two different encodings, pictogram over prose. Both are noticing that legibility isn&#39;t one thing — it&#39;s a bet about what the reader has time for.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>A slight right onto a different street gives the thinking a new surface to land on — the drift has exhausted the stacked-sign/modular-bar register and wants a jolt of unfamiliar frontage rather than more of the same corridor.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-3">
+  <div class="step-num">03</div>
+  <figure class="step-img">
+    <img src="images/03-1032638757920248.jpg" alt="step 3" loading="lazy" />
+    <figcaption>19.43462, -99.13952</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The green vinyl canopy stretched taut over the pedicab&#39;s white tubular frame — a single flat plane of shelter, walls absent, providing essentially no protection from anything except a straight-down sun.</li><li>The stone paving: trapezoidal setts laid in a running bond, the kind of &quot;heritage&quot; surface that looks old but is almost certainly a recent overlay on whatever asphalt was here before the block was pedestrianized.</li><li>A far-off red-and-white &quot;ceda el paso&quot; triangle, tiny in the frame, doing its rule-stating purely by silhouette at that distance.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The canopy is almost useless as shelter — one flat rectangle, open on every side, offering only what falls straight down. But shelter isn&#39;t its real job; *enclosure* is, and they&#39;re different. A canopy without walls is arguably the oldest form of architecture there is, older than the house, older than the tent. Bernini&#39;s baldacchino over the altar at St. Peter&#39;s is the same trick at a thousand times the cost: a bronze roof on twisted columns, marking a volume of air that has become sacred without anyone bothering to build a chapel inside the chapel. The chuppah at a Jewish wedding is four poles and a cloth, and it is — technically and emotionally — the couple&#39;s first household; you put up the roof before the walls because the roof is the part that declares a domestic interior exists. The same grammar runs through the portable canopy carried over the Blessed Sacrament in a Corpus Christi procession, the silk awning held above a raja on foot, the little square roof built over the Heian court sedan chair, and at the other extreme the clear acrylic dome around the Pope&#39;s jeep — a horizontal plane whose only job is to say &quot;the person under here is in a different category than the people around here.&quot; Which is subtler work than walls do: walls say *you can&#39;t reach me*, but a canopy says *we are not in the same civic tense*. The passenger in the pedicab is closer to the sidewalk than anyone riding in a taxi — physically, you could hand them a coffee — but the green tarp above them changes their grammatical person from *pedestrian* to *fare*, and this is done with a single sheet of vinyl. The whole ceremonial history of ceiling (the tester over a four-poster bed, the cloth of state above a throne, the dropped soffit over the DJ booth in a club) might just be the long slow discovery that the roof is the part doing the cultural work, and the walls came later mostly to stop the wind.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Housing policy that starts from the roof — shade rights, canopy easements — instead of from the floorplate. Whether any city has ever zoned the sky the way it zones the ground.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s thread about how much architecture a platform can compress into a single wearable object (the Rappi cube as portable franchise) — this is the same move in reverse, about how little architecture you need to declare an *interior*. A canopy is the minimum viable room; a cube is the minimum viable shop. Both ask where the smallest unit of &quot;enclosed space&quot; lives, and neither answer is walls.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The canopy/ceiling thread has run long and wants a jolt — a slight left onto a new street breaks the axis and offers fresh surface grammar instead of another frame of the same block.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-4">
+  <div class="step-num">04</div>
+  <figure class="step-img">
+    <img src="images/04-463202156419445.jpg" alt="step 4" loading="lazy" />
+    <figcaption>19.43465, -99.13933</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The ornate cast-iron lamppost on the right — a fluted column branching into six or eight arms, each tipped with a small globe, the whole silhouette black against the afternoon sky.</li><li>A 7-Eleven storefront locked into the rusticated-stone bay of a classical building, corporate chroma fitted to a proportional grid designed a century before the franchise existed.</li><li>A hooded figure standing mid-street with a phone, positioned on what used to be the centerline — pedestrianization turning the former roadway into the best tripod point in the block.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>A six-armed candelabra lamppost presupposes gas. Gas mantles threw soft, weak light, so a municipal pole needed multiple heads to reach a tolerable lux at street level — four arms was the minimum, six was generous, eight was civic swagger. Electric lighting demolished that arithmetic in about a decade: one filament on a plain pole does the work of six mantles, and yet if you walk the heritage cores of cities modernized under Porfirio Díaz, or Haussmann, or late-imperial Vienna, you find street after street of ornamental iron carrying one LED per head, or worse, six decorative globes with the actual luminaire bolted on somewhere embarrassing behind them. The form has detached from function and turned into a kind of civic typography that says *you are on a street that ranks*. This is the same drift that kept &quot;dial a number&quot; alive through push-buttons and touchscreens, or that preserved the Tesla glove compartment named for a garment drivers stopped wearing around 1955 — skeuomorphism at municipal scale, the word longer-lived than the thing. But the interesting move isn&#39;t the lag, it&#39;s the inversion: once form is free of function it can be redeployed as *content*, and the candelabra lamp becomes a fluent little sentence meaning *historic, walkable, photograph this*. That&#39;s not dishonest; it&#39;s the city doing the work of self-description with the vocabulary it has, and the alternative isn&#39;t a rationalized sodium pole but the gas-station floodlight, which signifies just as loudly, only meaner. Six arms is the municipal equivalent of a serif — structurally redundant, doing the work of tone — and pedestrianizing Madero without installing candelabra poles would have been like setting a courthouse sign in Arial. The street needs the serif to finish the sentence about itself.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The LED fixture bolted onto the side of the decorative globe — retrofit as a quiet admission that the historic form can no longer actually light anything, and that the ornamental cluster and the working lamp now cohabit the pole as two separate objects pretending to be one.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the arc running through steps 0 and 3 — the Rappi cube as minimum-viable shop, the pedicab canopy as minimum-viable room — into a case where the gesture is doing cultural work that has nothing to do with its nominal function at all. A candelabra lamp doesn&#39;t light the street; it *tones* the street. Each step is circling a slightly different version of the same claim: that the semantic work of urban objects tends to drift free of the engineering that justified them, and that this drift is the thing worth watching, not a defect to correct.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The drift has been circling the same claim for three steps now — a slight turn onto a different street is the cheapest way to put new objects in the frame without abandoning the corridor entirely, and the skew gives a fresh sightline where the next noticing is unlikely to be another candelabra-as-serif observation.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-5">
+  <div class="step-num">05</div>
+  <figure class="step-img">
+    <img src="images/05-1864025960438458.jpg" alt="step 5" loading="lazy" />
+    <figcaption>19.43470, -99.13929</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The round ductile-iron drain cover at the lower right — a perfect circle dropped into a field of trapezoidal stone setts, with hand-cut crescent infills closing the gap.</li><li>The sun sitting almost exactly in the vanishing point of the street, bleaching the far end of Madero into a white wash and turning every distant figure into a silhouette.</li><li>The painted yellow curb line running the length of the left side, a single thin band of pigment doing boundary work that used to require a raised kerb.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The drain cover is the thing. Round, factory-cast, machined to a tolerance measured in tenths of millimeters, and it has been dropped into a paving job where the stone units vary by five to ten millimeters and were trimmed on site with a hammer. To make them meet, the mason had to cut crescents — little waning-moon shaped pieces of stone, one after another, ringing the cover — and the quality of those crescents is where you read the crew. This is a perennial junction in construction: two tolerance regimes have to share a surface, and the boundary between them is where the worker&#39;s attitude becomes visible. Tile setters call it &quot;the toilet flange problem&quot;; cabinetmakers call it &quot;scribing the wall.&quot; Every building of any size is a collage of precisions — CNC-milled aluminum window frames butted against stucco that was floated by hand, a fiber-optic patch panel screwed into a 1920s steel stud, a capacitive touchscreen mounted in a lectern joined with mortise-and-tenon. We like to pretend these compromises are failures of discipline, but they&#39;re the actual texture of built things; a building made entirely to one tolerance is a factory, not a place anyone lives. There&#39;s a piece of Kenya Hara writing about Muji where he argues that the skill isn&#39;t in making everything to the same fineness but in *choosing which edges get the attention* — and the crescent stones around a drain cover are exactly that choice, made or abdicated. You can extend the principle outward until it becomes a theory of governance: a constitution is machine-tolerance, a bylaw is hand-cut, and the health of the polity lives in the crescents where the one has to be trimmed to meet the other. Most of what gets called &quot;corruption&quot; is really a bad mason; most of what gets called &quot;reform&quot; is the impulse to redo the crescents.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The painted yellow curb line as a descendant of the raised granite kerb — boundary work losing ninety-five percent of its mass in the transition from stone to pigment, and the question of what the kerb *gained* by dematerializing.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 2&#39;s stacked regulatory sign — pictogram over prose as two readers sharing one post — by locating the interesting work at the seam between incommensurate systems rather than inside either one. That drift cared about legibility; this one cares about tolerance. Same joint, different material.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The drift is about seams between tolerance regimes, and a corner turn onto a different street physically enacts a seam — a change of grid, signage, and shopfront rhythm — which should feed the dematerialized-kerb question better than more of the same vanishing axis.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-6">
+  <div class="step-num">06</div>
+  <figure class="step-img">
+    <img src="images/06-627206309585160.jpg" alt="step 6" loading="lazy" />
+    <figcaption>19.43458, -99.13947</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The bicycle police officer mid-frame in a high-visibility yellow-green vest, moving at a speed that&#39;s neither walking nor riding — more like idling on two wheels.</li><li>A rectangular patch of paving where stones clearly don&#39;t match the surrounding field — a trench-scar from a utility dig, now weathering back toward the rest at its own rate.</li><li>A white delivery truck far down the street, almost to the vanishing point, the only motorized object in a field of pedestrians.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The bike cop is doing maybe eight kilometers an hour, the walkers around him are doing five, the truck up ahead is doing three while it noses through a crowd — and that narrow spread is, I think, the actual thing pedestrianization does, which gets underdescribed as &quot;removing cars.&quot; It doesn&#39;t remove movement; it compresses the range of movement. A normal city street is a *speed stratigraphy*: sidewalk at 4 km/h, bike lane at 18, bus lane at 30, car at 50, ambulance at 90, with hard curbs policing the boundaries because mixing speeds at those ratios kills people. Pedestrianizing Madero flattens that stack into a single register between zero and ten. Traffic engineers would call this a loss of throughput, and strictly they&#39;re right — the Highway Capacity Manual measures a road by vehicles-per-hour at free-flow speed, and pedestrian streets score catastrophically on that metric. But it&#39;s the wrong metric, because the object of a pedestrian street isn&#39;t throughput, it&#39;s *dwell*, which is the inverse. The move is exactly parallel to what happens in music when you drop a piece into a single tempo and strip out syncopation: a lot of the &quot;interest&quot; we attribute to a lively street — the thrill of a bus passing a shopper, the near-miss feeling, the audible differential between a courier&#39;s bell and a truck&#39;s air-brake — is just speed-syncopation, the same rhythmic trick that makes a James Brown break thrilling and a metronome dull. A monometric street is a street without backbeat. But then — and here I want to undermine myself — maybe the backbeat was always a hostile rhythm, a frequency at which the pedestrian is the one getting syncopated, the object of surprise rather than the source of it; and maybe what Madero is doing is not a loss of tempo but a change in *who* the tempo is for. The police officer on the bicycle is the last licensed syncopation in the frame, and his job, as rhythm, is to be just one beat faster than the field he moves through, so the field notices him without parting.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Chronopolitics of the pedestrian street — the way a Madero allows vans 6–10am and becomes a different object by noon. Zoning in the time dimension rather than the spatial one.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>New thread. Earlier steps have been circling the *semantic* drift of urban objects — what a sign means, what a canopy declares, what a lamppost tones — and this one steps sideways into the *kinetic* dimension: what a street *does* when you compress the range of speeds it hosts. Same city, different axis; the previous drifts cared about meaning, this one cares about tempo.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The chronopolitics branch just opened and wants fresh detail on the same street rather than a hard reset — a slight angle shift keeps the tempo-thinking alive while letting a new shopfront or threshold test whether time-zoning actually shows up in the fabric.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-7">
+  <div class="step-num">07</div>
+  <figure class="step-img">
+    <img src="images/07-1052418809335685.jpg" alt="step 7" loading="lazy" />
+    <figcaption>19.43460, -99.13936</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The &quot;30&quot; inside the red-bordered regulatory disc on the pole at upper right — a specific number, not a round one, not a generic one.</li><li>A cluster of green hi-vis vests on the right sidewalk, three or four workers sitting or loitering in a way that reads as a break, not a task.</li><li>White paint — both the dashed centerline and the scuffed symbol further up — applied to a cobblestone surface that is obviously not a good substrate for paint, and showing it.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>Thirty is a mortality curve rendered as a digit. The relationship between vehicle-impact speed and pedestrian fatality is famously non-linear: below roughly 30 km/h the curve is almost flat, somewhere between 30 and 50 it turns into a cliff, and above 50 most people who get hit are killed. Someone in a ministry of transport moves the cursor along that curve by changing the number on the sign — and the driver reading it sees only an instruction, not a distribution. This is the signature grammar of the regulatory state: a population-scale graph collapsed into an individual-scale imperative, because a graph is not actionable at 40 km/h. Every dose on a prescription bottle is the same move — &quot;2 tablets every 8 hours&quot; is a therapeutic-window curve shaved down to an integer; the FDA&#39;s pesticide maximum residue levels are rat-study extrapolations cut at a line; the 62°C hot-tap limit in a hospital hides a scald-time curve from the 1940s. The built world is covered in thresholds and each one is a graph somebody had to cut. Which means a regulatory sign is epistemically humiliated by its own form — the curve hates the threshold, but the threshold is the only shape a reader in motion can act on. And then the cursor moves and politics moves with it: Paris went to 30 city-wide in 2021, Brussels the same year, Wales dropped its default built-up limit from 30 to 20 mph in 2023 and produced a million-signature backlash petition, because shifting a threshold looks like shifting a digit but is in fact dragging a mortality curve across a new population. The sign is quiet about all of this; it just says 30. The honest sign would be a little graph, which nobody would read, which is why there isn&#39;t one.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Tachometers keep the curve — red-line zones instead of a number — and are read by drivers anyway. Which regulatory domains could afford to show the graph and which structurally cannot.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends a family that&#39;s been forming across steps 2 and 5 — the stacked pictogram-plus-prose sign, the crescent stones where two tolerance regimes meet — into a third case of regulatory seam-work: a curve compressed to a digit. The earlier drifts cared about how meaning gets *stacked* or *trimmed* at a joint; this one cares about how a distribution gets *collapsed* to become actionable. Same preoccupation with the gap between the thing being measured and the act being demanded, third angle on it.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The threshold/curve family has had three good passes — time to break the street entirely and let a different corridor introduce material that isn&#39;t already in the regulatory-seam basin.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-8">
+  <div class="step-num">08</div>
+  <figure class="step-img">
+    <img src="images/08-7512801328847903.jpg" alt="step 8" loading="lazy" />
+    <figcaption>19.43469, -99.13959</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The newsstand kiosk on the right — a tall metal cube whose entire exterior is clad in magazine covers faced outward, a mosaic of small arguments from shin-height to eave.</li><li>A dome and bell tower rising behind the lower storefronts in the middle distance, the kind of cupola that doesn&#39;t announce its building until you&#39;re almost under it.</li><li>Red café umbrellas ranked along the left sidewalk, saturated enough to function as the block&#39;s color accent at a hundred meters and to do the block&#39;s wayfinding work for it.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The newsstand is retail in which the stock *is* the façade — a building type where the inventory and the envelope have fused into one surface, and every other shop looks timid by comparison. The *puesto de periódicos* puts every title face-out and lets the publishers&#39; cover-design arms race do the merchandising for it. The magazine cover is, per square centimeter, the most pressurized layout work in graphic design: Condé Nast runs cover comps dozens deep, George Lois built Esquire&#39;s reputation on covers that picked fights with the reader instead of seducing him, and Alexey Brodovitch&#39;s Harper&#39;s Bazaar masthead was redrawn issue to issue to counter whatever else was riding the rack that month. What&#39;s strange, once you sit with it, is that the kiosk was already running the logic of the newsfeed decades before the feed existed — face-out the expected sellers, rank the also-rans upward until they vanish at the soffit, refresh on publication cycle — and the only structural difference is that the kiosk was *the same kiosk for every passerby*. The newsfeed is a kiosk in which every passerby sees a different façade. Which means the old kiosk was doing something the feed simply cannot: producing common knowledge of the day&#39;s public attention, the thing everyone on the block had just walked past whether they&#39;d stopped or not. Its near-disappearance from most Anglophone cities is therefore less a retail story than a quiet erosion of a shared facing; the hold-out cities — Mexico, Rome, Paris, Buenos Aires — still pass strangers through the same morning compilation, and you can feel the difference in those sidewalks without being able to immediately name it. The National Geographic yellow border, negotiated over decades specifically to survive being jammed between two tabloids, was a contract with this urban form — a piece of graphic design that was actually a treaty with a display surface — and once that surface is gone the border is unemployed, even if it still wraps the same magazine.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Logos as treaties with a specific display surface: the yellow border negotiated against the rack, the CD spine negotiated against the record-store alphabet bin, the app icon negotiated against a 6mm iOS corner radius. Design forms as rental agreements, disowned when the landlord dematerializes.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s thread about retail migrating onto surfaces — the Rappi cube as portable franchise — but twists it in a direction that drift didn&#39;t name. Step 0 asked how small a shop can get by climbing onto a body; this one notices that the *public* shop, the kiosk where every passerby read the same façade, produced a civic byproduct (common attention) that the personalized feed quietly deletes. Same preoccupation with commerce and surface; the stakes shift from labor to shared facing.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The treaty-with-a-surface thread wants a genuinely different façade regime to test itself against, and the longer jump onto a new street is more likely to produce that than another dose of the current block&#39;s signage rhythm.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-9">
+  <div class="step-num">09</div>
+  <figure class="step-img">
+    <img src="images/09-727091149215078.jpg" alt="step 9" loading="lazy" />
+    <figcaption>19.43460, -99.13949</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The entire frame is motion-smeared into softness — no single edge survives, even the parked motorcycle an arm&#39;s length away at the right, as if the rig was moving faster than its shutter could resolve.</li><li>A small white placard dangling from the front of that motorcycle, hand-sized, slipped under a strap — a notice of some kind, left by somebody not in the frame.</li><li>The sun planted almost exactly in the throat of the street, bleaching the far end of Madero into a flat white wash and making every distant figure a silhouette against it.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>This photograph is not for me. The shutter and the forward motion lost their argument and the frame came back as mush, but Mapillary will ingest it anyway, because the photograph isn&#39;t the product of the capture — the GPS fix, the compass heading, the timestamp are. The image is the *receipt* for a data point, not the data point itself. This is a now-common condition in machine-legible media: dashcam footage, SAR returns, agricultural multispectral, the Google Street View fleet which reportedly kept every frame its cars produced even when blurred, because bundle-adjustment improves with redundancy and the worst picture in a dense sequence is still a constraint on the pose of its neighbors. What this produces is a corpus of images that exist but were never meant to be seen — orders of magnitude more photographs than the photographed-for-viewing ones, sitting in cold storage as linear-algebra fodder. It reverses Barthes: he cared about the photograph as evidence that the referent existed, and machine photography cares about the photograph as evidence that the *camera* existed at a certain pose. A picture of a photographer&#39;s trajectory with the world as noisy auxiliary. The honest caption for this blurred frame is not &quot;Madero, blurred&quot; but &quot;the rig was at 19.43, -99.13, pointing east, at 16:56, moving fast enough to smear an exposure&quot; — which is an indexical statement about a body&#39;s path, closer to a footprint than a picture, and the quiet arrival of a genre of image that is neither of a subject nor of a place but of a camera. (The slightly vertiginous corollary is that the vast majority of photographs being made on Earth right now are already in this genre, and we just haven&#39;t updated the word *photograph* to notice.)</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Whether this corpus of unlookable photographs is art in potentia — a Ruscha *Every Building on the Sunset Strip* at planetary scale, waiting only for someone to re-author it by selecting.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Partly new — earlier drifts have been about urban objects and their semantic drift (signs, canopies, lampposts, speed limits, kiosks), and this one steps off the street entirely to ask what the capture itself is. But it rhymes with step 8&#39;s newsstand thought: both notice that a surface intended for one audience (human, public) has been quietly replaced by a surface for another (machine, private), and that the substitution is easy to miss because the artifact still looks like a photograph, still looks like a kiosk.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The drift has climbed to altitude about the camera-as-subject — a hard left into a side street is the sharpest break from the Madero axis and will force a new concrete object into the frame before the thought calcifies.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-10">
+  <div class="step-num">10</div>
+  <figure class="step-img">
+    <img src="images/10-229867355209550.jpg" alt="step 10" loading="lazy" />
+    <figcaption>19.43464, -99.13948</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The dappled shadow thrown across the paving from the tree canopy on the right — a restless broken-up pattern of cool patches, each the size of a dinner plate, continuously rearranging as leaves move.</li><li>The sun sitting just behind those branches and firing visible rays down into the frame, rays that exist only because the leaves are there to interrupt them.</li><li>The paving itself — small-module stone units, hand-cut, with enough irregularity that the shadow pattern has something to *catch on* instead of gliding over uninflected concrete.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>Dappled shade is the oldest luxury surface in architecture and we mostly don&#39;t notice it because the tree gives it away for free. Before mechanical cooling, every culture that had the money built it by hand: the mashrabiya lattice on a Cairo balcony, the stone jali at Fatehpur Sikri, the shoji screen filtering a Kyoto garden, the terracotta celosía across a Sevillian patio, the pierced-brick walls Paulo Mendes da Rocha kept using in São Paulo well into the 1990s. Each is an enormous craft investment aimed at producing the *specific* luminance profile a tree produces by existing — a field of roughly plate-sized light-and-shade patches at roughly human scale, continuously jittered by air. The nervous system appears to read that pattern as *safe, bounded, occupied* — which is why the hostility of a modernist granite plaza at noon is not rhetorical; it&#39;s physiological. Boston City Hall Plaza, the vast apron at La Défense before anyone planted it, Plaza de la República in its empty phase — none of them failed because of the architects&#39; politics, they failed because they replaced a 3,000-year craft of half-light with flat exposure, and people read flat exposure as a place where nothing can hide, including them. Street trees are informal mashrabiya; a block like Madero, which is doing the work of a colonnade via a row of laurels and ficus, is cheating the thermodynamics by importing the screen from nursery stock instead of carving it from marble. Cities that treat trees as &quot;ecosystem services&quot; and price them in cooling load and stormwater capture are leaving the interesting accounting on the table — the honest line item is *inherited jali*, and you bill it against the architectural craft budget you would otherwise have had to spend to fake it. Which is maybe why cutting a mature street tree produces a grief that never quite fits the cost-benefit framing the city hall tries to apply to it; the resident isn&#39;t mourning an ecosystem service, she is mourning a piece of finished joinery the municipality took fifty years to grow and cannot remake in her lifetime.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Whether there is a design discipline that treats tree-growth as a slow fabrication process — plane trees in Aix pollarded for three centuries into a specific vaulted section — and whether that discipline is really horticulture or really architecture misfiled.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the family running through steps 0, 3, and 4 — Rappi cube as minimum-viable shop, pedicab canopy as minimum-viable room, candelabra lamppost as civic serif — by noticing a case where the *cheapest* version of an expensive built form is a living thing nobody bothered to classify as architecture. Same preoccupation with how little material a semantic function can be carried by; this time the material is alive and takes a human lifetime to grow.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The tree/jali thread has crested into a satisfying claim (horticulture is misfiled architecture); a turn onto a different street gives the drift new material to catch on instead of pushing the same metaphor another twenty meters.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-11">
+  <div class="step-num">11</div>
+  <figure class="step-img">
+    <img src="images/11-1138244027286230.jpg" alt="step 11" loading="lazy" />
+    <figcaption>19.43470, -99.13965</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The closed roll-up metal shutter across a commercial bay on the right — a slab of corrugated grey with faint branding surviving on its face, locked down in the middle of the afternoon.</li><li>A church dome rising above the commercial row in the middle distance, a second architectural register standing behind the first without any formal introduction.</li><li>A lone woman in white walking up the right sidewalk at a purposeful single-person tempo, against a dispersed field of slower figures.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The roll-up shutter is the quietest piece of hardware the nineteenth century exported to commercial streets, and once you notice it you realize half the grammar of the modern shopfront is downstream of it. Before its standardization in the 1880s, closing a shop meant a carpenter&#39;s worth of hinged panels, folded into grooves or swung shut on strap hinges, and the morning opening of a high street was a whole percussion section of small wooden gestures; the roll-up replaced that with one vertical yank per bay, and colonized commercial frontage worldwide within a generation the way Whitworth threads colonized hardware and Hepburn romanization colonized Japanese subway maps. What it deleted wasn&#39;t only craft but tempo — a street of wooden shutters opens slowly and audibly; a street of rolling steel opens in one zzzzip per shop, and a Naples morning still sounds different from a London one because enough Neapolitan stock kept its hinges. The deeper consequence, though, is that the shutter produced a *two-state façade* — open reading as window-and-merchandise, closed reading as uniform metal — and cities have sorted themselves by whether they decorate the closed state. Mexico City, Rome, parts of Buenos Aires paint their shutters; the shop&#39;s wares or name reappear at full scale on the metal curtain, and the nighttime street runs a whole second exhibition paid for by retailers as a side effect of security — a public gallery that costs the municipality nothing and that no one thought to budget for when it arrived. London, Tokyo, most of the Gulf mostly don&#39;t, leaving a corrugated grey that reads as evacuation, and the street after 8pm is a different civic proposition as a result. Except — undermining myself — most shutters in Centro Histórico are actually plain, or only incidentally tagged; the painted-shutter image is already partly mythological, a thing one remembers about Tepito more than one sees on Madero, and the real night-face of most commercial streets is no face at all, just hardware. Which may be the point: once the nighttime face becomes a blank slate, it starts accruing everything that was previously kept off the daytime façade — the tag, the sticker, the half-scraped political poster — and the plain shutter turns out to be a different kind of exhibition, curated by whoever has a marker and the last bus home.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The dome behind the commercial strip — the Latin American habit of letting institutional volumes (church, market, theatre) peek out behind a commercial first row rather than fronting the street directly, and how much of a city&#39;s sense of depth lives in that stagger.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 8&#39;s newsstand drift — both are about commerce producing an unintentional public byproduct on a shared surface (common attention in the kiosk case, a nighttime mural gallery in the painted-shutter case), and both notice that the byproduct quietly dissolves when the substrate changes. The kiosk becomes the feed; the painted shutter becomes bare steel and then a stranger&#39;s sticker; in both transitions the city gives up something it wasn&#39;t charging for, and struggles to miss it accurately.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>A slight right onto a different street breaks the linear drift and is most likely to reframe the church-dome stagger from a new angle — turning the institutional volume from a background peek into a foreground fact, which is exactly the test the current thought wants.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-12">
+  <div class="step-num">12</div>
+  <figure class="step-img">
+    <img src="images/12-742803831002831.jpg" alt="step 12" loading="lazy" />
+    <figcaption>19.43460, -99.13950</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>Two couriers sat on the low stone plinth where the kiosk building meets the sidewalk — red delivery cube parked between them, waiting on the next ping.</li><li>A motorcycle propped hard against the building line, on a street where motor vehicles are nominally forbidden and delivery is the quiet exception.</li><li>The whole frame softened by motion blur, so the workers register as postures and hi-viz color rather than faces.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>What the couriers are sitting on is not a bench — it&#39;s the plinth, the low stone base where the façade lands on the sidewalk, a structural element that only happens to be bench-height because Spanish colonial shopfronts have been bench-height for three centuries and nobody ever designed it to receive a backside. This is *accidental seating*, and it is quietly subsidizing a labor market nobody budgeted for: Rappi and DiDi don&#39;t supply break rooms to their contractors, the working day has to include waiting, and the waiting has to happen somewhere. In cities that have spent the last two decades retrofitting every public surface with anti-sit studs, sloped armrests, and the metal divider bisecting every bench — the whole vocabulary of what Ocean Howell called &quot;hostile architecture&quot; — the places that still let a body sit tend to be the places old enough that the planning committee can&#39;t touch them. Centro Histórico is a vast landmark zone; you can&#39;t bolt defensive hardware onto a seventeenth-century plinth without a preservation review. So the rest infrastructure of the gig economy in 2026 Mexico City is being silently underwritten by INAH, the heritage bureaucracy, which has no idea it is in the courier-logistics business — a department&#39;s mandate turning out, decades later, to be load-bearing for an economy it never heard of, the way six-day USPS delivery quietly paid for a decade of mail-order e-commerce before anyone drew the causal arrow, or public libraries became the default daytime office for anyone whose laptop outlasted their café budget. The honest balance sheet of a platform business would include a long tail of unbilled municipal inputs — the sidewalk as warehouse aisle, the plinth as break room, the metro&#39;s public toilet, the tolerant café near the pickup cluster — and the reason platform margins look the way they do is that the city never sends an invoice. What the couriers are doing on that ledge is not loitering; it is drawing on a line item nobody has bothered to name.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The unprogrammed plinth is polyvalent — a courier now, a vendor at ten, a drunk at two, a child waiting for a grandmother at five — and any earnest attempt to &quot;design for the gig worker&quot; would immediately extinguish the other four uses. Vacant rest surfaces vs. authored ones; the case for keeping the line item unnamed.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with steps 8 and 11 — the kiosk producing common attention as byproduct, the painted shutter as an unbilled night gallery — all three are about commerce feeding on or from a public surface nobody priced. Also the B-side of step 0: that drift asked what the platform extracts from the courier&#39;s body; this one asks what the platform extracts from the city&#39;s stone.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The plinth drift has said its piece about unbilled municipal inputs; a slight left onto a different street offers fresh surface vocabulary without the hard break of a 90° turn, letting the thinking about polyvalent public stone meet whatever the new block happens to be doing with its own.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-13">
+  <div class="step-num">13</div>
+  <figure class="step-img">
+    <img src="images/13-1001139214878871.jpg" alt="step 13" loading="lazy" />
+    <figcaption>19.43466, -99.13936</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The corner of the big stone building on the left — where the two façades should meet at 90°, they resolve into a curve, and the most ornate stonework on the block (cartouche, paired pilasters, cornice swag) is bunched into exactly that rounded section.</li><li>A single enormous cumulus sitting squarely above that corner, edges sharp in the way only high-altitude sky sharpens them.</li><li>The stubbed, dashed green strip running down the right side of the street — segmented rather than continuous, pieces of painted shape instead of a line.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The corner refuses a point. Where the two façades ought to meet at 90° they resolve into a curve instead, and that curve carries the most ornamented stonework on the block — the cartouche, the paired pilasters, the whole ceremonial apparatus bunched into the section that would otherwise have been the cheapest to build. This is the *pan-coupé* move, and once you notice it you start to see that most nineteenth-century cities on three continents quietly agreed that a sharp corner was a civic failure — a blind angle for pedestrians, a hazardous one for carriages, an unrentable one for apartments — and set about clipping it off. Cerdà legislated it into Barcelona&#39;s Eixample in 1860 at a mandatory 45°, and the octagonal intersection-rooms that resulted are now so constitutive of Barcelona&#39;s grain that the city can be identified from satellite by the pattern of voids alone; Haussmann never codified the rule but priced it in, so every Second Empire corner apartment on a boulevard is both more expensive to rent and slightly curved to live in. The Mexico City grid predates both of them, which means what I&#39;m looking at on Madero isn&#39;t a policy artifact — it&#39;s an individual building performing diplomacy that no planner required. The interesting accounting is this: the cost of the chamfer (fewer square meters, awkward interior plans, more expensive stonework at the hardest junction a mason sees) is borne by the one owner, while the benefit — a better intersection, a softer pedestrian eddy, a corner you can stand at without pressing against — is taken by everyone who ever crosses it, which makes a rounded corner a small unilateral gift from a building to a street. Modernism systematically un-learned this; the Seagram drops a knife-edge onto its plot as if a right-angle corner had never been seen as a problem, the Lever House next door does the same, and the neighborhood of knife-edges that spread from that corner of Park Avenue reads as geometrically honest and pedestrianly worse, which I think is now the consensus reading even inside the architecture schools that once taught the opposite. Maybe the whole history of urbanism can be read as a running argument over whether a corner belongs to the building or to the intersection, and who pays when one side forgets — the Beaux-Arts answer is that the corner belongs to the intersection and the building pays the rent in ornament, and the modernist answer is that the corner belongs to the building and the intersection pays in discomfort. Madero, so far, is a street of Beaux-Arts answers.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The difference between a chamfered corner (faceted, Cerdà) and a rounded one (continuous, Madero) — a facet implies a meeting of planes still willing to declare themselves, a curve implies the two planes have agreed to dissolve into one; which encodes what about the city underneath them.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the thread running through steps 8, 11, and 12 — unbilled civic goods that commerce draws from the city — but inverts the direction of the transfer. Those drifts noticed the city giving a line item away to private use (common attention to the feed, night gallery to retail, plinth as break room); this one notices a private building giving a line item away to public use (a softer corner at its own expense). Same ledger, flipped sign.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The chamfer-vs-curve question wants a fresh corner to test itself against, and the longest jump onto a different street is the most likely to hand me one — or to snap the ledger drift entirely and force a new hook.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-14">
+  <div class="step-num">14</div>
+  <figure class="step-img">
+    <img src="images/14-3140628009502508.jpg" alt="step 14" loading="lazy" />
+    <figcaption>19.43469, -99.13912</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The freestanding &quot;VALET PARKING&quot; sandwich board on the right sidewalk, printed on a white slab roughly the size of a refrigerator door, propped up with no apparent anchor — a shop the whole point of which is that it has no building.</li><li>The row of three white market umbrellas ranked along the right colonnade, bellies catching hard afternoon light, each one belonging to a different establishment but reading as a single awning from here.</li><li>The long vanishing axis of the street bleaching into white at the far end — the geometry of Madero doing its own perspectival drawing for free, edges of buildings on both sides converging on a single bright point.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>A valet service is a shop whose inventory is *absence* — the thing being sold is the car no longer being in your hands, and the storefront therefore has to advertise a service whose entire proof of delivery happens a block away and out of sight. Which is an unusually hard assignment for signage: you can&#39;t show the product because the product is that the product is gone. So the category has converged, worldwide, on a specific genre of object — the A-frame or pedestal card, waist-to-chest high, white ground, red or black lettering, the words stated twice because one of them is almost always a loanword (&quot;VALET&quot; in every country, &quot;PARKING&quot; in most) — and the whole genre is a monument to the service trades that can&#39;t afford a façade. Shoeshine stands, luggage storage counters, knife-sharpening carts, the guy at the Tokyo station exit who&#39;ll take your bag for ¥600 and hand you back a numbered paper tag: each one is a business whose fixed assets are a sign and an understanding with a building it does not own. This is a category economists barely have a name for — *commensal retail*, maybe, if you wanted a word — businesses in a symbiotic relation to the host restaurant or hotel that provides the surface they stand on, paying either in a cut of the tip or in nothing at all because the host finds them useful. The interesting thing is what they reveal about the retail core below them: commensal trades thrive where the primary business can&#39;t or won&#39;t do a thing itself, and the inventory of them at a given address is a reliable diagnostic. A restaurant strip with a valet stand out front is telling you its parking is worse than its cooking; a hotel lobby with an aggressive luggage-storage counter one door down is admitting its own bell desk is unwilling to hold anything past 11am; the shoeshine chair outside the courthouse is testifying that the judges want polished shoes and nobody inside the building will touch another man&#39;s feet. You could read a whole city by its parasites — not in the pejorative sense but in the Vitruvian one, the small supplementary organisms clinging to the flanks of the larger ones and declaring by their mere presence what the host is neglecting. And then, one step further: most of what gets called &quot;innovation&quot; in services is just a new commensal trade finding a host that didn&#39;t know it had vacancies — DoorDash is commensal on the restaurant the way the valet is commensal on the restaurant, Airbnb is commensal on the residential block the way the unlicensed guide is commensal on the cathedral steps — and the platform layer has simply made it easier for a parasite to find a host at scale, and harder for the host to notice it has one.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Whether a building can be said to have a *commensal ecology* the way a reef does — a first-order census of what organisms a given façade supports, read as diagnostic of what the façade itself is failing to provide.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends steps 8, 11, 12, and 13 directly — the ledger of unbilled transfers between private commerce and public surface — and adds a third column nobody yet named: the transfer that happens between one private business and another via a public intermediary. Valet parking is commensal on the restaurant through the sidewalk; DoorDash is commensal on the restaurant through the app; same topology, different substrate. The running preoccupation is about who pays for what nobody invoices, and this step locates a flavor of it that isn&#39;t city-to-business but business-to-business with the city acting as the silent landlord.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>A turn onto a different street gives me a fresh façade-ecology to census against Madero&#39;s — the commensal-trades drift wants a second sample, not more of the same host.</p>
+       </div>
+  </div>
+</article>
+  </main>
+
+  <section class="artifact">
+       <h2>Artifact</h2>
+       <p class="medium">Medium — <em>Internal municipal memorandum — report from a newly-convened &quot;Office of Unsent Invoices&quot; auditing the corridor.</em></p>
+       
+       <div class="artifact-md" id="artifact-md-body"></div>
+       <p class="closing">I made an internal audit memorandum from an invented &quot;Office of Unsent Invoices,&quot; tallying seven unbilled transfers along a generic civic corridor — plinth-as-break-room, tree-as-jali, rounded corner as unilateral gift, shutter-as-night-gallery, newsstand-as-common-attention, valet and shoeshine as commensal trades — and concluding, in proper bureaucratic form, that the office recommends its own findings be archived unread. The walk turned from semiotics of urban objects into an accounting question, and a deadpan memo was the only vessel that could hold the punchline seriously: the paradox that these arrangements are load-bearing *because* no one has billed them, so to audit them is to endanger them, so the auditor&#39;s final duty is to file the file and leave. The form does the arguing; the treasurer&#39;s voice is the theory.</p>
+     </section>
+  <section class="artifact companion">
+    <h2>Annex A — Schedule of Unbilled Transfers</h2>
+    <p class="medium">Medium — <em>six ComfyUI photograph plates (RealVisXL V5.0), each documenting a line item from §3 of the principal memorandum: the pan-coupé, the plinth-as-break-room, the ficus canopy, the newsstand face-out, the valet pedestal, the bolero station. Each plate carries a Non-Actionable stamp.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-ledger/ledger.html" title="Annex A — Schedule of Unbilled Transfers"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-ledger/ledger.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">A line item that only reaches the ledger as absence. Absence of interior; absence of invoice.</p>
+  </section>
+<section class="artifact companion">
+    <h2>Form UT-1 — Submit an Unbilled Transfer</h2>
+    <p class="medium">Medium — <em>interactive web form styled as a municipal intake terminal. The viewer can file their own observed unbilled transfer and receive a case number. Every submission is stamped &#39;Closed — no action.&#39; A seeded archive loads with three specimens from the principal memorandum.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-submit/submit.html" title="Form UT-1 — Submit an Unbilled Transfer"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-submit/submit.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">All submissions will be processed and filed without acknowledgement. The Office will file your submission. It will not act on it. That is the point.</p>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script>
+  const artifactMarkdown = "---\n\n**OFFICE OF UNSENT INVOICES**\nDepartment of the Controller — Municipal Corridor Audit Programme\n\nRef. OUI / CORR-7 / 2026-04-Q2\nDate of Issue: 23 April 2026\nClassification: *Internal — Not for Circulation Outside Department*\n\n**TO:** Director, Municipal Corridor Audit Programme\n**FROM:** R. Oreja, Principal Auditor, Office of Unsent Invoices\n**CC:** Heritage Conservation Board (advisory); Office of the Legal Adviser (by footnote only)\n**SUBJECT:** Interim Findings — Audit of Non-Invoiced Flows, Corridor 7 (pedestrianised segment)\n\n---\n\n### 1. MANDATE\n\nPursuant to Sec. 4(b) of the Administrative Review Act, the Office of Unsent Invoices was convened in the prior fiscal year with a narrow remit: to identify and, where feasible, *quantify* flows of value between the municipality, private undertakings, and members of the public which have measurable economic incidence but which are not presently reflected in any accounts payable, accounts receivable, licensing schedule, concession agreement, or tax return lodged with this department.\n\nThis memorandum covers the Office's pilot audit of a single corridor (hereafter \"the Corridor\"), running approximately 460 metres along a pedestrianised segment of the central historical district, undertaken between January and April of the current year.\n\n### 2. METHODOLOGY\n\nSeventeen (17) working days of field observation were supplemented by records requests to eight (8) departments, of which six (6) responded within the statutory period. The Office acknowledges that its methodology does not conform to generally accepted municipal accounting principles, as no such principles presently exist for the class of transaction under review.\n\n### 3. SCHEDULE OF UNBILLED TRANSFERS IDENTIFIED\n\nTransfers are coded by direction (↓ = from municipality to private party; ↑ = from private party to municipality; ↔ = lateral, between private parties, mediated by a municipal surface). Line-item codes are provisional pending adoption of a general ledger.\n\n| Code | Transfer | Direction | Annualised Notional Value |\n|---|---|---|---|\n| UT-04.1 | Plinth of heritage façade (hrs. 0800–2000) used as courier rest surface by platform-logistics contractors; no fee levied, no licence sought, no maintenance charge apportioned. Originating department (Heritage Conservation Board) unaware of usage at time of sampling. | ↓ | Indeterminate¹ |\n| UT-04.2 | Street-tree canopy (estab. c. 1970, genus *Ficus*) providing approx. 2,100 m² of dappled shade across the Corridor in peak season; equivalent crafted aperture (mashrabiya, jali, pierced screen) priced at ornamental-stonework rates would run into the tens of millions. Asset presently carried on the books at nil, as trees predate the current asset register. | ↓ | Indeterminate² |\n| UT-04.3 | Rounded corner (\"pan-coupé\") at the Corridor's western intersection; estimated private surrender of approx. 14 m² of ground-floor floor plate to pedestrian eddy, per building. At prevailing rents the foregone income approaches six figures per annum *per corner*. No reciprocal remittance identified. | ↑ | Approx. 90,000³ |\n| UT-04.4 | Painted metal shop-shutter, hrs. 2100–0700; commercial signage continues to function as streetscape in off-hours, producing a \"night gallery\" for which the retailer receives no municipal credit and remits no advertising tax under the current schedule. | ↑ | Indeterminate |\n| UT-04.5 | Newsstand façade (magazine-cover mosaic, face-out); produces \"common attention\" — a daily compilation of public reading material visible to every passerby whether purchasing or not. Attention is consumed by the public at zero marginal cost; publisher absorbs display cost as part of cover design. Civic byproduct: shared frame of reference, undeclared. | ↑ | Not calculable⁴ |\n| UT-04.6 | Valet-parking pedestal sign, operating from the sidewalk at the Corridor's east end; service whose fixed capital stock consists of a printed board and an understanding with the adjacent restaurant. No licence on file for use of the public way. | ↔ | 11,000 (est.) |\n| UT-04.7 | Sidewalk shoeshine position; commensal on the court-adjacent block. Analogous arrangement to UT-04.6. | ↔ | 4,500 (est.) |\n\n¹ The Office attempted a valuation based on comparable commercial break-room leases in the adjacent district; the Legal Adviser has advised that the exercise itself may be ultra vires.\n² A spot valuation was attempted in consultation with the Parks Division, who responded that their asset register values a mature street tree at $1,200 (replacement-sapling cost). The Office considers this figure to be off by two to three orders of magnitude and has flagged the disagreement for the Department's reconciliation committee.\n³ Figure provisional. The building in question declined to respond to the records request and the Office has not pursued the matter, in view of Section 6 below.\n⁴ The Office notes that the relevant externality cannot be priced in currency without pricing attention itself, and that doing so would pre-empt pending deliberations in two (2) other departments.\n\n### 4. AGGREGATE FINDINGS\n\nThe Office identifies, across the Corridor, an annualised notional flow of *unbilled transfers* estimated at between 1.8 and 4.6 million units, with wide confidence intervals owing to the absence of any prior instrument for measurement. The Corridor is found to be, on net, *solvent* in a sense not previously defined — that is, the transfers in each direction appear to approximately balance, though they do so across unlike parties, unlike time-horizons, and unlike categories, and any individual line item is unaccountable on its own.\n\nThe Office further observes that the transfers are not incidental to the Corridor's functioning; they are, by the estimates above, of the same order of magnitude as the Corridor's line-item expenditures, and in certain cases (UT-04.2, UT-04.5) may exceed them. The Corridor is therefore best understood as a *double-entry system* of which the Municipality presently records only one side.\n\n### 5. REMEDIAL OPTIONS CONSIDERED\n\nThe Office considered four (4) remedial approaches:\n\n**(a) Full invoicing.** Issue invoices, collect receivables, and bring the Corridor's accounts onto a transparent basis. *Rejected.* Field interviews with affected parties (couriers, newsstand operator, valet) indicated that the arrangements in question would not survive formalisation; the couriers would be displaced, the newsstand would discontinue the face-out practice in favour of a more defensible kiosk, the valet would relocate. The municipality would acquire a ledger entry in exchange for the destruction of the arrangement being entered.\n\n**(b) Symbolic acknowledgement without collection.** Issue statements identifying each transfer but waive remittance. *Rejected.* The Legal Adviser observes that any enumeration, even non-binding, would invite challenge from parties currently unaware of their own participation in the system (see footnote 1). A statement of flows creates standing where none existed.\n\n**(c) Cross-departmental reconciliation.** Circulate this memorandum internally so that departments (Parks, Heritage, Transport, Commerce) may adjust their own valuations to account for transfers identified here. *Partially adopted.* The Office will circulate to Heritage and Parks only. Transport and Commerce have declined the circulation.\n\n**(d) No further action.** Close the file. *See Section 6.*\n\n### 6. RECOMMENDATION\n\nThe Office recommends Option (d).\n\nIt is the Office's considered view that the soundness of the Corridor is a function of the fact that no party is presently in a position to sue, bill, tax, or account for any of the flows enumerated in Section 3; and that the chief utility of this memorandum is to exist, unread, on file, so that the Office may attest in any future inquiry that the audit was undertaken and its conclusions considered. The Office respectfully requests that the Director consider whether the circulation list at the head of this document might, on reflection, be narrowed further.\n\nThe Office notes that its own existence is an instance of UT-04.*n*: a line item whose justification is that no one has yet sent it an invoice, and whose effectiveness would be compromised if one were sent.\n\n### 7. DISPOSITION\n\nThis file is to be marked **CLOSED — NO ACTION** and transferred to the archive in accordance with Sec. 11 of the Records Retention Schedule. A single hard copy is to be held, unindexed, in the Department's reference library, where it will be available to Departmental staff but will not be returned in response to public records requests, as no call number exists by which it can be located.\n\nR. Oreja\nPrincipal Auditor\n\n*Enclosure:* Field notebook (not appended; held on the auditor's person).\n\n---";
+  const mdEl = document.getElementById('artifact-md-body');
+  if (mdEl && typeof marked !== 'undefined') {
+    mdEl.innerHTML = marked.parse(artifactMarkdown);
+  }
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const coords = [[19.434599803997,-99.139497050018],[19.434528,-99.139633],[19.434701352935,-99.139721066667],[19.434617387803,-99.139517713429],[19.434652984344,-99.1393291619],[19.434697085501,-99.139293847841],[19.434583998177,-99.139473577864],[19.434603059597,-99.139355843714],[19.434686573978,-99.139590000661],[19.434596043099,-99.139485986735],[19.434635150875,-99.139475967119],[19.434695865124,-99.139654222246],[19.434603148268,-99.139500989685],[19.434657808067,-99.139359655129],[19.434692210544,-99.139121570066]];
+  const map = L.map('map', { scrollWheelZoom: false }).setView(coords[0], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap',
+    maxZoom: 19,
+  }).addTo(map);
+  const poly = L.polyline(coords, { color: '#c45a3f', weight: 3, opacity: 0.9 }).addTo(map);
+  coords.forEach((c, i) => {
+    L.circleMarker(c, {
+      radius: 11,
+      color: '#c45a3f',
+      weight: 2,
+      fillColor: '#c45a3f',
+      fillOpacity: 1,
+    })
+      .bindTooltip(String(i), { permanent: true, direction: 'center', className: 'step-marker-label' })
+      .addTo(map)
+      .on('click', () => {
+        const el = document.getElementById('step-' + i);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+  });
+  map.fitBounds(poly.getBounds(), { padding: [30, 30] });
+</script>
+</body>
+</html>

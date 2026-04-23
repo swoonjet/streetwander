@@ -1,0 +1,20 @@
+{
+  "walk_id": "walk-2026-04-23T16-56-30-mexico-city-madero",
+  "label": "mexico-city-madero",
+  "start_time_ms": 1776963393978,
+  "end_time_ms": 1776964957714,
+  "duration_ms": 1563736,
+  "max_steps": 45,
+  "actual_steps": 15,
+  "termination_reason": "image_fetch_failed",
+  "total_distance_m": 248,
+  "distance_from_home_at_end_m": 41,
+  "start_image_id": "833771435087891",
+  "start_coords": {
+    "lat": 19.434599803997,
+    "lng": -99.139497050018
+  },
+  "artifact_medium": "Internal municipal memorandum — report from a newly-convened \"Office of Unsent Invoices\" auditing the corridor.",
+  "artifact_md": "artifact/artifact.md",
+  "artifact_html": null
+}
