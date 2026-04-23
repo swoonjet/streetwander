@@ -1,0 +1,13 @@
+SEED:
+- Pink Hello Kitty barricade stands alternating with orange-and-white striped cones along both shoulders — cartoon faces at knee height repeating down the whole block
+- The ENEOS sign in saturated red, sans-serif katakana/Latin lockup, floating mid-frame like a single emphatic word in an otherwise muttered street
+- The boxy zinc-grey building on the right with its corrugated side panel — utilitarian, no windows on that face, just the flat plane pressed up against sky
+
+WANDER:
+The Hello Kitty barricades are doing something philosophically interesting that the plain cone cannot: they are *individuated*. Each one has a face. Which means the road isn't lined with a repeating unit — it's lined with a crowd. Hundreds of identical crowds, technically, but the eye reads face-presence as persons, not pattern, even when it knows better. This is the Pareidolia Tax that every designer pays the moment they put eyes on something: you lose the ability to abstract it. A Muji stool is furniture; a Muji stool with a smiley face is a small stubborn citizen you have to negotiate with. Which is why airports and hospitals use faceless icons — the pictogram guy on a bathroom door has no expression because an expression would make him a specific man, and a specific man cannot be universal. Sanrio figured out the reverse trade: make the face *nearly* featureless (Kitty famously has no mouth) and you get both — a face enough to personify, vague enough to project onto. It's the Mona Lisa trick scaled to plush licensing. Which maybe explains why Kitty metastasized onto construction barriers in rural Hokkaido in the first place: she is the mascot equivalent of a serif — just enough ornament to feel hospitable, not so much that it commits to a mood. I keep thinking the barricade is softening the street, but maybe it's the opposite — maybe the street is hardening Kitty, dragging her out of the gift shop and into civic infrastructure, and she survives the trip because she was always a cipher, never a character.
+
+BRANCH:
+The zinc building with no windows on its visible face — buildings as directional objects, with a "back" that isn't meant to be seen but inevitably is, from the side street. The architecture of the unintended elevation.
+
+ECHO:
+Extends step 0 — that piece was about three grammars of warning (shout/apologize/withhold); this one drills into what happens when you bolt a face onto the shout. The apologizing-monkey barricade and the Kitty barricade are the same move, but Kitty goes further: she doesn't just soften the signal, she refuses to commit to *being* a signal at all.

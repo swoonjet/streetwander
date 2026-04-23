@@ -1,0 +1,159 @@
+{
+  "start_image_id": "152838440117249",
+  "start_coords": {
+    "lat": 43.58903625707,
+    "lng": 142.46451041488
+  },
+  "steps": [
+    {
+      "step": 0,
+      "id": "152838440117249",
+      "lat": 43.58903625707,
+      "lng": 142.46451041488,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 144.23187961981,
+      "captured_at": 1436628826900,
+      "image_file": "00-152838440117249.jpg"
+    },
+    {
+      "step": 1,
+      "id": "423002095411637",
+      "lat": 43.588862597899,
+      "lng": 142.46472467054,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 144.16536924977,
+      "captured_at": 1436628829160,
+      "image_file": "01-423002095411637.jpg"
+    },
+    {
+      "step": 2,
+      "id": "760939411271234",
+      "lat": 43.588692871505,
+      "lng": 142.46493278234,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 144.14508529176,
+      "captured_at": 1436628831371,
+      "image_file": "02-760939411271234.jpg"
+    },
+    {
+      "step": 3,
+      "id": "241448061114954",
+      "lat": 43.588575388929,
+      "lng": 142.46509911851,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 143.8979544552,
+      "captured_at": 1436628833580,
+      "image_file": "03-241448061114954.jpg"
+    },
+    {
+      "step": 4,
+      "id": "377388296826028",
+      "lat": 43.588394627153,
+      "lng": 142.46532427516,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 143.96453767745,
+      "captured_at": 1436628835769,
+      "image_file": "04-377388296826028.jpg"
+    },
+    {
+      "step": 5,
+      "id": "317531866713608",
+      "lat": 43.588223097764,
+      "lng": 142.4655565458,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 141.34431658676,
+      "captured_at": 1436628838076,
+      "image_file": "05-317531866713608.jpg"
+    },
+    {
+      "step": 6,
+      "id": "735483553792889",
+      "lat": 43.588047221689,
+      "lng": 142.46575430036,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 128.59279044177,
+      "captured_at": 1436628840317,
+      "image_file": "06-735483553792889.jpg"
+    },
+    {
+      "step": 7,
+      "id": "195886462217381",
+      "lat": 43.587957931786,
+      "lng": 142.46597447913,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 132.44236401548,
+      "captured_at": 1436628842521,
+      "image_file": "07-195886462217381.jpg"
+    },
+    {
+      "step": 8,
+      "id": "289583982760599",
+      "lat": 43.587780355224,
+      "lng": 142.46620425795,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 132.16537478945,
+      "captured_at": 1436628844759,
+      "image_file": "08-289583982760599.jpg"
+    },
+    {
+      "step": 9,
+      "id": "838825750080126",
+      "lat": 43.58764098744,
+      "lng": 142.46638402513,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 132.64850146936,
+      "captured_at": 1436628846991,
+      "image_file": "09-838825750080126.jpg"
+    },
+    {
+      "step": 10,
+      "id": "257636536101824",
+      "lat": 43.587584550775,
+      "lng": 142.46645639806,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 132.82589597856,
+      "captured_at": 1436628849204,
+      "image_file": "10-257636536101824.jpg"
+    },
+    {
+      "step": 11,
+      "id": "318548926374965",
+      "lat": 43.587519083096,
+      "lng": 142.46654201936,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 131.81203168865,
+      "captured_at": 1436628883508,
+      "image_file": "11-318548926374965.jpg"
+    },
+    {
+      "step": 12,
+      "id": "822214455048377",
+      "lat": 43.587559850019,
+      "lng": 142.46677083001,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 62.449326032999,
+      "captured_at": 1436628888107,
+      "image_file": "12-822214455048377.jpg"
+    },
+    {
+      "step": 13,
+      "id": "1416231875392350",
+      "lat": 43.587640869981,
+      "lng": 142.46692528999,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 59.653276477898,
+      "captured_at": 1436628890292,
+      "image_file": "13-1416231875392350.jpg"
+    },
+    {
+      "step": 14,
+      "id": "4217860521566959",
+      "lat": 43.58779989,
+      "lng": 142.4671114,
+      "sequence": "-d9g3P0C6GRVQakEYcORzg",
+      "heading": 0,
+      "captured_at": 1436628892480,
+      "image_file": "14-4217860521566959.jpg"
+    }
+  ]
+}
