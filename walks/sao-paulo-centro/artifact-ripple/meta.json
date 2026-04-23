@@ -1,0 +1,5 @@
+{
+  "title": "Companion — The Ripple",
+  "medium": "interactive cloth simulation — a US flag on a pole with a toggleable stiffening rod and an atmosphere slider. mass-spring verlet cloth, gravity, procedural wind. vacuum + rod off = the photograph 1969 refused to take. the small droop at the far end is R.'s ripple.",
+  "caption": "Drag atmosphere to zero, switch the rod off, and the flag hangs straight down along the pole — exactly what nylon does in vacuum. Turn the rod back on; the signal is carried by its prop again. R.'s ripple at the fly is always visible."
+}
