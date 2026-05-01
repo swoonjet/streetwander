@@ -1,0 +1,109 @@
+{
+  "start_image_id": "102893242543754",
+  "start_coords": {
+    "lat": 47.395217684586,
+    "lng": -79.684849147701
+  },
+  "steps": [
+    {
+      "step": 0,
+      "id": "102893242543754",
+      "lat": 47.395217684586,
+      "lng": -79.684849147701,
+      "sequence": "Q05A1s2EGPlmjivyDqW6Bc",
+      "heading": 4.4207285847378,
+      "captured_at": 1626548629939,
+      "image_file": "00-102893242543754.jpg"
+    },
+    {
+      "step": 1,
+      "id": "625918385807255",
+      "lat": 47.395092400257,
+      "lng": -79.685278845865,
+      "sequence": "xWlRI25y6svBaEwnHMQpCN",
+      "heading": 90.83190383067,
+      "captured_at": 1626548615408,
+      "image_file": "01-625918385807255.jpg"
+    },
+    {
+      "step": 2,
+      "id": "772163730524896",
+      "lat": 47.395020579783,
+      "lng": -79.685096549757,
+      "sequence": "xWlRI25y6svBaEwnHMQpCN",
+      "heading": 122.90576122456,
+      "captured_at": 1626548621908,
+      "image_file": "02-772163730524896.jpg"
+    },
+    {
+      "step": 3,
+      "id": "3137455023231149",
+      "lat": 47.395121868711,
+      "lng": -79.68489793321,
+      "sequence": "Q05A1s2EGPlmjivyDqW6Bc",
+      "heading": 90.373601710744,
+      "captured_at": 1626548624939,
+      "image_file": "03-3137455023231149.jpg"
+    },
+    {
+      "step": 4,
+      "id": "3360974370847480",
+      "lat": 47.395251709439,
+      "lng": -79.684914252327,
+      "sequence": "2T3mOAswXG9lUL478vckZC",
+      "heading": 314.8970698767,
+      "captured_at": 1626549418285,
+      "image_file": "04-3360974370847480.jpg"
+    },
+    {
+      "step": 5,
+      "id": "459495676122611",
+      "lat": 47.395091535472,
+      "lng": -79.685313133266,
+      "sequence": "xWlRI25y6svBaEwnHMQpCN",
+      "heading": 90.464744144469,
+      "captured_at": 1626548613408,
+      "image_file": "05-459495676122611.jpg"
+    },
+    {
+      "step": 6,
+      "id": "628562002166541",
+      "lat": 47.395089296594,
+      "lng": -79.685373789336,
+      "sequence": "xWlRI25y6svBaEwnHMQpCN",
+      "heading": 90.304050230952,
+      "captured_at": 1626548611408,
+      "image_file": "06-628562002166541.jpg"
+    },
+    {
+      "step": 7,
+      "id": "1934692763391733",
+      "lat": 47.395087665242,
+      "lng": -79.68541502788,
+      "sequence": "xWlRI25y6svBaEwnHMQpCN",
+      "heading": 90.241244152681,
+      "captured_at": 1626548610408,
+      "image_file": "07-1934692763391733.jpg"
+    },
+    {
+      "step": 8,
+      "id": "495404385381898",
+      "lat": 47.395091193376,
+      "lng": -79.685322938926,
+      "sequence": "xWlRI25y6svBaEwnHMQpCN",
+      "heading": 90.361970024466,
+      "captured_at": 1626548612908,
+      "image_file": "08-495404385381898.jpg"
+    },
+    {
+      "step": 9,
+      "id": "487770639868282",
+      "lat": 47.39503906219,
+      "lng": -79.685144490189,
+      "sequence": "xWlRI25y6svBaEwnHMQpCN",
+      "heading": 129.0575114175,
+      "captured_at": 1626548620408,
+      "image_file": "09-487770639868282.jpg"
+    }
+  ]
+}

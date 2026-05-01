@@ -1,0 +1,20 @@
+{
+  "walk_id": "walk-2026-05-01T16-46-54-cobalt-ontario",
+  "label": "cobalt-ontario",
+  "start_time_ms": 1777654016944,
+  "end_time_ms": 1777655158868,
+  "duration_ms": 1141924,
+  "max_steps": 14,
+  "actual_steps": 10,
+  "termination_reason": "returned_home",
+  "total_distance_m": 148,
+  "distance_from_home_at_end_m": 30,
+  "start_image_id": "102893242543754",
+  "start_coords": {
+    "lat": 47.395217684586,
+    "lng": -79.684849147701
+  },
+  "artifact_medium": "A fictional internal engineering memo — a lens-selection rationale at a dashcam company, pure technical register, where an aesthetic decision affecting a generation of documentary footage is being made without anyone in the document acknowledging it as one.",
+  "artifact_md": "artifact/artifact.md",
+  "artifact_html": null
+}

@@ -1,0 +1,13 @@
+SEED:
+- the wooden headframe at left — inclined leg, diagonal bracing, the squared cap where the sheave wheel used to sit, the whole thing transparent against the sky
+- a hoist-house roofline behind it, low and pragmatic, addressed only to the machine it served
+- the headframe and the cream parapet on the brick mill standing at almost the same height across the lot, like two answers to the same question of verticality
+
+WANDER:
+The headframe is a machine turned inside-out. A passenger elevator hides its cable, its counterweight, its sheave; this thing displays them — or did, when it had them — the rope path, the inclined leg taking the brace from the hoist house, the square box up top where the wheel was bolted. Exoskeletal: a structure whose form is just the load diagram standing up. There's a long migration in the history of lifting from this kind of confessing machine — derrick, gantry, A-frame, headframe, ship's davit — to the concealing one, the elevator chase, the curtain-sided crawler crane, the modern wind turbine where the whole gearbox lives inside an opaque fiberglass nacelle eighty meters off the ground. Architecture stops *narrating* the work it's doing and starts *delivering* it the way a stage delivers a trick: the audience experiences the result, the rig is somebody else's problem. The same migration runs through other media — view-source HTML in 1996 was a working headframe, which is why so many people who never planned to became web developers, and minified bundle output is the elevator chase; Pixar conceals its rigs with religious commitment while Wes Anderson keeps the seam on his armatures showing on purpose, because the visible seam is a politics. So a preserved heritage headframe is not really a monument to mining — most monuments-to-mining work would be a granite plaque and a list of names — it's a monument to a now-rare *epistemic posture* about how machines should declare themselves. Whether anyone in town reads it that way is a separate question; I suspect mostly they don't, and the structure stands in a kind of pedagogic loneliness, holding a posture for a class that isn't currently being taught.
+
+BRANCH:
+What you actually lose, in young hands, when the machines around them stop showing their rigs — and whether anything has stepped in to replace the apprenticeship that exposed mechanism used to provide for free.
+
+ECHO:
+Rhymes with step 0 — the false front declared an identity it wasn't backing; the headframe is the inverse, an honest skeleton declaring a function it's no longer performing. Both are surfaces taking a position relative to what's behind them, but the axis has rotated from claimed-vs-actual *image* to revealed-vs-hidden *mechanism*.

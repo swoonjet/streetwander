@@ -1,0 +1,13 @@
+SEED:
+- the black HUD strip across the bottom of the frame: "015km/h" mid-left, "MIC OFF/NV   BLACKVUE DR900M-1CH/UHD" flush right
+- the horizon bowing into a shallow smile from the fisheye barrel distortion
+- a small white sign-on-legs out by the water, isolated against the dark embankment behind it
+
+WANDER:
+That leading zero is the giveaway — "015km/h" instead of "15km/h", a fixed-width field that won't reflow when the digits change. It's a vestigial habit from seven-segment LED readouts and avionics panels, where field width was sacrosanct because a digit jumping a column at speed was a legibility failure, and embedded firmware inherited the convention long after the hardware reason for it vanished. So an 8K sensor in a Korean dashcam quietly speaks fluent FORTRAN-format, and the strip it sits in is doing something stranger still — burning its own metadata into the image instead of writing to EXIF or a sidecar, the way a sane system would. The metadata refuses to be metadata. You see the same impulse in the Polaroid border (the chemistry self-frames), in television station bugs anchored top-right since cable went 24-hour, in the timestamp corner that became the entire visual genre of CCTV evidence — and there's a politics to it, because data outside the frame can be stripped while data inside the frame is a stowaway in the picture itself. Forensic chain-of-custody loves this; archivists hate it; an editor cleaning up the shot for a magazine layout is suddenly committing what a court would call tampering, which is one of those category collisions where two professions look at the same act and reach for opposite verbs. The closer historical analog isn't the watermark, it's the wax notarial seal on a 17th-century deed — the bulge in the page where image and proof are the same object, indistinguishable, so any attempt to clean up the document destroys the signature in the act. The dashcam is doing the deed-stamp at thirty frames a second; product and provenance share a surface, and the design choice — *don't trust anyone with the metadata* — is so quietly load-bearing that nobody mentions it in the spec sheet.
+
+BRANCH:
+When the chain of custody and the picture share a surface, the act of cropping becomes ambiguous — courtesy or tampering depending on who's holding the file — and design conventions usually punt that question.
+
+ECHO:
+Extends step 4's thread on machines that declare themselves versus machines that disappear, but rotates the axis: the headframe wears its mechanism *around* the work it does; the dashcam HUD wears its capture machine *inside* the image it produces. Same epistemic posture (refuse to hide), different surface to inscribe it on.

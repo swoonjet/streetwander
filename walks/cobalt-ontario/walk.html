@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>walk-2026-05-01T16-46-54-cobalt-ontario — Wanderer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --bg: #faf7f2;
+    --ink: #1a1a1a;
+    --dim: #6a6a6a;
+    --line: #e5ddd0;
+    --accent: #c45a3f;
+    --block: #f2ede3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 120px; }
+  header.top h1 {
+    font: 400 28px/1.2 Georgia, serif;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  header.top .meta {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  dl.stats {
+    display: flex; flex-wrap: wrap; gap: 0 28px;
+    margin: 16px 0 0; padding: 0;
+    font: 13px/1.3 ui-monospace, Menlo, monospace;
+  }
+  dl.stats > div { display: flex; gap: 6px; }
+  dl.stats dt { color: var(--dim); margin: 0; }
+  dl.stats dd { margin: 0; color: var(--ink); }
+  #map {
+    height: 420px;
+    margin: 32px 0 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .step-marker-label {
+    background: transparent; border: none; box-shadow: none;
+    color: #fff; font: 700 11px/1 ui-monospace, Menlo, monospace;
+    pointer-events: none;
+  }
+  main.steps { margin-top: 48px; }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px 20px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+  }
+  .step:first-child { border-top: none; padding-top: 8px; }
+  .step-num {
+    font: 700 14px/1 ui-monospace, Menlo, monospace;
+    color: var(--accent);
+    padding-top: 4px;
+  }
+  .step-img { grid-column: 2; margin: 0 0 16px; }
+  .step-img img { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
+  .step-img figcaption {
+    font: 12px/1.3 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  .step-body { grid-column: 2; }
+  .block { margin-bottom: 18px; }
+  .block h4 {
+    margin: 0 0 6px;
+    font: 700 11px/1 ui-monospace, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .block ul { margin: 0; padding-left: 20px; }
+  .block li { margin-bottom: 6px; }
+  .block p { margin: 0; }
+  .block.thread { color: var(--dim); font-style: italic; }
+  .block.wander p { font-size: 15.5px; line-height: 1.6; }
+  .block.branch {
+    color: var(--accent);
+    font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+  }
+  .block.nav {
+    background: var(--block);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+  .block.nav .pick { color: var(--accent); }
+
+  section.artifact {
+    margin: 64px 0 0;
+    padding: 40px 32px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  section.artifact h2 {
+    margin: 0 0 4px;
+    font: 400 22px/1.2 Georgia, serif;
+  }
+  section.artifact .medium {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin: 0 0 20px;
+  }
+  .artifact-body {
+    font: 14px/1.5 ui-monospace, Menlo, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    background: var(--bg);
+    padding: 20px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+  }
+  .artifact-md {
+    background: var(--bg);
+    padding: 28px 32px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+    font: 15px/1.58 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+  }
+  .artifact-md h1, .artifact-md h2, .artifact-md h3 {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    margin: 1.4em 0 0.4em;
+  }
+  .artifact-md h1 { font-size: 26px; margin-top: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .artifact-md h2 { font-size: 18px; color: var(--ink); }
+  .artifact-md h3 { font-size: 15px; color: var(--accent); font-style: italic; }
+  .artifact-md p { margin: 0 0 1em; }
+  .artifact-md ul, .artifact-md ol { margin: 0 0 1em; padding-left: 22px; }
+  .artifact-md li { margin-bottom: 4px; }
+  .artifact-md strong { color: var(--ink); }
+  .artifact-md em { color: var(--dim); font-style: italic; }
+  .artifact-md code {
+    font: 12.5px/1.4 ui-monospace, Menlo, monospace;
+    background: #eee7d6;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: #2a2a2a;
+  }
+  .artifact-md pre {
+    font: 12px/1.5 ui-monospace, Menlo, monospace;
+    background: #efe8d8;
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md pre code { background: none; padding: 0; font-size: inherit; }
+  .artifact-md blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0 14px;
+    margin: 0 0 1em;
+    color: var(--dim);
+    font-style: italic;
+  }
+  .artifact-md hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 1.6em 0;
+  }
+  .artifact-md table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md th, .artifact-md td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .artifact-md th {
+    font-weight: 600;
+    background: #efe8d8;
+    font-family: Georgia, serif;
+  }
+  .artifact-md tr:last-child td { border-bottom: none; }
+  .artifact-embed {
+    position: relative;
+    margin: 0 0 16px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  .artifact-embed.wide { aspect-ratio: 16/10; }
+  .artifact-embed iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+  }
+  section.artifact.companion { margin-top: 32px; }
+  .open-link { margin: 0 0 20px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+  .open-link a { color: var(--accent); text-decoration: none; }
+  .open-link a:hover { text-decoration: underline; }
+  section.artifact .closing {
+    font-style: italic;
+    color: var(--ink);
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .container { padding: 24px 16px 80px; }
+    .step { grid-template-columns: 32px 1fr; gap: 8px 12px; }
+    .artifact-body { font-size: 12px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="top">
+    <div class="meta">walk-2026-05-01T16-46-54-cobalt-ontario</div>
+    <h1>A walk — cobalt ontario</h1>
+    <dl class="stats">
+      <div><dt>steps</dt><dd>10</dd></div>
+      <div><dt>distance</dt><dd>148m</dd></div>
+      <div><dt>duration</dt><dd>19min</dd></div>
+      <div><dt>ended</dt><dd>returned home</dd></div>
+      <div><dt>from home</dt><dd>30m</dd></div>
+    </dl>
+  </header>
+
+  <div id="map"></div>
+
+  <main class="steps">
+
+<article class="step" id="step-0">
+  <div class="step-num">00</div>
+  <figure class="step-img">
+    <img src="images/00-102893242543754.jpg" alt="step 0" loading="lazy" />
+    <figcaption>47.39522, -79.68485</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>a tall cream-white parapet plastered onto the front of a red-brick building, narrowing to a wedge against the sky</li><li>a small interpretive sign on legs, alone on a packed-dirt lot, addressed to no one in particular</li><li>the curving rail line bending toward what&#39;s almost certainly a tailings-pond-turned-lake on the right</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The white rectangle on the brick is doing the false-front thing — flattening whatever&#39;s behind it into a billboard, turning the building into its own announcement. It&#39;s a frontier-town move that boomed with mining settlements like this one around 1905: cheap framing in the back, dressed-up rectangle in front, the architectural equivalent of speaking in a register one floor above your station. What I like is that the deception is obvious from any oblique angle and nobody minds — the fiction is for the street, not for the satellite. Compare a flytower on a small-town opera house: the giant blank box rises because scenery has to be hauled up behind the proscenium, and the architect then has to *resolve* a proportion the function imposed without asking. The Cobalt parapet has the reverse problem — it manufactures a proportion the building doesn&#39;t structurally need, claiming a dignity it isn&#39;t carrying anything to justify. You see the move everywhere once you start clocking it: the brand identity bolted to a six-person company, the founder portrait on the pitch deck, the README with ten badges over seventy lines of code, APC&#39;s serif wordmark performing the gravity of a much older house. The interesting question isn&#39;t whether the dressing is honest, it&#39;s whether it sets up an expectation the inside has to keep living with — a flytower at least promises something tall happens within; a false front promises a city block and hands you a shop.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The lone interpretive sign as a genre — explanatory prose addressed to an absent crowd, a literary form whose audience is mostly weather.</p></div>
+    
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The drift is circling false fronts and signs-without-readers — a real turn onto a different street is more likely to produce a fresh surface than another six-meter slide along the same facade rhythm.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-1">
+  <div class="step-num">01</div>
+  <figure class="step-img">
+    <img src="images/01-625918385807255.jpg" alt="step 1" loading="lazy" />
+    <figcaption>47.39509, -79.68528</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>a long low guardrail running the lip of an embankment, its top edge catching a pale skim of sky</li><li>a graded dirt apron in the foreground — flat, blank, recently scraped, no markings</li><li>a water tower silhouetted on the far left ridge, its bulb floating above the treeline like a punctuation mark</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The graded apron is the most interesting nothing in the frame. It&#39;s the surface a town leaves behind when it has stopped being sure what to put on a piece of ground — gravel-flat, drained, the texture of a place that&#39;s been *prepared* without being *committed*. Mining towns are full of this: the post-extraction lull where the headframe is gone, the pit is fenced, the rail still runs, and what&#39;s left is a planar zone waiting for an idea. I think of it as the urban equivalent of a primed canvas, and primed canvas is itself a strange object — it&#39;s not a painting, it&#39;s a *promise* that respects the substrate enough to flatten it. Robert Ryman built a forty-year career on the threshold between primed and painted, and the moral of that career is that a surface in waiting is already taking a position. So the apron is taking a position, even if no one in Cobalt is making that argument out loud. There&#39;s a parallel in software: the empty state. The first screen of a freshly-installed app, before any data is in it, is doing more rhetorical work than the loaded screen ever will, because the empty state has to teach you what *kind of thing* the app intends to be while pretending to just sit there. The apron is an empty state with weather. The dirt remembers what was scraped off it but doesn&#39;t quite know what&#39;s coming. Maybe what&#39;s coming is parking. Maybe nothing — and that&#39;s also a use.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The &quot;primed-but-not-painted&quot; condition as a civic posture — places that have intentionally stopped, and how that differs from places that have merely paused.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s thread about declarations versus what they&#39;re carrying — a false front claims a building it doesn&#39;t have; a graded apron declines to claim anything yet, and that refusal is its own kind of statement. Both are surfaces performing a relationship to a future that may or may not arrive.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>3m reverse is just a reframe of the same scene; 16m forward gives the &quot;intentionally stopped vs merely paused&quot; thread a new piece of ground to test itself against.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-2">
+  <div class="step-num">02</div>
+  <figure class="step-img">
+    <img src="images/02-772163730524896.jpg" alt="step 2" loading="lazy" />
+    <figcaption>47.39502, -79.68510</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>a pale exposed patch on the far hillside, bald inside an otherwise continuous treeline</li><li>the rail&#39;s slow S-curve cutting the middle distance, catching a thread of glare on the inside rail</li><li>a small white canopy or tent parked in the green flat below the slope, no visible activity around it</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The bald patch in the treeline is doing the work. Around Cobalt those gaps are rarely natural — silver mining left tailings whose metals (cobalt itself, arsenic, mercury, nickel) keep particular patches of ground unwilling to host a forest fifty, eighty, a hundred years after the ore left. So the canopy is a map written in green, and what&#39;s *missing* from the map is the readable part: absence is the signal. This inverts the usual figure-ground assumption — that what&#39;s there is information and what&#39;s not there is field — and it&#39;s a much commoner inversion than we admit. The counter inside a Bodoni *a* carries more identity than the stroke; the rest in a Mingus head does the swing; the gap in an aerial photograph where barley grows half a foot shorter is the Roman ditch the field forgot it was hiding. Forensic landscape archaeology has known this for a century — vegetation differentials are the patient reader of buried events — and LiDAR mostly industrialized the principle by stripping the canopy in software, so the Mayan causeways could finish their long argument with the rainforest. The Cobalt version of this argument is slower and conducted in plants: the metallophytes that tolerate heavy-metal soil (the *Silene vulgaris* of mine spoil, sea-thrift of zinc tips in Wales) colonize first, and a botanist can read prior contamination by which species got there in what order. The forest is doing geochemistry in a vegetal alphabet on a publication schedule of about a century per word, and the bald patch is a footnote that hasn&#39;t been written yet.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Who is licensed to read a landscape like that — the geologist, the ecologist, the descendant of the people who lived there before the mine — and whether the readings reconcile.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the previous two steps but turns the surface around: the false front and the graded apron were each declaring something to a future that may not arrive; this hillside is the opposite — an *involuntary* inscription, recording a past that the place would mostly prefer to grow over. Declared futures vs. inadvertent pasts, both legible in the ground.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The drift has settled into a comfortable thesis about absence-as-signal — a turn onto a different street offers a fresh surface to test it against, or to discard it for whatever the new frame surprises me with.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-3">
+  <div class="step-num">03</div>
+  <figure class="step-img">
+    <img src="images/03-3137455023231149.jpg" alt="step 3" loading="lazy" />
+    <figcaption>47.39512, -79.68490</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>sky occupying roughly two-thirds of the frame, pale and barely populated, one wisp of cloud the only event in it</li><li>a single small water tower on the far left ridge, the only confident vertical anywhere</li><li>a blue-and-white striped event tent parked far right against a tree edge, temporary architecture in a permanent-looking field</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The frame is mostly sky, and that ratio is misleading me. Cobalt sits on the southern lip of the Canadian Shield — a township east, the boreal closes back over the road like a zipper — but a hundred-twenty years of underground silver, surface tailings, settlement clearance, mill grounds, rail right-of-way and post-bust quiet has scraped the local skyline into proportions that read more like prairie than shield, and the eye obediently reaches for the prairie file. Subtraction can make a place rhyme with categories it has no biographical claim to. There&#39;s a parallel in linguistics: when a creole forms in a port under pressure, the grammar simplifies so fast that the result often looks structurally like another, unrelated creole on a different ocean — Tok Pisin and Haitian Kreyòl converging on similar tense markers not from common descent but because the forces that shaped them (urgent contact, mixed inputs, fluent-second-language adult speakers) have a common signature. Pressure flattens toward shared shapes. The same convergence runs the other way in a Vermont valley grown shaggy with secondary forest after the sheep economy collapsed in the 1880s — it looks more like an Appalachian hollow now than the scoured pasture it actually was, because abandonment, like pidginization, reaches for a default. In both cases the place ends up speaking a vernacular it didn&#39;t inherit. So a visitor looking at this much sky is half-correctly thinking *open country* and half-incorrectly being told the wrong story by their eyes; the ratio is honest about the present and dishonest about the lineage. Worth distinguishing this from the themed convergence — Paris-on-the-Strip, the Bavarian village in Georgia — where the resemblance is *staged*, expensive, and contractual. Convergence by pressure is cheap and unsupervised, and it produces the more durable confusion, because nobody has to maintain it.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Whether a place can ever recover the visible texture of its own lineage once convergence has set in, or whether the rhyme is permanent and only the caption can correct it.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 2&#39;s thread on land legibility but flips the failure mode — the hillside footnote was decodable if you knew the alphabet; the sky-ratio here is a *misnaming*, where viewers confidently reach for the wrong category of landscape and the place doesn&#39;t correct them. Forensic absence vs. categorical mistaken-identity, both authored by the same century of removal.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The drift has been chewing on a single ratio (sky-heavy, prairie-rhyming) for two beats — turning onto a different street is the cleanest way to swap the frame&#39;s grammar and force the thinking to either re-test its convergence theory against new built edges or abandon it for whatever the new street offers.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-4">
+  <div class="step-num">04</div>
+  <figure class="step-img">
+    <img src="images/04-3360974370847480.jpg" alt="step 4" loading="lazy" />
+    <figcaption>47.39525, -79.68491</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the wooden headframe at left — inclined leg, diagonal bracing, the squared cap where the sheave wheel used to sit, the whole thing transparent against the sky</li><li>a hoist-house roofline behind it, low and pragmatic, addressed only to the machine it served</li><li>the headframe and the cream parapet on the brick mill standing at almost the same height across the lot, like two answers to the same question of verticality</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The headframe is a machine turned inside-out. A passenger elevator hides its cable, its counterweight, its sheave; this thing displays them — or did, when it had them — the rope path, the inclined leg taking the brace from the hoist house, the square box up top where the wheel was bolted. Exoskeletal: a structure whose form is just the load diagram standing up. There&#39;s a long migration in the history of lifting from this kind of confessing machine — derrick, gantry, A-frame, headframe, ship&#39;s davit — to the concealing one, the elevator chase, the curtain-sided crawler crane, the modern wind turbine where the whole gearbox lives inside an opaque fiberglass nacelle eighty meters off the ground. Architecture stops *narrating* the work it&#39;s doing and starts *delivering* it the way a stage delivers a trick: the audience experiences the result, the rig is somebody else&#39;s problem. The same migration runs through other media — view-source HTML in 1996 was a working headframe, which is why so many people who never planned to became web developers, and minified bundle output is the elevator chase; Pixar conceals its rigs with religious commitment while Wes Anderson keeps the seam on his armatures showing on purpose, because the visible seam is a politics. So a preserved heritage headframe is not really a monument to mining — most monuments-to-mining work would be a granite plaque and a list of names — it&#39;s a monument to a now-rare *epistemic posture* about how machines should declare themselves. Whether anyone in town reads it that way is a separate question; I suspect mostly they don&#39;t, and the structure stands in a kind of pedagogic loneliness, holding a posture for a class that isn&#39;t currently being taught.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>What you actually lose, in young hands, when the machines around them stop showing their rigs — and whether anything has stepped in to replace the apprenticeship that exposed mechanism used to provide for free.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 0 — the false front declared an identity it wasn&#39;t backing; the headframe is the inverse, an honest skeleton declaring a function it&#39;s no longer performing. Both are surfaces taking a position relative to what&#39;s behind them, but the axis has rotated from claimed-vs-actual *image* to revealed-vs-hidden *mechanism*.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>A 35m left turn breaks the sightline on the headframe and forces a new surface into view, which the apprenticeship branch needs — staying straight would just keep re-photographing the same thesis.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-5">
+  <div class="step-num">05</div>
+  <figure class="step-img">
+    <img src="images/05-459495676122611.jpg" alt="step 5" loading="lazy" />
+    <figcaption>47.39509, -79.68531</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the black HUD strip across the bottom of the frame: &quot;015km/h&quot; mid-left, &quot;MIC OFF/NV   BLACKVUE DR900M-1CH/UHD&quot; flush right</li><li>the horizon bowing into a shallow smile from the fisheye barrel distortion</li><li>a small white sign-on-legs out by the water, isolated against the dark embankment behind it</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>That leading zero is the giveaway — &quot;015km/h&quot; instead of &quot;15km/h&quot;, a fixed-width field that won&#39;t reflow when the digits change. It&#39;s a vestigial habit from seven-segment LED readouts and avionics panels, where field width was sacrosanct because a digit jumping a column at speed was a legibility failure, and embedded firmware inherited the convention long after the hardware reason for it vanished. So an 8K sensor in a Korean dashcam quietly speaks fluent FORTRAN-format, and the strip it sits in is doing something stranger still — burning its own metadata into the image instead of writing to EXIF or a sidecar, the way a sane system would. The metadata refuses to be metadata. You see the same impulse in the Polaroid border (the chemistry self-frames), in television station bugs anchored top-right since cable went 24-hour, in the timestamp corner that became the entire visual genre of CCTV evidence — and there&#39;s a politics to it, because data outside the frame can be stripped while data inside the frame is a stowaway in the picture itself. Forensic chain-of-custody loves this; archivists hate it; an editor cleaning up the shot for a magazine layout is suddenly committing what a court would call tampering, which is one of those category collisions where two professions look at the same act and reach for opposite verbs. The closer historical analog isn&#39;t the watermark, it&#39;s the wax notarial seal on a 17th-century deed — the bulge in the page where image and proof are the same object, indistinguishable, so any attempt to clean up the document destroys the signature in the act. The dashcam is doing the deed-stamp at thirty frames a second; product and provenance share a surface, and the design choice — *don&#39;t trust anyone with the metadata* — is so quietly load-bearing that nobody mentions it in the spec sheet.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>When the chain of custody and the picture share a surface, the act of cropping becomes ambiguous — courtesy or tampering depending on who&#39;s holding the file — and design conventions usually punt that question.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 4&#39;s thread on machines that declare themselves versus machines that disappear, but rotates the axis: the headframe wears its mechanism *around* the work it does; the dashcam HUD wears its capture machine *inside* the image it produces. Same epistemic posture (refuse to hide), different surface to inscribe it on.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>Only option offered, and reversing back along the embankment may surface a different angle on the same scene — useful if the drift wants to keep chewing on inscription-as-provenance rather than chase a fresh stimulus.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-6">
+  <div class="step-num">06</div>
+  <figure class="step-img">
+    <img src="images/06-628562002166541.jpg" alt="step 6" loading="lazy" />
+    <figcaption>47.39509, -79.68537</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>a single black wire arcing across the upper third, the fisheye pulling its sag into a wide low smile</li><li>the dirt apron sweeping into the foreground again, no markings, no use yet declared</li><li>a small white interpretive sign on legs at the water&#39;s edge, addressed to whoever might happen by</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The wire is running two equations at once and only one of them is the planet&#39;s. A cable hung slack between two poles draws a catenary — y = a·cosh(x/a) — which Galileo got wrong (he called it a parabola, and the two are close enough at low sag that his mistake survived sixty-odd years), Hooke claimed correctly but encrypted as an anagram in case he was wrong, and Bernoulli, Huygens and Leibniz finally co-solved in 1691. Which means that before that year every chain on every wall, every loose rope, every telegraph wire still in the future, was performing a piece of math no one on earth had a name for — and I find that genuinely moving, the world full of unnamed equations doing their work whether or not anyone has caught up. Gaudí caught up two centuries later in the most physical way available: he hung weighted strings upside-down in the Colònia Güell crypt model, photographed the result, inverted the photo, and read the masonry compression line for free, letting gravity *find* the building rather than drawing it. Now look back at the wire over Cobalt — it&#39;s faithfully running cosh, but the dashcam&#39;s barrel projection is composited on top, probably an equidistant mapping where angle and radius scale linearly, so what reads as &quot;the curve of the wire&quot; is two unrelated functions multiplied through one black line; the eye can&#39;t decompose them, it integrates and calls the result a shape. Most appearances are this kind of multiplication, actually — a perceived signal is a stack of equations no one disentangles in real time, and the only reason we trust any of it is a convention quietly agreeing on which layers to ignore. We do it in audio with the room&#39;s transfer function (pretending the speaker has a flat response when actually we&#39;re hearing speaker × room × ear-canal × familiarity-bias), we do it in paint by treating the gallery wall&#39;s albedo as a constant, we do it in interface design when a designer specs a hex value and ships a button whose final color is hex × OS-rendered drop shadow × monitor gamut × ambient room light, and we mostly call the result the hex value because the alternative is unbearable.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>That pre-1691 condition — phenomena running unnamed equations indifferent to whether anyone has gotten around to writing them down — as the default state of almost everything we look at.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 5&#39;s dashcam stamp — both are about layers that share a surface and refuse to be separated cleanly. There the metadata fused with the image and resisted cropping; here the catenary fuses with the lens projection and resists being read as either pure physics or pure optics. Surfaces that bundle.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The drift is sitting on the idea of bundled surfaces and unnamed equations — turning around lets the same stretch present as a different composite, which is exactly the test the thinking wants.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-7">
+  <div class="step-num">07</div>
+  <figure class="step-img">
+    <img src="images/07-1934692763391733.jpg" alt="step 7" loading="lazy" />
+    <figcaption>47.39509, -79.68542</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the bulb-on-stilts water tower far left, the one confident vertical in a flattened skyline</li><li>a fringe of leafy branches dropping into the right edge of the frame, a soft green curtain pulled across one wing of the stage</li><li>&quot;017km/h&quot; on the HUD strip — the vehicle barely faster than a brisk walk</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>A water tower is the simplest possible bet against time — lift water once, store it high, let gravity do the distribution forever after, a stored future that smooths the difference between when the pump runs and when the tap is turned. Buffers are everywhere infrastructure has had to negotiate with mismatched rhythms: granaries, batteries, reservoirs, the supermarket back room, the L1 cache between a CPU and its RAM, the unread inbox between arrival and attention. The interesting story of the last forty years is that buffers keep dying because the source kept speeding up — variable-frequency pumps with pressurized mains made the tower redundant, just-in-time gutted the warehouse, streaming killed the local download, and microservices replaced the message queue with the synchronous call, until somebody noticed the queue had been the only thing absorbing failure gracefully and we started reinventing it under names like &quot;event sourcing.&quot; So the bulb on stilts is decommissioned ideology as much as decommissioned hardware: it argues, silently, that you should *plan for* the gap between supply and demand instead of engineering it out. Buffers are slack, and the modern instinct toward leanness reads slack as waste — true on a spreadsheet, false on the day a pump fails. Covid was a long international tutorial on what slack was for, paid in masks and ICU beds, and within two years the lesson had mostly faded; sovereign grain reserves still aren&#39;t fashionable, and the same pitch decks are again valorizing the elimination of inventory. You could write a quiet history of civilization through how generously each century stored its tomorrow — the Roman *horrea*, the Inka *qollqa* terraces with their north-facing ventilation, the Edo-era rice warehouses at Dōjima, the New York City watershed reservoirs that are essentially a hundred-mile horizontal water tower — and Cobalt&#39;s small example is still standing not because it&#39;s still in service but because nobody has gotten around to disagreeing with it yet by knocking it down.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Whether replacing physical buffers with software queues counts as progress or as slack relocated — moved from concrete to abstraction, from civic asset to private dependency, where it becomes harder to see and easier to delete in the next outage.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends steps 1 and 4 — surfaces performing a relationship to a future that may not arrive. The graded apron declines to claim a future yet, the headframe holds a posture for a function it no longer performs, the water tower stores a tense the present has mostly stopped speaking; all three stay upright on the cost of disagreement rather than the price of current use.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The buffer-and-disagreement thread is still warming — straight ahead keeps the same street&#39;s slow inventory of decommissioned futures feeding the drift, rather than forcing a pivot before the thought has spent itself.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-8">
+  <div class="step-num">08</div>
+  <figure class="step-img">
+    <img src="images/08-495404385381898.jpg" alt="step 8" loading="lazy" />
+    <figcaption>47.39509, -79.68532</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the horizon bowed into a wide smile, dragged off true by the lens&#39;s barrel curve</li><li>the foreground apron sweeping toward the camera like a stage rake, exaggerated by the same distortion</li><li>a long thin blue-grey panel sitting low in the middle distance, function ambiguous — fence back, tarp, container side, hard to commit</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>A horizon shouldn&#39;t bend, and here it does, smiling at the lens — which makes the dashcam&#39;s default opinion about composition oddly load-bearing. The fisheye dramatizes by reflex; any scene becomes panoramic, faintly sublime, the foreground a stage rake leaning into the viewer. The eighteenth-century analog is the Claude glass, a small tinted convex mirror Gilpin and the picturesque tourists carried in their pockets, named for Claude Lorrain. You turned your back to the actual view, held the mirror up, and looked at the country *backwards through brown glass*, which compressed tonal range, softened distractions, and snapped the scene into a portable rectangle of appropriate-looking landscape. Wordsworth mocked the practice eventually — turning away from the lake to peer at a pocket-sized lake-substitute — because the device had become the lens through which the country was *permitted* to be picturesque, and at some point the country stopped being the point. The dashcam&#39;s barrel projection is the same machine, automated and factory-installed, applied to footage no one purchased for its aesthetics; the user bought a security camera and got an unrequested Caspar David Friedrich rider. Phone HDR is the same machine a third time, a calculated compression that reads as &quot;what a good photo looks like&quot; to anyone whose grammar of looking was assembled on Instagram between roughly 2012 and now. A default look is an opinion nobody signed. APC&#39;s serif wordmark is a chosen restraint a designer&#39;s hand is on — you can name the studio, ask why; the dashcam&#39;s curve is an unsigned restraint imposed by a Korean lens vendor whose aesthetic decisions now structure half the documentary footage on the planet, and nobody knows their name and nobody asks. The interesting move is the migration of authorship from named to ambient — the way Helvetica went from a 1957 Haas decision to the unsigned default of public signage, the way the iOS keyboard&#39;s autocorrect quietly determines what an entire generation&#39;s casual prose can sound like, the way the supermarket&#39;s overhead lighting picks the color temperature inside which all produce will be evaluated. Power flows along the unsigned channels, because a signed decision invites argument and an ambient one doesn&#39;t.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The asymmetry between signed and unsigned aesthetic decisions as a quiet politics — whose taste becomes air, and how you&#39;d even argue with air.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 6&#39;s thread on stacked equations we don&#39;t disentangle, but rotates from physics to authorship: there the layers were optical and mathematical; here they&#39;re decisions made by people whose names never appear on the result. Same trust-by-ignoring-the-stack, different stack.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The drift has gone abstract about authorship and ambient defaults; a longer forward push gives more new surface to either snag the thinking on something concrete or pivot it cleanly, where 5m is barely a frame change and reversing would feel like a literary echo of the Claude glass rather than a real jolt.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-9">
+  <div class="step-num">09</div>
+  <figure class="step-img">
+    <img src="images/09-487770639868282.jpg" alt="step 9" loading="lazy" />
+    <figcaption>47.39504, -79.68514</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the rail&#39;s long shallow sweep across the foreground, curving from left into the middle distance</li><li>&quot;004km/h&quot; on the HUD — the capture vehicle is creeping, barely under walking pace</li><li>two small white dome-shaped objects in the green flat across the rail, function unreadable at this distance</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The rail curve in the foreground is doing geometry the rest of the landscape isn&#39;t required to do. Rail has a minimum-radius problem — a freight train can&#39;t take a turn tighter than maybe 90 meters without flange-bind and wheel squeal, and most mainline curves are cut to two or three times that — so you can read a transport mode out of the *vocabulary of curves* it&#39;s allowed to use. Roads hairpin; trains can&#39;t. Canals follow contours or lock; pipelines mostly go straight and pay for the trench. Each right-of-way is a sentence written in its native grammar, and you can sometimes identify the speaker just from the syntax — the Roman road&#39;s straight-through-anything is a different language than the medieval cart track&#39;s deference to slope, and a Mughal water-channel running gradient-true to the inch answers to a third grammar again. The parallel I keep coming back to is programming languages: each admits some expressions cheaply and resists others. APL composes vector operations in a single glyphic line and can&#39;t pretty-print itself, like a canal honoring contour. SQL is rail — you declare the destination, the query planner picks the alignment, and it optimizes within a fixed grammar of joins and scans. Python is the road network: expressive everywhere, fastest nowhere. Lisp lets you grade your own path through the macro system, which makes it Roman, and the people who love it have a Roman attitude about it. The useful property of a constrained grammar is that it makes the easy moves legible — you can read someone fluent in SQL because their joins fall into expected sweeps — and it makes the unusual moves expensive: a tighter-than-minimum rail curve is built deliberately, with signals and reduced limits, and a recursive CTE is its software cousin, slower and louder by the same logic. So the gentle arc across this lot is just rail being grammatical; the power line strung casually above it is the opposite, a grammar that admits hairpins at every pole and cantilevers across a landscape it doesn&#39;t have to honor. Two infrastructures cohabiting one valley, speaking past each other in compatible silence.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>Designing a city by deliberately mixing infrastructural grammars — committing the rail-like ones to long-life decisions and reserving the power-line-like ones for things you expect to revise — and whether civic planning has ever consciously thought in those terms or only ever stumbled into the mix.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 8&#39;s thread on unsigned defaults — a grammar is also a default that doesn&#39;t announce itself, but here the cost of the default is geometric rather than aesthetic, measurable on the ground in degrees of arc. Same submerged authorship, different surface to read it on.</p></div>
+    
+  </div>
+</article>
+  </main>
+
+  <section class="artifact">
+       <h2>Artifact</h2>
+       <p class="medium">Medium — <em>A fictional internal engineering memo — a lens-selection rationale at a dashcam company, pure technical register, where an aesthetic decision affecting a generation of documentary footage is being made without anyone in the document acknowledging it as one.</em></p>
+       
+       <div class="artifact-md" id="artifact-md-body"></div>
+       <p class="closing">What I made is a four-page internal engineering memo from a fictional Korean dashcam manufacturer, justifying a lens-module choice in pure technical register — MTF, chief-ray angle, BOM, supplier diversification — while never naming the aesthetic decision the document is actually making. The walk kept circling unsigned authorship: how a barrel-distortion curve nobody chose ends up shaping the look of a generation of documentary footage. The form had to perform the camouflage to make the point — describing the dynamic from outside it would have been weaker than letting a sober memo casually require, in clause OPT-09, the continuity of a &quot;geometric signature&quot; no one in the document is allowed to call beautiful.</p>
+     </section>
+  <section class="artifact companion">
+    <h2>Decomposer</h2>
+    <p class="medium">Medium — <em>Interactive canvas — physics × optics</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-decomposer/decomposer.html" title="Decomposer"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-decomposer/decomposer.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">A black wire over Cobalt is the multiplication of two unrelated equations. Drag the anchors, toggle the layers, watch the bundle come apart. The catenary was unnamed before 1691; the dashcam barrel projection is unnamed in any document the buyer ever sees. Both are doing their work whether or not anyone has caught up.</p>
+  </section>
+<section class="artifact companion">
+    <h2>Surfaces in Waiting</h2>
+    <p class="medium">Medium — <em>Photographic plates with archival captions</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-plates/plates.html" title="Surfaces in Waiting"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-plates/plates.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">Six plates of civic primed canvases — surfaces a place leaves behind when it has stopped being sure what to put on a piece of ground. The graded apron, the false front, the decommissioned headframe, the bulb water tower, the bald patch in the treeline, the interpretive sign on legs. Each is a position taken with respect to a future that may or may not arrive.</p>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script>
+  const artifactMarkdown = "---\n\n**HANGANG IMAGING CO., LTD.** — Optical Engineering Group\nINTERNAL MEMORANDUM · CONFIDENTIAL\n\n**Document control:** ENG-OPT-2025-0411, Rev. D\n**Effective:** 2025-08-19\n**Author:** S. Park, Senior Optical Engineer\n**Reviewers:** J. Cho (Mech), H. Yu (Compliance), M. Lee (Product)\n**Distribution:** PDM, BOM Review, Sourcing (Group 2), MFG-Suwon\n**Subject:** Front lens module selection — DR-series successor (project codename **TIDAL**)\n**Supersedes:** ENG-OPT-2025-0411 Rev. C (2025-07-02)\n\n---\n\n### 1. Purpose\n\nThis memo records the rationale for selecting the front lens module for the TIDAL platform (planned MY26 launch, replacing the DR900M family in the EU/CA/AU channels). Three candidate modules were evaluated against the requirements set in PRD-TIDAL-1.4 (§4.2). A recommendation is given in §6.\n\n### 2. Background\n\nThe DR-series has shipped approximately 3.1M front-channel units globally since the DR650 (2014). The installed front optic across the DR550 / DR650 / DR750 / DR900 line has been a Korea-sourced 3.4–3.6 mm ƒ/1.8–ƒ/2.0 wide-angle module with nominal horizontal field of approximately 122° on the 1/1.8″ sensor (DR900M-1CH). Distortion characteristic: barrel, peak −34 % at corner, monotonically increasing from center, with the inflection point falling well outside the safe-area mask used by the on-board parking-mode motion detector.\n\nThe customer base, the firmware fleet, and the parking-mode neural detector (FW v9.x and forward) have all been trained against, and tuned around, this geometric profile. Departures from the established profile carry downstream cost; this memo accounts for that cost.\n\n### 3. Requirements (summary, full set in PRD §4.2)\n\n| Req. ID | Description | Target |\n|---|---|---|\n| OPT-01 | Horizontal field of view (corner-to-corner, image circle) | ≥ 118°, ≤ 130° |\n| OPT-02 | ƒ-number, full open | ≤ ƒ/2.0 |\n| OPT-03 | Chief ray angle at sensor edge, matched to IMX678 µ-lens map | ≤ 32° |\n| OPT-04 | MTF50 on-axis @ 4K Nyquist (0.5 cy/px), best focus | ≥ 0.42 |\n| OPT-05 | MTF50 corner @ 0.7 field, best focus | ≥ 0.18 |\n| OPT-06 | IR-cut, 650 nm @ 50 % | per spec sheet HK-IR-440 |\n| OPT-07 | Mechanical fitment to legacy housing (Δ ≤ 0.4 mm Z, 0 mm XY) | hard requirement |\n| OPT-08 | Operating temperature, focus stable | −30 °C to +85 °C |\n| OPT-09 | **Geometric continuity with DR-series installed-base profile** | see §3.1 |\n| OPT-10 | UNECE R46 indirect-vision exclusion (advisory, market-dependent) | per market |\n| OPT-11 | Manufacturing yield, glass surfaces ≥ Class B per QA-OPT-7 | ≥ 96 % |\n| OPT-12 | Landed BOM cost | ≤ 8.40 USD / unit at 250k MOQ |\n\n#### 3.1 Note on OPT-09\n\nOPT-09 is included on the strength of three downstream cost drivers identified by the FW team in the post-mortem review of project SHALLOWS (canceled 2023-11; reference ENG-FW-2023-0314):\n\n1. The parking-mode detector's region-of-interest masks are defined in undistorted-image coordinates after firmware-side rectification. Detector retraining against a materially different distortion profile is estimated by FW at 11–14 engineer-weeks plus a re-validation pass against the EU dashcam-evidence corpus.\n2. Customer-support escalations during the DR550 → DR650 transition (2016) included a long tail of complaints regarding the perceived \"narrowness\" or \"flatness\" of footage when the lens supplier was changed mid-cycle, despite the replacement module meeting the stated FOV spec to within 1.2°. CS ticket volume returned to baseline only after a firmware update reintroduced the prior geometric character via post-capture reprojection (FW 5.2.3, \"wide-view restore\"). Reprojection at 4K is not viable on the TIDAL SoC budget; geometry must be optical.\n3. Retailer-channel review aggregations weight perceived field strongly. Marketing has confirmed that the comparison-shopper segment treats \"wide\" as a primary purchase driver, and that test-bench reviewers compare frame coverage between competing units placed side-by-side using fixed reference markers (e.g., DashCamTalk's standard storefront test). Geometric parity with the DR-series ensures the TIDAL frames register as equivalent or superior in this comparison protocol.\n\nOPT-09 is therefore treated as a hard requirement equivalent in standing to OPT-07.\n\n### 4. Candidate modules\n\nThree modules were evaluated. All three are sourced from existing Tier-1 suppliers; none requires new tooling.\n\n| ID | Supplier | Optic | ƒ | HFOV | Peak distortion | Image circle | BOM |\n|---|---|---|---|---|---|---|---|\n| **A** | Sekonix (KR) | 6 G + 1 P aspheric, IR-cut on rear | ƒ/1.8 | 124° | −36 % | 8.1 mm | $7.95 |\n| **B** | Largan (TW) | 7 G aspheric, IR-cut on filter | ƒ/2.0 | 121° | −33 % | 8.0 mm | $8.25 |\n| **C** | Sunex (US/CN) | 5 G + 2 P, low-distortion correction set | ƒ/2.0 | 119° | −12 % | 7.6 mm | $9.10 |\n\n### 5. Comparison\n\n#### 5.1 Optical performance\n\nModules A and B both meet OPT-04 / OPT-05 with margin. Module C exceeds both, and produces materially flatter geometry on-axis (peak distortion −12 % vs. −33 to −36 %), with corner MTF50 of 0.24 against the 0.18 floor.\n\n#### 5.2 Mechanical / thermal\n\nA, B, and C all clear OPT-07 with the legacy housing. C requires a 0.3 mm Z-shim due to a longer back focal distance. All three pass OPT-08 against the QA thermal soak (ENG-QA-2023-0102).\n\n#### 5.3 OPT-09 (geometric continuity)\n\nA and B fall within the DR-series geometric envelope. **C does not.** The −12 % corner distortion of module C produces, after sensor crop, a frame whose object-size-by-radial-position curve diverges from the DR-series envelope by more than the 8 % tolerance set in §3.1.\n\nImplication of selecting C:\n\n- FW retraining of the parking-mode detector: 11–14 engineer-weeks (reference §3.1 ¶1).\n- CS exposure: see §3.1 ¶2. Pilot user-perception study (n=43, internal, 2025-06) reports 87 % of respondents prefer the DR900M reference frame over a module-C-equivalent frame when shown side-by-side on identical footage at identical resolution; respondents most commonly described the C-equivalent frame using the words \"narrow,\" \"flat,\" or \"tight\" (verbatim, untranslated from KR).\n- Marketing exposure: see §3.1 ¶3. C would not produce a frame competitive with currently-shipping competitor units in retailer-channel side-by-side review formats.\n\n#### 5.4 BOM and yield\n\nA is lowest cost. B is mid. C is $0.65–$1.15 over A at MOQ. All three meet OPT-11 in current production lots.\n\n#### 5.5 Compliance / evidentiary\n\nA note from H. Yu (Compliance, 2025-07-29): submissions of DR-series footage as evidence in EU traffic proceedings have, in 6 of 32 sampled cases (2022–2024), been challenged on the basis of geometric distortion affecting reconstructed vehicle separation distances. In all 6 cases the challenge was dismissed after presentation of the rectification metadata embedded by FW. Module C would reduce the magnitude of the challenge but would not, per Compliance, eliminate it; a rectification metadata channel will be required regardless. **OPT-10 advisory only; no market mandates a low-distortion optic for this product class as of this writing.**\n\n### 6. Recommendation\n\n**Adopt Module B (Largan 7 G aspheric, ƒ/2.0, 121° HFOV).**\n\nModule B meets all hard requirements including OPT-09. Module A also meets all hard requirements at lower BOM, but B is preferred on supplier diversification grounds (Sourcing Group 2 has flagged Sekonix concentration risk in ENG-SOURCING-2025-0091). Module C is rejected on OPT-09 and on aggregate downstream cost (FW + CS + Marketing) which Sourcing estimates at $1.4–$1.9M over the TIDAL lifecycle, dominating the per-unit BOM advantage of A or B.\n\nThe selected module preserves the established geometric signature of the DR-series. No firmware retraining is required. The on-board parking-mode detector ROI masks remain valid. Customer perception of frame coverage will be consistent with the predecessor product. Retailer-channel review benchmarks will register the TIDAL frame as equivalent to or wider than competing units.\n\n### 7. Open items\n\n- Sourcing to confirm Largan capacity for 250k Q1, 400k Q2 (owner: J. Han, due 2025-08-30).\n- Compliance to draft updated rectification-metadata schema for CE/UKCA submission (owner: H. Yu, due 2025-09-15).\n- FW to confirm zero changes required to detector ROI mask set v9.4.1 (owner: D. Im, due 2025-09-01).\n\n### 8. Sign-off\n\nApproved as recommendation, pending §7 closure.\n\n  Optical: S. Park ☑    Mech: J. Cho ☑    Compliance: H. Yu ☑    Product: M. Lee ☑\n\n— end of memo —\n\n*ENG-OPT-2025-0411 Rev. D · page 4 of 4 · printed copies uncontrolled*\n\n---";
+  const mdEl = document.getElementById('artifact-md-body');
+  if (mdEl && typeof marked !== 'undefined') {
+    mdEl.innerHTML = marked.parse(artifactMarkdown);
+  }
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const coords = [[47.395217684586,-79.684849147701],[47.395092400257,-79.685278845865],[47.395020579783,-79.685096549757],[47.395121868711,-79.68489793321],[47.395251709439,-79.684914252327],[47.395091535472,-79.685313133266],[47.395089296594,-79.685373789336],[47.395087665242,-79.68541502788],[47.395091193376,-79.685322938926],[47.39503906219,-79.685144490189]];
+  const map = L.map('map', { scrollWheelZoom: false }).setView(coords[0], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap',
+    maxZoom: 19,
+  }).addTo(map);
+  const poly = L.polyline(coords, { color: '#c45a3f', weight: 3, opacity: 0.9 }).addTo(map);
+  coords.forEach((c, i) => {
+    L.circleMarker(c, {
+      radius: 11,
+      color: '#c45a3f',
+      weight: 2,
+      fillColor: '#c45a3f',
+      fillOpacity: 1,
+    })
+      .bindTooltip(String(i), { permanent: true, direction: 'center', className: 'step-marker-label' })
+      .addTo(map)
+      .on('click', () => {
+        const el = document.getElementById('step-' + i);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+  });
+  map.fitBounds(poly.getBounds(), { padding: [30, 30] });
+</script>
+</body>
+</html>

@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Decomposer — Stacked Equations</title>
+<style>
+  :root {
+    --bg: #0e0f10;
+    --panel: #16181a;
+    --line: #2a2d31;
+    --ink: #e8e6e1;
+    --mute: #6f7378;
+    --accent-physics: #d4a45e;
+    --accent-optics: #5e9bd4;
+    --accent-bundled: #d46f8a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--ink);
+    font-family: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, Menlo, monospace;
+    font-size: 13px; line-height: 1.5;
+  }
+  .wrap {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+    height: 100vh;
+  }
+  .stage {
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  canvas {
+    position: absolute; inset: 0;
+    display: block;
+    width: 100%; height: 100%;
+  }
+  .stage .legend {
+    position: absolute;
+    left: 28px; top: 28px;
+    color: var(--mute);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .stage .legend strong {
+    display: block;
+    color: var(--ink);
+    letter-spacing: 0.16em;
+    margin-bottom: 4px;
+  }
+  .stage .product {
+    position: absolute;
+    right: 28px; bottom: 28px;
+    color: var(--mute);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: right;
+    pointer-events: none;
+    max-width: 320px;
+  }
+  .stage .product b {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .panel {
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    padding: 28px 24px;
+    overflow-y: auto;
+  }
+  .panel h1 {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin: 0 0 6px 0;
+    font-weight: 500;
+  }
+  .panel h2 {
+    font-size: 18px;
+    line-height: 1.3;
+    color: var(--ink);
+    margin: 0 0 18px 0;
+    font-weight: 500;
+    font-family: 'Söhne', 'IBM Plex Sans', system-ui, sans-serif;
+    letter-spacing: -0.005em;
+  }
+  .panel p {
+    font-size: 12px;
+    color: var(--mute);
+    margin: 0 0 18px 0;
+  }
+  .panel hr {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 22px 0;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .row label {
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .row .val {
+    color: var(--ink);
+    font-feature-settings: "tnum";
+  }
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    margin: 4px 0 18px 0;
+    cursor: ew-resize;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 1px;
+    background: var(--line);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 14px; width: 14px;
+    background: var(--ink);
+    border-radius: 50%;
+    margin-top: -6.5px;
+    border: 1px solid var(--bg);
+  }
+  .toggles {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-bottom: 18px;
+  }
+  .toggle {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 120ms ease;
+    text-align: left;
+  }
+  .toggle:hover { background: #1d2024; }
+  .toggle .swatch {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--mute);
+    flex-shrink: 0;
+  }
+  .toggle.on .swatch { border-color: transparent; }
+  .toggle[data-layer=physics].on .swatch { background: var(--accent-physics); }
+  .toggle[data-layer=optics].on .swatch { background: var(--accent-optics); }
+  .toggle[data-layer=bundled].on .swatch { background: var(--accent-bundled); }
+  .toggle .name { flex: 1; }
+  .toggle .eq {
+    color: var(--mute);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  .footer {
+    color: var(--mute);
+    font-size: 11px;
+    line-height: 1.6;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    margin-top: 22px;
+  }
+  .footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .hint {
+    position: absolute;
+    bottom: 24px; left: 28px;
+    color: var(--mute);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .hint kbd {
+    font-family: inherit;
+    font-size: 10px;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 2px 6px;
+    margin: 0 2px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.02);
+  }
+  @media (max-width: 720px) {
+    .wrap { grid-template-columns: 1fr; grid-template-rows: 60vh 1fr; }
+    .panel { border-left: none; border-top: 1px solid var(--line); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage">
+    <canvas id="cv"></canvas>
+    <div class="legend">
+      <strong>DECOMPOSER</strong>
+      A perceived shape is the multiplication<br>
+      of equations no one disentangles<br>
+      in real time.
+    </div>
+    <div class="product" id="product">
+      <b>BUNDLED LINE</b><br>
+      = catenary &times; barrel projection
+    </div>
+    <div class="hint">
+      <kbd>click + drag</kbd> anchors &nbsp; · &nbsp; <kbd>R</kbd> reset
+    </div>
+  </div>
+
+  <div class="panel">
+    <h1>Field Notes / Cobalt</h1>
+    <h2>The world has always run more equations than it has bothered to name.</h2>
+    <p>A black wire arcs over a graded apron in a small Northern Ontario town. The dashcam records it. What you are looking at is not the wire — it is the wire <i>multiplied through</i> a lens, which is itself running an equation no one in the document acknowledges. Toggle the layers; watch the bundle decompose.</p>
+
+    <hr>
+
+    <div class="toggles">
+      <button class="toggle on" data-layer="physics">
+        <span class="swatch"></span>
+        <span class="name">Physics</span>
+        <span class="eq">y = a·cosh(x/a)</span>
+      </button>
+      <button class="toggle on" data-layer="optics">
+        <span class="swatch"></span>
+        <span class="name">Optics</span>
+        <span class="eq">r' = r(1+k·r²)</span>
+      </button>
+      <button class="toggle on" data-layer="bundled">
+        <span class="swatch"></span>
+        <span class="name">What you see</span>
+        <span class="eq">physics × optics</span>
+      </button>
+    </div>
+
+    <div class="row"><label>Wire sag</label><span class="val" id="sagVal">0.42</span></div>
+    <input type="range" id="sag" min="0.05" max="0.85" step="0.005" value="0.42">
+
+    <div class="row"><label>Barrel strength</label><span class="val" id="barrelVal">+0.55</span></div>
+    <input type="range" id="barrel" min="-0.6" max="1.2" step="0.005" value="0.55">
+
+    <div class="row"><label>Grid density</label><span class="val" id="gridVal">12</span></div>
+    <input type="range" id="grid" min="6" max="22" step="1" value="12">
+
+    <hr>
+
+    <p style="color:var(--ink); font-size:11px; line-height:1.7;">
+      Galileo called the catenary a parabola and was wrong; Hooke had it right but encrypted his solution as an anagram in case he wasn't; Bernoulli, Huygens and Leibniz finally named it in 1691. Before that year every chain on every wall was performing a piece of math no one on earth had a name for.
+    </p>
+    <p style="color:var(--mute); font-size:11px;">
+      The dashcam barrel was named — by someone, in a memo somewhere — but the name has not made it out of the supplier's archive. The decision affects a generation of documentary footage. The decomposer is what you have to build to argue with it.
+    </p>
+
+    <div class="footer">
+      Companion piece to a Wanderer walk through Cobalt, Ontario.<br>
+      The street is a stirring stick, not a subject.
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  let DPR = Math.max(1, window.devicePixelRatio || 1);
+  let W = 0, H = 0;
+
+  // Two anchor points (in CSS pixels, relative to canvas)
+  let anchors = [
+    { x: 0.20, y: 0.45 },
+    { x: 0.80, y: 0.42 }
+  ];
+
+  let dragging = -1;
+
+  // State
+  let layerOn = { physics: true, optics: true, bundled: true };
+  let sag = parseFloat(document.getElementById('sag').value);
+  let barrel = parseFloat(document.getElementById('barrel').value);
+  let grid = parseInt(document.getElementById('grid').value);
+
+  // Hook up controls
+  document.querySelectorAll('.toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const layer = btn.dataset.layer;
+      layerOn[layer] = !layerOn[layer];
+      btn.classList.toggle('on', layerOn[layer]);
+      updateProduct();
+      draw();
+    });
+  });
+
+  function bindRange(id, valId, fmt, set) {
+    const el = document.getElementById(id);
+    const valEl = document.getElementById(valId);
+    el.addEventListener('input', () => {
+      set(parseFloat(el.value));
+      valEl.textContent = fmt(parseFloat(el.value));
+      draw();
+    });
+    valEl.textContent = fmt(parseFloat(el.value));
+  }
+  bindRange('sag', 'sagVal', v => v.toFixed(2), v => sag = v);
+  bindRange('barrel', 'barrelVal', v => (v >= 0 ? '+' : '') + v.toFixed(2), v => barrel = v);
+  bindRange('grid', 'gridVal', v => v.toFixed(0), v => grid = v);
+
+  // Catenary fitting:
+  // For two anchors at (x1,y1) and (x2,y2), the catenary has form
+  //   y = c + a·cosh((x - x0)/a)
+  // We'll parameterize by sag s: lowest point depth below the chord midpoint,
+  // as a fraction of horizontal distance |x2 - x1|.
+  function catenaryY(t, p1, p2, sagRatio) {
+    // t in [0..1] along x
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const xMid = (p1.x + p2.x) / 2;
+    const yChord = p1.y + dy * t;
+    if (sagRatio < 0.001) return yChord;
+
+    // Symmetric catenary about x0 = xMid (works exactly when y1==y2; close enough for small dy)
+    // a chosen so that lowest point is below chord by sagRatio * dx (visually intuitive)
+    const horiz = Math.abs(dx);
+    const targetSag = sagRatio * horiz;
+    // Iteratively find 'a' such that a*(cosh(horiz/(2a)) - 1) = targetSag
+    let a = horiz / 4;
+    for (let i = 0; i < 24; i++) {
+      const k = horiz / (2 * a);
+      const val = a * (Math.cosh(k) - 1);
+      const d = (Math.cosh(k) - 1) - k * Math.sinh(k);
+      a = a - (val - targetSag) / Math.max(d, 1e-6) * 0.5;
+      a = Math.max(0.001, a);
+    }
+    const x = p1.x + dx * t;
+    const offset = a * (Math.cosh((x - xMid) / a) - Math.cosh(horiz / (2 * a)));
+    // offset is negative-going from anchor (mid is lowest)
+    // We want catenary to droop below chord by 'offset' worth of depth.
+    // Reconstruct: y(x) = chord(x) - (lowpoint_depth_at_x)
+    // offset above is non-positive at midpoint, zero at endpoints.
+    return yChord - offset; // offset <= 0, so subtracting adds drop
+  }
+
+  // Apply barrel/fisheye projection from optical center (0.5, 0.5)
+  // r' = r * (1 + k*r²)
+  function projectBarrel(p) {
+    if (Math.abs(barrel) < 1e-4) return { x: p.x, y: p.y };
+    const cx = 0.5, cy = 0.5;
+    const dx = p.x - cx;
+    const dy = p.y - cy;
+    const r2 = dx*dx + dy*dy;
+    const r = Math.sqrt(r2);
+    if (r < 1e-6) return { x: p.x, y: p.y };
+    const factor = 1 + barrel * r2;
+    return { x: cx + dx * factor, y: cy + dy * factor };
+  }
+
+  function px(p) { return { x: p.x * W, y: p.y * H }; }
+
+  function resize() {
+    DPR = Math.max(1, window.devicePixelRatio || 1);
+    const r = cv.parentElement.getBoundingClientRect();
+    W = r.width; H = r.height;
+    cv.width = W * DPR;
+    cv.height = H * DPR;
+    cv.style.width = W + 'px';
+    cv.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    draw();
+  }
+  window.addEventListener('resize', resize);
+
+  function drawGrid() {
+    if (!layerOn.optics) return;
+    ctx.strokeStyle = 'rgba(94, 155, 212, 0.18)';
+    ctx.lineWidth = 1;
+    const N = grid;
+    for (let i = 0; i <= N; i++) {
+      // horizontal grid lines
+      ctx.beginPath();
+      let first = true;
+      for (let j = 0; j <= N * 4; j++) {
+        const u = j / (N * 4);
+        const v = i / N;
+        const proj = projectBarrel({ x: u, y: v });
+        const p = { x: proj.x * W, y: proj.y * H };
+        if (first) { ctx.moveTo(p.x, p.y); first = false; }
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      // vertical
+      ctx.beginPath();
+      first = true;
+      for (let j = 0; j <= N * 4; j++) {
+        const v = j / (N * 4);
+        const u = i / N;
+        const proj = projectBarrel({ x: u, y: v });
+        const p = { x: proj.x * W, y: proj.y * H };
+        if (first) { ctx.moveTo(p.x, p.y); first = false; }
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  function drawCatenary(distorted) {
+    const SEG = 240;
+    ctx.lineWidth = distorted ? 2.4 : 1.4;
+    if (distorted) ctx.strokeStyle = 'rgba(212, 111, 138, 0.95)';
+    else ctx.strokeStyle = 'rgba(212, 164, 94, 0.7)';
+
+    ctx.beginPath();
+    let first = true;
+    for (let i = 0; i <= SEG; i++) {
+      const t = i / SEG;
+      const x = anchors[0].x + (anchors[1].x - anchors[0].x) * t;
+      const y = catenaryY(t, anchors[0], anchors[1], sag);
+      let p = { x, y };
+      if (distorted) p = projectBarrel(p);
+      const px = p.x * W, py = p.y * H;
+      if (first) { ctx.moveTo(px, py); first = false; }
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  function drawAnchors() {
+    anchors.forEach((a, i) => {
+      const p = px(a);
+      ctx.fillStyle = '#0e0f10';
+      ctx.strokeStyle = '#e8e6e1';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#6f7378';
+      ctx.font = '10px IBM Plex Mono, ui-monospace, monospace';
+      ctx.fillText('p' + (i+1), p.x + 10, p.y - 8);
+    });
+  }
+
+  function drawOpticalCenter() {
+    if (!layerOn.optics) return;
+    const cx = 0.5 * W, cy = 0.5 * H;
+    ctx.strokeStyle = 'rgba(94, 155, 212, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx - 8, cy); ctx.lineTo(cx + 8, cy);
+    ctx.moveTo(cx, cy - 8); ctx.lineTo(cx, cy + 8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Vignette / atmosphere
+    const grd = ctx.createRadialGradient(W*0.5, H*0.5, 50, W*0.5, H*0.5, Math.max(W, H));
+    grd.addColorStop(0, 'rgba(255,255,255,0.018)');
+    grd.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    drawGrid();
+    drawOpticalCenter();
+
+    if (layerOn.physics) drawCatenary(false);
+    if (layerOn.bundled) drawCatenary(true);
+
+    drawAnchors();
+  }
+
+  function updateProduct() {
+    const product = document.getElementById('product');
+    const parts = [];
+    if (layerOn.physics) parts.push('catenary');
+    if (layerOn.optics) parts.push('barrel projection');
+    let label;
+    if (layerOn.bundled && parts.length === 2) label = 'BUNDLED LINE';
+    else if (layerOn.bundled && parts.length === 1) label = 'PARTIAL BUNDLE';
+    else if (layerOn.bundled) label = 'BUNDLED LINE — IDENTITY';
+    else label = 'COMPONENTS ONLY';
+    product.innerHTML = '<b>' + label + '</b><br>= ' + (parts.length ? parts.join(' &times; ') : 'nothing visible');
+  }
+
+  // Pointer interaction
+  function pointerPos(e) {
+    const r = cv.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+  }
+  cv.addEventListener('pointerdown', e => {
+    const p = pointerPos(e);
+    const dist = anchors.map(a => Math.hypot((a.x - p.x) * W, (a.y - p.y) * H));
+    const min = Math.min(...dist);
+    if (min < 24) {
+      dragging = dist.indexOf(min);
+      cv.setPointerCapture(e.pointerId);
+    }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (dragging < 0) return;
+    const p = pointerPos(e);
+    anchors[dragging] = {
+      x: Math.max(0.04, Math.min(0.96, p.x)),
+      y: Math.max(0.06, Math.min(0.94, p.y))
+    };
+    draw();
+  });
+  cv.addEventListener('pointerup', e => {
+    dragging = -1;
+    try { cv.releasePointerCapture(e.pointerId); } catch (err) {}
+  });
+
+  window.addEventListener('keydown', e => {
+    if (e.key === 'r' || e.key === 'R') {
+      anchors = [{ x: 0.20, y: 0.45 }, { x: 0.80, y: 0.42 }];
+      sag = 0.42;
+      barrel = 0.55;
+      document.getElementById('sag').value = sag;
+      document.getElementById('barrel').value = barrel;
+      document.getElementById('sagVal').textContent = sag.toFixed(2);
+      document.getElementById('barrelVal').textContent = '+' + barrel.toFixed(2);
+      draw();
+    }
+  });
+
+  resize();
+  updateProduct();
+})();
+</script>
+</body>
+</html>
