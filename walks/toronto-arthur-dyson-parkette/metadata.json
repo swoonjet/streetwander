@@ -1,0 +1,20 @@
+{
+  "walk_id": "walk-2026-05-01T16-07-30-toronto-arthur-dyson-parkette",
+  "label": "toronto-arthur-dyson-parkette",
+  "start_time_ms": 1777651651531,
+  "end_time_ms": 1777653020486,
+  "duration_ms": 1368955,
+  "max_steps": 15,
+  "actual_steps": 13,
+  "termination_reason": "returned_home",
+  "total_distance_m": 158,
+  "distance_from_home_at_end_m": 27,
+  "start_image_id": "517172765952857",
+  "start_coords": {
+    "lat": 43.696413080495,
+    "lng": -79.351212490323
+  },
+  "artifact_medium": "A leaked internal memo announcing a sunset that quietly admits, by its final paragraph, that the sunset is not going to happen.",
+  "artifact_md": "artifact/artifact.md",
+  "artifact_html": null
+}

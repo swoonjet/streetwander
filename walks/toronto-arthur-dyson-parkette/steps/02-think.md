@@ -1,0 +1,13 @@
+SEED:
+- the wet asphalt at the intersection, polished black, doubling the overcast downward into the road
+- the squat brick two-story with its blunt central chimney — Toronto vernacular, 1930s, repeated up and down the block with tiny variation
+- the hydro pole at left with its stack of horizontal crossbars, ribs of a fan no one ever opened
+
+WANDER:
+The street has gone mirror. A few millimetres of standing water is enough to flip the road from opaque-and-grey to glossy-and-doubled, and the visual budget of the scene roughly doubles — every pixel of pavement becomes another pixel of sky and silhouette, for free. Photographers have always known this in their bones: Brassaï's Paris is wet eighty percent of the time, Saul Leiter's New York wet most of the rest, and neither is really about *weather* — both are about acquiring a second storey of image at no cost in content. Music does the identical trick with reverb. A vocal in a treated closet is anemic; the same vocal with a 1.2-second hall tail sounds *real*, and what's been added isn't information, it's a polite second copy of the information, slightly delayed, and the brain reads "more of the same" as richness. Stereo widening on a kick. Antiphonal choirs in San Marco, designed into the architecture before the music was written. The DX7 shipped its e-piano patch with chorus baked in because the bare oscillator sounded thin, and a generation of pop ballads owes its emotional weight to that decision. There's something quietly indignant in the realization that *depth*, in art, is mostly doubling — we talk about richness as if it were a property of the source, but it's almost always a property of the relationship between the source and a reflective surface placed near it. Maybe that's what a city becomes on a wet day: an instrument whose body cavity is finally turned on, the asphalt acting as soundboard for the sky. Or maybe the puddle is just pragmatic — water sits there because the storm drain at this corner hasn't been rodded since some Wednesday in August — and beauty, as usual, is an accident of deferred maintenance.
+
+BRANCH:
+At what phase delay does a doubling stop being read as *reflection* (one thing) and start being read as *copy* (two things) — and is that threshold the same in the eye as in the ear?
+
+ECHO:
+Step 0 found honesty in lines that carry a load, step 1 in surfaces that admit they conceal — both about decoration earning its keep. This drift sidesteps the integrity question and lands somewhere near it: the wet road doesn't lie or labor, it just *doubles*, and the gain is real. Maybe the through-line is less "honesty" than what surfaces do for free.

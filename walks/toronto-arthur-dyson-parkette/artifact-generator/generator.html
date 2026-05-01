@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>The Marcescent Memo Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #efeae0; --paper: #f7f1de; --ink: #1d1a13; --dim: #6b6253;
+    --line: #c9bea5; --stamp: #b03a2d; --code: #1a3060;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body { font: 12.5px/1.55 "IBM Plex Serif", Georgia, serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 36px 24px 48px; }
+  header { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; border-bottom: 2px double var(--ink); padding-bottom: 14px; margin-bottom: 24px; }
+  header .stamp { font: 700 10px/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim); margin-bottom: 5px; }
+  header h1 { font: italic 400 28px/1.15 "Playfair Display", serif; margin: 0; }
+  header .sub { font-size: 11px; color: var(--dim); font-family: "IBM Plex Mono", monospace; letter-spacing: 0.04em; margin-top: 4px; }
+  header .ref { text-align: right; font: 10px/1.5 "IBM Plex Mono", monospace; color: var(--dim); letter-spacing: 0.14em; }
+  header .ref strong { color: var(--ink); display: block; font-weight: 600; }
+  .lede { font: italic 13.5px/1.62 "Playfair Display", serif; margin: 0 0 28px; max-width: 720px; }
+  .lede em { color: var(--stamp); }
+  .layout { display: grid; grid-template-columns: 360px 1fr; gap: 26px; align-items: start; }
+  fieldset { background: var(--paper); border: 1px solid var(--line); padding: 20px 22px 18px; position: relative; }
+  fieldset::before { content: "FORM SS-1"; position: absolute; top: -9px; left: 16px; background: var(--bg); padding: 0 8px; font: 600 9px/1 "IBM Plex Mono", monospace; letter-spacing: 0.22em; color: var(--dim); }
+  legend { padding: 0; font: italic 400 17px/1.2 "Playfair Display", serif; margin: 0 0 4px; }
+  fieldset .help { font-size: 11px; color: var(--dim); margin: 0 0 16px; font-style: italic; }
+  .field { display: grid; gap: 5px; margin-bottom: 12px; }
+  .field label { font: 700 10px/1 "IBM Plex Mono", monospace; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); }
+  .field input, .field textarea { font: 12.5px/1.45 "IBM Plex Serif", serif; background: #fff; border: 1px solid #b8ad94; padding: 6px 8px; color: var(--ink); width: 100%; }
+  .field textarea { min-height: 56px; resize: vertical; font-family: "IBM Plex Serif", serif; }
+  .field .hint { font-size: 10px; color: var(--dim); font-style: italic; margin-top: 2px; font-family: "Playfair Display", serif; }
+  button.primary { display: block; width: 100%; padding: 12px; margin-top: 8px; background: var(--ink); color: var(--paper); border: none; font: 700 10px/1 "IBM Plex Mono", monospace; letter-spacing: 0.24em; text-transform: uppercase; cursor: pointer; }
+  button.primary:hover { background: #2a2520; }
+  .memo { background: var(--paper); border: 1px solid var(--line); padding: 28px 30px; font: 12.5px/1.62 "IBM Plex Serif", serif; }
+  .memo h2 { font: 700 11px/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.2em; text-transform: uppercase; margin: 18px 0 6px; color: var(--ink); }
+  .memo h2:first-of-type { margin-top: 0; }
+  .memo .head { display: grid; grid-template-columns: 90px 1fr; gap: 4px 12px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 2px double var(--ink); font: 11px/1.5 "IBM Plex Mono", monospace; letter-spacing: 0.04em; }
+  .memo .head dt { color: var(--dim); font-weight: 600; }
+  .memo .head dd { margin: 0; color: var(--ink); }
+  .memo .head dd code { color: var(--code); font-weight: 600; }
+  .memo p { margin: 0 0 10px; }
+  .memo p code { color: var(--code); font-family: "IBM Plex Mono", monospace; font-size: 11.5px; }
+  .memo ul { margin: 6px 0 14px; padding-left: 22px; }
+  .memo ul li { margin-bottom: 4px; }
+  .memo .end { margin-top: 18px; padding-top: 14px; border-top: 2px double var(--ink); text-align: center; font-style: italic; color: var(--dim); font-family: "Playfair Display", serif; }
+  footer { margin-top: 32px; padding-top: 14px; border-top: 2px double var(--ink); display: grid; grid-template-columns: 1fr auto; gap: 12px; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); font-family: "IBM Plex Mono", monospace; }
+  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); font-family: "Playfair Display", serif; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="stamp">Office of the CTO · Sunset Notices · template</div>
+      <h1>The Marcescent Memo Generator</h1>
+      <div class="sub">Form SS-1 · for the announcement of exits that will not occur</div>
+    </div>
+    <div class="ref"><strong>FORM SS-1</strong>For internal use only<br/>Distribution confidential</div>
+  </header>
+
+  <p class="lede">
+    Marcescent: <em>retaining dead matter that should have fallen.</em> A sunset memo announces a departure; a marcescent sunset memo announces a departure and then, in its carve-outs, lists every system from which the thing is exempt — until the in-scope set has shrunk to surfaces on which the path was already inactive. Fill in the form. Issue the notice.
+  </p>
+
+  <div class="layout">
+    <fieldset>
+      <legend>Inputs</legend>
+      <p class="help">All fields persist locally. Generated memo updates live.</p>
+      <div class="field"><label>Legacy thing</label><input id="f-thing" type="text" value="legacy_session_v2 authentication path" /><div class="hint">named technical artifact, lowercase if it deserves to be</div></div>
+      <div class="field"><label>Replacement</label><input id="f-replace" type="text" value="unified_auth" /></div>
+      <div class="field"><label>Effective date</label><input id="f-date" type="text" value="2026-09-30" /></div>
+      <div class="field"><label>Volume share now (%)</label><input id="f-share" type="text" value="71" /><div class="hint">of total request load that still flows through the legacy path</div></div>
+      <div class="field"><label>Years previously deprecated</label><input id="f-deprecations" type="text" value="2018, 2021, 2023, 2024" /><div class="hint">comma-separated list of prior, ineffective sunset notices</div></div>
+      <div class="field"><label>Carve-outs (one per line)</label><textarea id="f-carves" rows="6">Partner X embedded experience (contractually guaranteed through 2031)
+Mobile SDK versions ≤ 4.7
+The internal admin console, pending the Phoenix rewrite
+The audit-export pipeline (Compliance has formally objected)
+EU-West-2 and AP-South-1 (regulatory review pending)
+Read-only public endpoints (anonymous traffic)
+The Phoenix rewrite itself (uses legacy path to test compatibility)</textarea></div>
+      <div class="field"><label>Remaining in-scope (one per line)</label><textarea id="f-scope" rows="3">Developer portal sign-in
+Internal jobs board
+Marketing site staging
+Test-fixture seeding scripts</textarea></div>
+      <div class="field"><label>Residual share (%)</label><input id="f-residual" type="text" value="0.4" /></div>
+      <button class="primary" id="reissue">Reissue memo</button>
+    </fieldset>
+
+    <div class="memo" id="memo"></div>
+  </div>
+
+  <footer>
+    <div>OFFICE OF THE CTO · FORM SS-1 · <em>a walk past Arthur Dyson Parkette</em></div>
+    <div>not for circulation outside distribution list</div>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const fields = ['thing','replace','date','share','deprecations','carves','scope','residual'];
+  const els = {};
+  fields.forEach(f => { els[f] = document.getElementById('f-'+f); els[f].addEventListener('input', render); });
+  document.getElementById('reissue').addEventListener('click', render);
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+
+  function render() {
+    const v = {};
+    fields.forEach(f => v[f] = els[f].value.trim());
+    const carves = v.carves.split('\n').map(s => s.trim()).filter(Boolean);
+    const scope = v.scope.split('\n').map(s => s.trim()).filter(Boolean);
+    const deprecations = v.deprecations.split(',').map(s => s.trim()).filter(Boolean);
+    const depList = deprecations.length ? deprecations.map((y, i) => `${y}-${(i%12+1).toString().padStart(2,'0')}-${((i*7)%28+1).toString().padStart(2,'0')}`).join(', ') : 'none on file';
+    const thing = v.thing || 'the legacy path';
+
+    const html = `
+      <h2>Internal memorandum — distribution confidential</h2>
+      <dl class="head">
+        <dt>To:</dt><dd>Engineering Leads · Platform Council · Risk &amp; Compliance · Office of the General Counsel</dd>
+        <dt>From:</dt><dd>Office of the Chief Technology Officer</dd>
+        <dt>Re:</dt><dd>Final sunset of the <code>${esc(thing)}</code></dd>
+        <dt>Effective:</dt><dd>${esc(v.date)} (90-day formal notice)</dd>
+        <dt>Supersedes:</dt><dd>Memos of ${esc(depList)}</dd>
+      </dl>
+      <h2>1. Decision</h2>
+      <p>After extended review, the Architecture Council has resolved to retire <code>${esc(thing)}</code>. All client traffic will migrate to <code>${esc(v.replace) || 'the new path'}</code> on or before <strong>${esc(v.date)}</strong>. This memorandum is the canonical record of that decision and is intended to function as the final notice of sunset.</p>
+      <h2>2. Background</h2>
+      <p>The path was first deprecated in ${esc(deprecations[0] || 'an earlier period')}, formally re-deprecated in ${esc(deprecations[1] || 'a subsequent year')}, and listed as "scheduled for removal" in each subsequent annual platform review. It currently mediates approximately ${esc(v.share)}% of authenticated request volume across the production surface, a figure broadly unchanged for several years. The Council acknowledges that prior sunset notices did not result in sunset, and considers the present notice to constitute a meaningful departure from that pattern.</p>
+      <h2>3. Carve-outs</h2>
+      <p>The following surfaces are explicitly out of scope for the present sunset and will continue to authenticate against <code>${esc(thing)}</code> until further notice:</p>
+      <ul>${carves.map(c => `<li>${esc(c)}.</li>`).join('')}</ul>
+      <h2>4. Refined scope</h2>
+      <p>In light of the carve-outs enumerated in §3, the sunset will, on its effective date, remove <code>${esc(thing)}</code> from the following remaining in-scope surfaces:</p>
+      <ul>${scope.map(s => `<li>${esc(s)}.</li>`).join('')}</ul>
+      <p>The Council notes that these surfaces, in aggregate, account for under <strong>${esc(v.residual)}%</strong> of <code>${esc(thing)}</code> request volume.</p>
+      <h2>5. Note from the Chief Architect</h2>
+      <p>In the course of drafting §3 and §4 it became evident, to the present author and to the working group, that the carve-out list as constructed encompasses substantially all of the systems through which <code>${esc(thing)}</code> presently carries production load. The remaining in-scope surfaces are those on which the path was already, by various measures, dormant.</p>
+      <p>The working group considered withdrawing this memorandum. We resolved instead to issue it as written, on the following reasoning:</p>
+      <p><strong>(a)</strong> An announcement issued is preferable to an announcement deferred. The historical record of deprecation notices is itself a load-bearing artifact: each prior memo created a small amount of organizational friction against new dependencies on the legacy path, and we wish to maintain that friction in good standing.</p>
+      <p><strong>(b)</strong> The migration of the in-scope surfaces, while modest in volume, reduces by some non-zero amount the surface area we must describe to new hires when explaining authentication. This is a real benefit, even if it is small.</p>
+      <p><strong>(c)</strong> The present memorandum should not be read as a substitute for forthcoming work, nor as a final sunset in any operational sense beyond the scope defined in §4. A further notice will be issued at a later date, on a schedule to be determined.</p>
+      <h2>6. Acknowledgement</h2>
+      <p>This document is to be treated as the authoritative record of the present sunset of <code>${esc(thing)}</code>. It is not to be circulated outside the distribution list.</p>
+      <div class="end">— end of memorandum —</div>
+    `;
+    document.getElementById('memo').innerHTML = html;
+  }
+  render();
+})();
+</script>
+</body>
+</html>
