@@ -1,0 +1,39 @@
+{
+  "start_image_id": "242229867697421",
+  "start_coords": {
+    "lat": 43.66224704,
+    "lng": -79.38231244
+  },
+  "steps": [
+    {
+      "step": 0,
+      "id": "242229867697421",
+      "lat": 43.66224704,
+      "lng": -79.38231244,
+      "sequence": "MaFbkcAt3NLlSug-olryHw",
+      "heading": 179.25166883559,
+      "captured_at": 1427367444000,
+      "image_file": "00-242229867697421.jpg"
+    },
+    {
+      "step": 1,
+      "id": "921006948691174",
+      "lat": 43.66216363,
+      "lng": -79.38218607,
+      "sequence": "MaFbkcAt3NLlSug-olryHw",
+      "heading": 33.999947719801,
+      "captured_at": 1427367479000,
+      "image_file": "01-921006948691174.jpg"
+    },
+    {
+      "step": 2,
+      "id": "297448955371058",
+      "lat": 43.66219647,
+      "lng": -79.38232601,
+      "sequence": "MaFbkcAt3NLlSug-olryHw",
+      "heading": 69.699430808065,
+      "captured_at": 1427367459000,
+      "image_file": "02-297448955371058.jpg"
+    }
+  ]
+}

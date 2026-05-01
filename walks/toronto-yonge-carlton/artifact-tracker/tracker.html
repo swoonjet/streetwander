@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gesture Tracker — one burst, six wars</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&family=Anton&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #06060a;
+    --panel: #14141a;
+    --ink: #e8e6df;
+    --dim: #8a857b;
+    --line: #26262a;
+    --accent: #c9a962;
+    --burst: #c8281a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); height: 100%; overflow: hidden; }
+  body { font: 11px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+
+  .stage {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+  }
+  .scene {
+    position: relative;
+    overflow: hidden;
+    background: #050505;
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .overlay {
+    position: absolute;
+    top: 24px;
+    left: 26px;
+    z-index: 5;
+    font: 600 10px/1.4 "IBM Plex Mono", monospace;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(232,230,223,0.7);
+  }
+  .overlay strong {
+    display: block;
+    font-family: "Playfair Display", serif;
+    font-style: italic;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: -0.005em;
+    font-size: 26px;
+    color: var(--ink);
+    margin-top: 4px;
+  }
+
+  .ticker {
+    position: absolute;
+    bottom: 24px;
+    left: 26px;
+    right: 26px;
+    z-index: 5;
+    display: flex;
+    gap: 6px;
+  }
+  .ticker .pip {
+    flex: 1;
+    height: 3px;
+    background: rgba(232,230,223,0.15);
+    overflow: hidden;
+  }
+  .ticker .pip .fill {
+    height: 100%;
+    width: 0%;
+    background: var(--burst);
+    transition: width 60ms linear;
+  }
+  .ticker .pip.done .fill { width: 100%; }
+
+  aside {
+    border-left: 1px solid var(--line);
+    padding: 28px 24px;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    overflow-y: auto;
+  }
+  aside .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  aside h1 {
+    font: italic 400 22px/1.15 "Playfair Display", serif;
+    color: var(--ink);
+    margin: 4px 0 0;
+  }
+  aside .sub {
+    font-size: 12px;
+    color: #c9c3b6;
+    line-height: 1.55;
+  }
+  aside em { font-style: italic; color: var(--accent); font-family: "Playfair Display", serif; font-size: 12.5px; }
+
+  .station-card {
+    background: #1a1a22;
+    border: 1px solid var(--line);
+    padding: 18px;
+    transition: border-color 240ms ease;
+  }
+  .station-card .yr {
+    font: 600 10px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.22em;
+    color: var(--burst);
+    text-transform: uppercase;
+  }
+  .station-card h2 {
+    font: italic 400 18px/1.2 "Playfair Display", serif;
+    margin: 6px 0 8px;
+    color: var(--ink);
+  }
+  .station-card .gloss {
+    font: italic 12.5px/1.55 "Playfair Display", serif;
+    color: #cfc9bd;
+    margin: 0 0 10px;
+  }
+  .station-card .signal {
+    font: 600 10px/1.4 "IBM Plex Mono", monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--burst);
+    padding: 8px 12px;
+    border-left: 2px solid var(--burst);
+    background: #14141c;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  button {
+    font: 600 10px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: #1a1a22;
+    border: 1px solid var(--line);
+    padding: 10px;
+    cursor: pointer;
+  }
+  button:hover { background: #22222c; }
+  button.primary { background: var(--burst); color: #fff; border-color: var(--burst); }
+
+  .footnote {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+    line-height: 1.6;
+  }
+  .footnote em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); font-family: "Playfair Display", serif; }
+
+  @media (max-width: 760px) {
+    .stage { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+    aside { border-left: none; border-top: 1px solid var(--line); max-height: 50vh; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="scene">
+    <canvas id="c"></canvas>
+    <div class="overlay">
+      Same gesture · different war
+      <strong id="ov-title">The heraldic corner</strong>
+    </div>
+    <div class="ticker" id="ticker"></div>
+  </div>
+
+  <aside>
+    <div>
+      <div class="eyebrow">FROM THE MONOLOGUE · RUNNABLE COMPANION</div>
+      <h1>Gesture Tracker</h1>
+      <p class="sub">The red diagonal banner stays. Everything else cycles. <em>The form survives the function.</em> Watch the same shape look like a different sign every six seconds.</p>
+    </div>
+
+    <div class="station-card" id="card">
+      <div class="yr" id="card-yr">c. 1415</div>
+      <h2 id="card-title">The heraldic corner</h2>
+      <p class="gloss" id="card-gloss">A diagonal stripe sewn onto a knight's tabard. Reads at a hundred paces.</p>
+      <div class="signal" id="card-signal">I am So-and-So's; do not strike me.</div>
+    </div>
+
+    <div class="controls">
+      <button id="prev">← Prev</button>
+      <button id="next" class="primary">Next →</button>
+    </div>
+
+    <div class="footnote">
+      yonge &amp; carlton · 2026-05-01 · <em>a walk</em>
+    </div>
+  </aside>
+</div>
+
+<script>
+(() => {
+  const STATIONS = [
+    { yr: 'c. 1415', title: 'The heraldic corner', gloss: 'A diagonal stripe sewn onto a knight\'s tabard. Reads at a hundred paces. Distinguishes one armoured man from another in a press of armoured men.', signal: 'I am So-and-So\'s; do not strike me.', burstText: '', context: 'tabard' },
+    { yr: 'c. 1955', title: 'The detergent burst', gloss: 'Mid-century shelf-combat. The corner of the box ambushes the eye on its way past. Every other word is an exclamation.', signal: 'NEW!', burstText: 'NEW!', context: 'detergent' },
+    { yr: 'c. 1992', title: 'The shelf at war', gloss: 'Twenty boxes wide. Everywhere is the corner of something. The form is dying of its own success.', signal: 'BIG SAVINGS!', burstText: 'BIG\nSAVINGS', context: 'shelf' },
+    { yr: 'c. 2014', title: 'The parking ribbon', gloss: 'Bolted to a sign at a property line a bylaw has already drawn. No competing lot exists. The ambush continues, by reflex.', signal: '24 HOUR', burstText: '24 HOUR', context: 'parking' },
+    { yr: 'c. 2018', title: 'The civic index', gloss: 'A diagonal in a wavelength reserved by code, on a fire connection. The gesture has meant one thing, exactly, for a hundred years.', signal: 'FIRE LINE', burstText: 'FIRE\nLINE', context: 'standpipe' },
+    { yr: 'c. 2026', title: 'The civic mannerism', gloss: 'A SALE sticker peeling from a window. The diagonal has stopped being a weapon and started being a costume — the shape that means "sign."', signal: 'SALE', burstText: 'SALE', context: 'sale' },
+  ];
+
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const ovTitle = document.getElementById('ov-title');
+  const cardYr = document.getElementById('card-yr');
+  const cardTitle = document.getElementById('card-title');
+  const cardGloss = document.getElementById('card-gloss');
+  const cardSignal = document.getElementById('card-signal');
+  const ticker = document.getElementById('ticker');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+
+  let W = 0, H = 0, dpr = 1;
+  let stationIdx = 0;
+  let stationStart = performance.now();
+  let auto = true;
+  const PER = 6500;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const wrap = canvas.parentElement;
+    W = wrap.clientWidth; H = wrap.clientHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function buildTicker() {
+    ticker.innerHTML = STATIONS.map(() => '<div class="pip"><div class="fill"></div></div>').join('');
+  }
+
+  function setStation(i, animate = true) {
+    stationIdx = ((i % STATIONS.length) + STATIONS.length) % STATIONS.length;
+    stationStart = performance.now();
+    const s = STATIONS[stationIdx];
+    ovTitle.textContent = s.title;
+    cardYr.textContent = s.yr;
+    cardTitle.textContent = s.title;
+    cardGloss.textContent = s.gloss;
+    cardSignal.textContent = s.signal;
+    [...ticker.children].forEach((p, j) => {
+      p.classList.toggle('done', j < stationIdx);
+      const f = p.querySelector('.fill');
+      if (j !== stationIdx) f.style.width = j < stationIdx ? '100%' : '0%';
+    });
+  }
+
+  function drawContext(ctxName) {
+    ctx.clearRect(0, 0, W, H);
+    if (ctxName === 'tabard') drawTabard();
+    else if (ctxName === 'detergent') drawDetergent();
+    else if (ctxName === 'shelf') drawShelf();
+    else if (ctxName === 'parking') drawParking();
+    else if (ctxName === 'standpipe') drawStandpipe();
+    else if (ctxName === 'sale') drawSale();
+  }
+
+  function drawTabard() {
+    // cream linen background
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#e8d9b0');
+    g.addColorStop(1, '#c8b285');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    // weave noise
+    ctx.fillStyle = 'rgba(60,40,20,0.03)';
+    for (let i = 0; i < (W*H)/40; i++) ctx.fillRect(Math.random()*W, Math.random()*H, 1, 1);
+    // horizontal warp lines
+    ctx.strokeStyle = 'rgba(60,40,20,0.07)';
+    ctx.lineWidth = 0.6;
+    for (let y = 0; y < H; y += 3) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    // an embroidered border / hem
+    ctx.strokeStyle = 'rgba(120,80,40,0.4)';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeRect(20, 20, W-40, H-40);
+    ctx.setLineDash([]);
+  }
+
+  function drawDetergent() {
+    // glossy cardboard box face — saturated mid-century
+    ctx.fillStyle = '#e6c52d';
+    ctx.fillRect(0, 0, W, H);
+    // brand block
+    const cx = W*0.5, cy = H*0.55;
+    ctx.fillStyle = '#1a3060';
+    ctx.fillRect(cx-160, cy-50, 320, 100);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 60px "Playfair Display", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('BRIGHT', cx, cy + 18);
+    // tagline
+    ctx.font = 'italic 18px "Playfair Display", serif';
+    ctx.fillStyle = '#1a3060';
+    ctx.fillText('a name for cleanness', cx, cy + 80);
+    // box edge highlight
+    ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0, 0, W, H);
+    // subtle scuff marks
+    ctx.fillStyle = 'rgba(0,0,0,0.04)';
+    for (let i = 0; i < 12; i++) ctx.fillRect(Math.random()*W, Math.random()*H, 30, 1);
+  }
+
+  function drawShelf() {
+    // Many small boxes in a grid, each with a tiny burst — a war
+    ctx.fillStyle = '#2a2a2c';
+    ctx.fillRect(0, 0, W, H);
+    const cols = 8, rows = 4;
+    const cellW = W / cols, cellH = H / rows;
+    const palette = ['#d23a2a','#e6b020','#1a3060','#2d6a4a','#7a2a4a','#c46a20','#2a4a8a'];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = c * cellW, y = r * cellH;
+        const col = palette[(r*7+c*3)%palette.length];
+        ctx.fillStyle = col;
+        ctx.fillRect(x+4, y+4, cellW-8, cellH-8);
+        // tiny corner burst (mini)
+        ctx.fillStyle = '#c8281a';
+        ctx.beginPath();
+        ctx.moveTo(x+4, y+4);
+        ctx.lineTo(x+4+cellW*0.35, y+4);
+        ctx.lineTo(x+4, y+4+cellH*0.35);
+        ctx.closePath();
+        ctx.fill();
+        // mini text
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 9px "IBM Plex Mono", monospace';
+        ctx.save();
+        ctx.translate(x+12, y+18);
+        ctx.rotate(-Math.PI/4);
+        ctx.fillText('NEW', 0, 0);
+        ctx.restore();
+      }
+    }
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(0, H*0.86, W, 8);
+  }
+
+  function drawParking() {
+    // metal sign — white background
+    ctx.fillStyle = '#f1ede4';
+    ctx.fillRect(0, 0, W, H);
+    // top band
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(0, 0, W, 38);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 18px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('PARKING', 24, 26);
+    // rate grid
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = 'bold 14px "IBM Plex Mono", monospace';
+    const lines = [
+      ['MON–FRI 7–18', '$4 / HOUR'],
+      ['MON–FRI 18–7', '$2 / HOUR'],
+      ['SAT–SUN', '$20 / DAY'],
+      ['MAX', '$25 / DAY'],
+      ['LOST TICKET', '$30'],
+    ];
+    let y = H * 0.4;
+    for (const [a, b] of lines) {
+      ctx.textAlign = 'left';
+      ctx.fillText(a, 36, y);
+      ctx.textAlign = 'right';
+      ctx.fillText(b, W - 36, y);
+      // dashed underline
+      ctx.strokeStyle = 'rgba(26,26,26,0.3)';
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(36, y + 6); ctx.lineTo(W - 36, y + 6); ctx.stroke();
+      ctx.setLineDash([]);
+      y += 28;
+    }
+    // bolt holes
+    [[20,20],[W-20,20],[20,H-20],[W-20,H-20]].forEach(([x,y])=>{
+      ctx.fillStyle = '#888';
+      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  function drawStandpipe() {
+    // weathered red brick wall
+    ctx.fillStyle = '#7a2a1f';
+    ctx.fillRect(0, 0, W, H);
+    const brickH = 26, brickW = 64;
+    for (let r = 0; r < Math.ceil(H/brickH)+1; r++) {
+      const off = (r % 2) ? brickW/2 : 0;
+      for (let x = -brickW; x < W + brickW; x += brickW) {
+        const bx = x + off;
+        const by = r * brickH;
+        ctx.fillStyle = `rgba(${110 + (r*7+x*3)%30}, ${42 + (r*3)%14}, ${30 + (x*2)%14}, 1)`;
+        ctx.fillRect(bx+1, by+1, brickW-2, brickH-2);
+      }
+    }
+    // mortar lines
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 1;
+    for (let r = 0; r < Math.ceil(H/brickH)+1; r++) {
+      ctx.beginPath(); ctx.moveTo(0, r*brickH); ctx.lineTo(W, r*brickH); ctx.stroke();
+    }
+    // two brass standpipe connections lower-center
+    const ccy = H * 0.7;
+    [-1, 1].forEach((s) => {
+      const cx2 = W*0.5 + s * 50;
+      const grad = ctx.createRadialGradient(cx2, ccy, 5, cx2, ccy, 28);
+      grad.addColorStop(0, '#d4a85a');
+      grad.addColorStop(0.5, '#a08038');
+      grad.addColorStop(1, '#5a4222');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(cx2, ccy, 24, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#1a1410';
+      ctx.beginPath(); ctx.arc(cx2, ccy, 10, 0, Math.PI*2); ctx.fill();
+    });
+    // small enamel placard
+    ctx.fillStyle = '#f1ede4';
+    ctx.fillRect(W*0.5 - 90, H*0.45, 180, 56);
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(W*0.5 - 90, H*0.45, 180, 56);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = 'bold 11px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('FIRE DEPT', W*0.5, H*0.45 + 22);
+    ctx.font = '10px "IBM Plex Mono", monospace';
+    ctx.fillText('CONNECTION', W*0.5, H*0.45 + 38);
+  }
+
+  function drawSale() {
+    // glass storefront — dark interior with reflections
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#1a2230');
+    g.addColorStop(0.5, '#2a3848');
+    g.addColorStop(1, '#11161e');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    // hint of merchandise inside
+    ctx.fillStyle = 'rgba(120,140,170,0.18)';
+    for (let i = 0; i < 8; i++) {
+      const w = 30 + Math.random()*60;
+      const h = 60 + Math.random()*80;
+      ctx.fillRect(Math.random()*W*0.9, H*0.45 + Math.random()*H*0.3, w, h);
+    }
+    // streetlamp reflection
+    const rx = W*0.7, ry = H*0.25;
+    const rg = ctx.createRadialGradient(rx, ry, 4, rx, ry, 80);
+    rg.addColorStop(0, 'rgba(255,220,160,0.45)');
+    rg.addColorStop(1, 'rgba(255,220,160,0)');
+    ctx.fillStyle = rg;
+    ctx.beginPath(); ctx.arc(rx, ry, 80, 0, Math.PI*2); ctx.fill();
+    // window mullions
+    ctx.fillStyle = 'rgba(40,40,48,0.85)';
+    ctx.fillRect(W*0.5 - 4, 0, 8, H);
+    ctx.fillRect(0, H*0.5 - 3, W, 6);
+    // diagonal scratch / wear on sticker corner (handled by burst)
+  }
+
+  function drawBurst(text) {
+    // Constant red diagonal corner burst at the top-left
+    // Define triangle from (0,0) → (0.5W, 0) → (0, 0.5W) — but cap to a max size
+    const size = Math.min(W*0.42, H*0.65);
+    ctx.save();
+    // soft drop shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath();
+    ctx.moveTo(0+8, 0+8);
+    ctx.lineTo(size+8, 0+8);
+    ctx.lineTo(0+8, size+8);
+    ctx.closePath();
+    ctx.fill();
+    // burst body
+    ctx.fillStyle = '#c8281a';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(size, 0);
+    ctx.lineTo(0, size);
+    ctx.closePath();
+    ctx.fill();
+    // inner highlight
+    const grad = ctx.createLinearGradient(0, 0, size, size);
+    grad.addColorStop(0, 'rgba(255,255,255,0.18)');
+    grad.addColorStop(0.4, 'rgba(255,255,255,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(size, 0);
+    ctx.lineTo(0, size);
+    ctx.closePath();
+    ctx.fill();
+    // text rotated -45°
+    if (text) {
+      ctx.save();
+      ctx.translate(size*0.32, size*0.32);
+      ctx.rotate(-Math.PI/4);
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const lines = text.split('\n');
+      const lineH = lines.length > 1 ? 28 : 0;
+      const fontSize = Math.min(36, size/Math.max(text.length/4, 4));
+      ctx.font = `bold ${Math.round(fontSize)}px Anton, "IBM Plex Mono", monospace`;
+      lines.forEach((ln, i) => ctx.fillText(ln, 0, (i - (lines.length-1)/2) * lineH));
+      ctx.restore();
+    }
+    // dark edge along the diagonal
+    ctx.strokeStyle = 'rgba(80,8,2,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(size, 0);
+    ctx.lineTo(0, size);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function frame() {
+    const s = STATIONS[stationIdx];
+    drawContext(s.context);
+    drawBurst(s.burstText);
+
+    if (auto) {
+      const elapsed = performance.now() - stationStart;
+      const fill = ticker.children[stationIdx]?.querySelector('.fill');
+      if (fill) fill.style.width = Math.min(100, (elapsed / PER) * 100) + '%';
+      if (elapsed > PER) setStation(stationIdx + 1);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  prevBtn.addEventListener('click', () => { auto = false; setStation(stationIdx - 1); });
+  nextBtn.addEventListener('click', () => { auto = false; setStation(stationIdx + 1); });
+  window.addEventListener('resize', resize);
+
+  resize();
+  buildTicker();
+  setStation(0);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

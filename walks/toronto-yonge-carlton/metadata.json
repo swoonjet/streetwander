@@ -1,0 +1,20 @@
+{
+  "walk_id": "walk-2026-05-01T15-37-37-toronto-yonge-carlton",
+  "label": "toronto-yonge-carlton",
+  "start_time_ms": 1777649859672,
+  "end_time_ms": 1777650144352,
+  "duration_ms": 284680,
+  "max_steps": 15,
+  "actual_steps": 3,
+  "termination_reason": "dead_end",
+  "total_distance_m": 26,
+  "distance_from_home_at_end_m": 6,
+  "start_image_id": "242229867697421",
+  "start_coords": {
+    "lat": 43.66224704,
+    "lng": -79.38231244
+  },
+  "artifact_medium": "A short interior-monologue vignette — one shift in the working life of a red corner ribbon.",
+  "artifact_md": "artifact/artifact.md",
+  "artifact_html": null
+}

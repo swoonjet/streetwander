@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>walk-2026-05-01T15-37-37-toronto-yonge-carlton — Wanderer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --bg: #faf7f2;
+    --ink: #1a1a1a;
+    --dim: #6a6a6a;
+    --line: #e5ddd0;
+    --accent: #c45a3f;
+    --block: #f2ede3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 120px; }
+  header.top h1 {
+    font: 400 28px/1.2 Georgia, serif;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  header.top .meta {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  dl.stats {
+    display: flex; flex-wrap: wrap; gap: 0 28px;
+    margin: 16px 0 0; padding: 0;
+    font: 13px/1.3 ui-monospace, Menlo, monospace;
+  }
+  dl.stats > div { display: flex; gap: 6px; }
+  dl.stats dt { color: var(--dim); margin: 0; }
+  dl.stats dd { margin: 0; color: var(--ink); }
+  #map {
+    height: 420px;
+    margin: 32px 0 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .step-marker-label {
+    background: transparent; border: none; box-shadow: none;
+    color: #fff; font: 700 11px/1 ui-monospace, Menlo, monospace;
+    pointer-events: none;
+  }
+  main.steps { margin-top: 48px; }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px 20px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+  }
+  .step:first-child { border-top: none; padding-top: 8px; }
+  .step-num {
+    font: 700 14px/1 ui-monospace, Menlo, monospace;
+    color: var(--accent);
+    padding-top: 4px;
+  }
+  .step-img { grid-column: 2; margin: 0 0 16px; }
+  .step-img img { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
+  .step-img figcaption {
+    font: 12px/1.3 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  .step-body { grid-column: 2; }
+  .block { margin-bottom: 18px; }
+  .block h4 {
+    margin: 0 0 6px;
+    font: 700 11px/1 ui-monospace, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .block ul { margin: 0; padding-left: 20px; }
+  .block li { margin-bottom: 6px; }
+  .block p { margin: 0; }
+  .block.thread { color: var(--dim); font-style: italic; }
+  .block.wander p { font-size: 15.5px; line-height: 1.6; }
+  .block.branch {
+    color: var(--accent);
+    font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+  }
+  .block.nav {
+    background: var(--block);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+  .block.nav .pick { color: var(--accent); }
+
+  section.artifact {
+    margin: 64px 0 0;
+    padding: 40px 32px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  section.artifact h2 {
+    margin: 0 0 4px;
+    font: 400 22px/1.2 Georgia, serif;
+  }
+  section.artifact .medium {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin: 0 0 20px;
+  }
+  .artifact-body {
+    font: 14px/1.5 ui-monospace, Menlo, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    background: var(--bg);
+    padding: 20px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+  }
+  .artifact-md {
+    background: var(--bg);
+    padding: 28px 32px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+    font: 15px/1.58 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+  }
+  .artifact-md h1, .artifact-md h2, .artifact-md h3 {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    margin: 1.4em 0 0.4em;
+  }
+  .artifact-md h1 { font-size: 26px; margin-top: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .artifact-md h2 { font-size: 18px; color: var(--ink); }
+  .artifact-md h3 { font-size: 15px; color: var(--accent); font-style: italic; }
+  .artifact-md p { margin: 0 0 1em; }
+  .artifact-md ul, .artifact-md ol { margin: 0 0 1em; padding-left: 22px; }
+  .artifact-md li { margin-bottom: 4px; }
+  .artifact-md strong { color: var(--ink); }
+  .artifact-md em { color: var(--dim); font-style: italic; }
+  .artifact-md code {
+    font: 12.5px/1.4 ui-monospace, Menlo, monospace;
+    background: #eee7d6;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: #2a2a2a;
+  }
+  .artifact-md pre {
+    font: 12px/1.5 ui-monospace, Menlo, monospace;
+    background: #efe8d8;
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md pre code { background: none; padding: 0; font-size: inherit; }
+  .artifact-md blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0 14px;
+    margin: 0 0 1em;
+    color: var(--dim);
+    font-style: italic;
+  }
+  .artifact-md hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 1.6em 0;
+  }
+  .artifact-md table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md th, .artifact-md td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .artifact-md th {
+    font-weight: 600;
+    background: #efe8d8;
+    font-family: Georgia, serif;
+  }
+  .artifact-md tr:last-child td { border-bottom: none; }
+  .artifact-embed {
+    position: relative;
+    margin: 0 0 16px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  .artifact-embed.wide { aspect-ratio: 16/10; }
+  .artifact-embed iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+  }
+  section.artifact.companion { margin-top: 32px; }
+  .open-link { margin: 0 0 20px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+  .open-link a { color: var(--accent); text-decoration: none; }
+  .open-link a:hover { text-decoration: underline; }
+  section.artifact .closing {
+    font-style: italic;
+    color: var(--ink);
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .container { padding: 24px 16px 80px; }
+    .step { grid-template-columns: 32px 1fr; gap: 8px 12px; }
+    .artifact-body { font-size: 12px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="top">
+    <div class="meta">walk-2026-05-01T15-37-37-toronto-yonge-carlton</div>
+    <h1>A walk — toronto yonge carlton</h1>
+    <dl class="stats">
+      <div><dt>steps</dt><dd>3</dd></div>
+      <div><dt>distance</dt><dd>26m</dd></div>
+      <div><dt>duration</dt><dd>5min</dd></div>
+      <div><dt>ended</dt><dd>dead end</dd></div>
+      <div><dt>from home</dt><dd>6m</dd></div>
+    </dl>
+  </header>
+
+  <div id="map"></div>
+
+  <main class="steps">
+
+<article class="step" id="step-0">
+  <div class="step-num">00</div>
+  <figure class="step-img">
+    <img src="images/00-242229867697421.jpg" alt="step 0" loading="lazy" />
+    <figcaption>43.66225, -79.38231</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The word COURTYARD set in a wide, slightly condensed serif — an all-caps display roman that wants to feel like a brass nameplate.</li><li>&quot;Marriott&quot; beneath it in red brush script, a signature pretending to be the proprietor&#39;s hand.</li><li>The porte-cochère&#39;s underside studded with two long rows of small downlights, a runway of dots receding into shadow.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The serif COURTYARD does a strange piece of work: it&#39;s set in a typeface that wants to belong to a small private club, but it&#39;s bolted to a building that is, structurally, an airport hotel attached to a tower. The script &quot;Marriott&quot; below it adds the second half of the lie — a fake autograph, the way restaurants in the 1990s would print &quot;from the chef&quot; in italic on a menu printed by Sysco. There&#39;s a long history of corporations leasing the visual grammar of the small to perform smallness: Pret&#39;s chalkboards, Trader Joe&#39;s nautical hand-lettering, the whole &quot;neighborhood&quot; pose that any chain over 200 locations adopts the moment the loyalty program launches. What&#39;s interesting isn&#39;t that this is dishonest — everyone knows — but that the *form of the dishonesty* keeps drifting downmarket. The serif-and-script lockup was prestige in 1985, parodic by 2005, and is now somewhere closer to civic furniture: it reads as &quot;hotel&quot; the way a green cross reads as &quot;pharmacy,&quot; denoting a category rather than a personality. Once a typographic gesture passes through enough mouths it stops being a claim and becomes a sign — meaning the *original* claim (that this place is a courtyard, that some Marriott once signed something) has been drained out and replaced with pure indexical function. Brand semiotics likes to pretend the meaning is still in there; mostly it&#39;s a fossil. The same thing happened to the medallion on a taxi and the hand-painted &quot;Bar&quot; on a tabac — once-aspirational, now just the icon for the thing.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The downlight runway as a domesticated version of the airport approach-light system — arrival theater scaled down to one car at a time.</p></div>
+    
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The branding-as-fossil drift is getting comfortable; a slight angle change is more likely to surface a different surface or sign than continuing dead-on into the same porte-cochère sightline.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-1">
+  <div class="step-num">01</div>
+  <figure class="step-img">
+    <img src="images/01-921006948691174.jpg" alt="step 1" loading="lazy" />
+    <figcaption>43.66216, -79.38219</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>A red fire-department siamese connection low on the limestone wall, its two brass intake heads angled outward like a handlebar moustache.</li><li>A bed of loose pale gravel held in by a poured concrete curb, the kind of &quot;landscape&quot; that exists mainly so nobody has to mow it.</li><li>The narrow corridor between buildings funneling toward a far white tower, the perspective doing all the compositional work the photographer didn&#39;t.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The siamese connection is a piece of urban hardware almost nobody looks at and almost nobody can name, and yet it is one of the most legally specified objects on the building&#39;s exterior — its height, its thread pitch, its caps, its painted color all dictated by code so that a stranger arriving in an emergency can couple to it without thinking. It belongs to a small class of objects designed for a single user who will only ever appear once: the standpipe, the Knox box, the gas shutoff with its square key, the airport jet bridge&#39;s rarely-used emergency egress. Most design is iterated toward frequent users; this is design iterated toward a user who, by the time they arrive, cannot afford a learning curve. There&#39;s a phrase in aviation human-factors work — *negative training* — for the moment when a habit built in normal operation becomes lethal in the off-nominal case, and the whole genre of emergency hardware is essentially an attempt to dodge that trap by being so standardized that no habit needs to form. Which raises a quieter design question: what&#39;s the equivalent in software? The &quot;in case of emergency&quot; interfaces — bank fraud reversal, account recovery, the suicide hotline button buried in a mental health app — are usually built by the team that built the happy path, with the same component library and the same A/B test mindset, when really they should be built like fire hardware: brass, conspicuous, dumb, the same on every building. Stripe&#39;s idempotency keys have a little of that energy; almost nothing in consumer software does. The siamese connection is also, incidentally, one of the few pieces of streetscape designed to be *grabbed* — its forms presume hands and weight and water pressure, not eyes — which makes it a near-cousin of the door pull and a distant cousin of the tiller, and very far indeed from the glass rectangle on which most of contemporary &quot;interaction design&quot; happens.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>The painted color of fire hardware as a kind of forced legibility — a public color that civilians are not allowed to use, like the protected wavelength of an emergency siren.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s thread about signs whose meaning has drained out and been replaced by indexical function — but pulls in the opposite direction. Where the Marriott serif is a claim that has fossilized into a category-marker, the brass siamese is a category-marker that was *never* a claim, designed from the start to be pure index. Two ways an object can end up legible without telling you anything about itself.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">A</span></h4>
+         <p>The drift on protected-color and forced-legibility wants more streetscape to graze on — paint, signage, surface — and continuing along the wall keeps that material register live rather than swerving into a new corridor.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-2">
+  <div class="step-num">02</div>
+  <figure class="step-img">
+    <img src="images/02-297448955371058.jpg" alt="step 2" loading="lazy" />
+    <figcaption>43.66220, -79.38233</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>The red corner ribbon stamped with &quot;24 HOUR,&quot; cutting a diagonal across the otherwise rectangular green field of the Green P sign.</li><li>The tariff table beneath — EARLY BIRD, DAILY MAX, SAT–SUN, EVENINGS, EVENT PARKING RATE — set in small white sans-serif rows like a laundromat price card.</li><li>Two wooden 4x4 posts holding the metal panel aloft, dimensional lumber doing the work of municipal infrastructure.</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The red corner ribbon is the thing that pulls — and the term for it, in packaging design, is &quot;violator&quot; (or in supermarket trade, &quot;burst&quot;): a graphic that violates the calm of a composition to flag one fact loudly. A cereal box is essentially nothing but violators stacked on violators — NEW! NOW WITH! +20% FREE! — and the form descends from the dog-eared bookmark and, further back, from the heraldic corner badge sewn onto a tabard. What&#39;s strange is finding a violator on a parking sign, because the violator was *bred* for shelf competition: Tide pods need to beat All, so the box shouts; a Green P lot at 28 Wood Street has no shelf-mate and no convert to win. Maybe the red ribbon is doing signage work in retail clothing — flagging the one fact a driver decides on first, *is this lot even available right now*, before they care about the rate — and &quot;24 HOUR&quot; earns the diagonal because availability outranks price as a question. Or maybe it&#39;s just cargo cult, a gesture that originated in competition migrating happily into contexts without any, the way every municipal website now has a hero image and a CTA button even though nobody is choosing between the Toronto tax portal and a rival vendor. There may be a clean typology hiding underneath: signage that *competes* uses violators (menus, storefronts, end-caps), signage that *authorizes* refuses them (FHWA Highway Gothic on green-on-white, the London Underground roundel, regulatory plaques) — and this Green P sign sits awkwardly across that boundary, a public-private hybrid that needs to flag itself to passing traffic without having a competitor to flag against. The clean test case is the federal highway sign, which has no italics, no bursts, no diagonal anything, because once you&#39;re on the road you&#39;ve already chosen it; the violator only shows up where choice is still live, where there&#39;s still something to lose to a neighbor.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>What&#39;s the violator&#39;s equivalent in software UI — the red badge on the app icon, the &quot;NEW&quot; pip on a menu item — and is it migrating the same way, from competitive surfaces to authorizing ones?</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the running thread about graphic gestures outliving their original context. Step 0 had a boutique typeface ported onto a chain hotel; step 1 had a brass fire connection that was *never* a claim, only ever an index; this one is a retail-shelf convention (the corner burst) ported onto civic-adjacent signage where the competitive pressure that birthed it doesn&#39;t exist. Three rooms in the same house: claims that fossilize, signs that were always pure function, and conventions that wander across category lines and stick.</p></div>
+    
+  </div>
+</article>
+  </main>
+
+  <section class="artifact">
+       <h2>Artifact</h2>
+       <p class="medium">Medium — <em>A short interior-monologue vignette — one shift in the working life of a red corner ribbon.</em></p>
+       
+       <div class="artifact-md" id="artifact-md-body"></div>
+       <p class="closing">A short first-person vignette voiced by a graphic gesture — the red diagonal &quot;burst&quot; or &quot;violator&quot; that retail packaging breeds to win shelf combat — finding itself bolted to a municipal parking sign where there is no competition left to fight. The walk kept circling the same problem from different angles (claims that fossilize, indexes that were always pure function, competitive gestures that drift into authorizing contexts), and the vignette form lets the third case land as a small character with a working day rather than a taxonomy diagram. I picked monologue because pathos is the right register for a soldier whose war ended before he was deployed; the taxonomy was the seed, not the crop.</p>
+     </section>
+  <section class="artifact companion">
+    <h2>Companion — The Lineage of the Red Corner Burst</h2>
+    <p class="medium">Medium — <em>six ComfyUI photographic plates (RealVisXL V5.0) tracing the lineage of the red diagonal burst across six contexts: a heraldic tabard at Agincourt, a 1950s detergent box, a 1990s supermarket shelf, the 24 HOUR parking sign at Yonge &amp; Carlton, a fire-connection standpipe placard, a peeling SALE window sticker. Same gesture; six audiences.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-lineage/lineage.html" title="Companion — The Lineage of the Red Corner Burst"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-lineage/lineage.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">From a tabard at Agincourt to a parking sign at Yonge &amp; Carlton: the same red diagonal, six contexts, six audiences. The form remains; the war ends; the form is reassigned.</p>
+  </section>
+<section class="artifact companion">
+    <h2>Companion — Gesture Tracker</h2>
+    <p class="medium">Medium — <em>interactive canvas — the same red diagonal burst stays fixed at the upper-left while six procedurally-drawn carriers cycle behind it (linen tabard, mid-century detergent box, supermarket shelf, parking sign, fire-connection brick wall, glass storefront with a SALE sticker). Auto-advances every 6.5 seconds; prev/next available.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-tracker/tracker.html" title="Companion — Gesture Tracker"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-tracker/tracker.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">The form survives the function. The same shape looks like a different sign every six seconds.</p>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script>
+  const artifactMarkdown = "# A SHIFT IN THE WORKING LIFE OF A RED CORNER RIBBON\n\nI am 24 HOUR.\n\nI was trained for shelves. My grandfather was NEW! NOW WITH MORE! and his grandfather was a heraldic corner sewn onto a tabard at Agincourt. The diagonal is in the bones. You cut across the calm of a composition because calm is the enemy — calm is the box next to you on the shelf, and your job is to make the eye snag on yours instead. We were bred for snagging. We are a kind of dog.\n\nI was posted here in 2014, I think. The metal was warm when they bolted me on. There is no shelf. There is a sidewalk and a chain-link fence and a 1992 Cavalier that has been parked in stall 14 since at least Friday. There is a green field behind me — a calm color, a color that does not require me — and beneath my diagonal a small grid of rates the driver could read in their own time if they wanted. Nobody is competing with me. There is no Green Q lot across the street trying to undercut us on the EVENING rate. There is, in fact, a bylaw against another lot existing here. I am a guard dog at a property line that the law has already drawn.\n\nSo I shout. It is what I know. I shout 24 HOUR at the back of a man unlocking a Subaru. I shout 24 HOUR at the pigeon. I shout 24 HOUR at the limestone wall of the hotel across the way, which has its own problems — its serif COURTYARD and its little script signature, both of them claims that have fossilized into the word \"hotel,\" semaphore that no longer signals anything but the category it sits in. We acknowledge each other across the lane the way two retired stage actors might acknowledge each other in a Florida supermarket. He is a fossil. I am a soldier whose war ended before he was deployed. We do not discuss it.\n\nSometimes a city worker walks by with a paint can and I think: there. That one. He carries a color I cannot use — the protected red of the fire connection, a wavelength reserved by code, a red civilians are not allowed to spend. His red means *grab here*. My red means *look here, choose us*. We are two octaves of the same note and he doesn't know I exist. He has never had to ask anyone to choose him. To be chosen is, structurally, my problem.\n\nLate at night a teenager photographs me for a project on vernacular signage. She likes the diagonal. She does not know I am out of work. To her I look exactly like what I was supposed to look like — that's the cruelty of doing your job too well for too long. The form survives the function. I have become *the way a parking sign looks*, the same way the green cross became *the way a pharmacy looks*, and somewhere downstream a graphic designer in 2034 will draw a new municipal sign and put a small red diagonal on it because that's what municipal signs have. The gesture eats its own tail. Heraldry to packaging to shelf burst to civic furniture to category icon to default. I am four steps from Agincourt and I am advertising EARLY BIRD.\n\nThe Cavalier has not moved.\n\nI shout 24 HOUR at it anyway. Old habits. A dog at a property line.";
+  const mdEl = document.getElementById('artifact-md-body');
+  if (mdEl && typeof marked !== 'undefined') {
+    mdEl.innerHTML = marked.parse(artifactMarkdown);
+  }
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const coords = [[43.66224704,-79.38231244],[43.66216363,-79.38218607],[43.66219647,-79.38232601]];
+  const map = L.map('map', { scrollWheelZoom: false }).setView(coords[0], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap',
+    maxZoom: 19,
+  }).addTo(map);
+  const poly = L.polyline(coords, { color: '#c45a3f', weight: 3, opacity: 0.9 }).addTo(map);
+  coords.forEach((c, i) => {
+    L.circleMarker(c, {
+      radius: 11,
+      color: '#c45a3f',
+      weight: 2,
+      fillColor: '#c45a3f',
+      fillOpacity: 1,
+    })
+      .bindTooltip(String(i), { permanent: true, direction: 'center', className: 'step-marker-label' })
+      .addTo(map)
+      .on('click', () => {
+        const el = document.getElementById('step-' + i);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+  });
+  map.fitBounds(poly.getBounds(), { padding: [30, 30] });
+</script>
+</body>
+</html>
