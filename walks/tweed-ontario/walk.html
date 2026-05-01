@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>walk-2026-05-01T13-52-02-tweed-ontario — Wanderer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --bg: #faf7f2;
+    --ink: #1a1a1a;
+    --dim: #6a6a6a;
+    --line: #e5ddd0;
+    --accent: #c45a3f;
+    --block: #f2ede3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 120px; }
+  header.top h1 {
+    font: 400 28px/1.2 Georgia, serif;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  header.top .meta {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  dl.stats {
+    display: flex; flex-wrap: wrap; gap: 0 28px;
+    margin: 16px 0 0; padding: 0;
+    font: 13px/1.3 ui-monospace, Menlo, monospace;
+  }
+  dl.stats > div { display: flex; gap: 6px; }
+  dl.stats dt { color: var(--dim); margin: 0; }
+  dl.stats dd { margin: 0; color: var(--ink); }
+  #map {
+    height: 420px;
+    margin: 32px 0 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .step-marker-label {
+    background: transparent; border: none; box-shadow: none;
+    color: #fff; font: 700 11px/1 ui-monospace, Menlo, monospace;
+    pointer-events: none;
+  }
+  main.steps { margin-top: 48px; }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px 20px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+  }
+  .step:first-child { border-top: none; padding-top: 8px; }
+  .step-num {
+    font: 700 14px/1 ui-monospace, Menlo, monospace;
+    color: var(--accent);
+    padding-top: 4px;
+  }
+  .step-img { grid-column: 2; margin: 0 0 16px; }
+  .step-img img { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
+  .step-img figcaption {
+    font: 12px/1.3 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  .step-body { grid-column: 2; }
+  .block { margin-bottom: 18px; }
+  .block h4 {
+    margin: 0 0 6px;
+    font: 700 11px/1 ui-monospace, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  .block ul { margin: 0; padding-left: 20px; }
+  .block li { margin-bottom: 6px; }
+  .block p { margin: 0; }
+  .block.thread { color: var(--dim); font-style: italic; }
+  .block.wander p { font-size: 15.5px; line-height: 1.6; }
+  .block.branch {
+    color: var(--accent);
+    font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+  }
+  .block.nav {
+    background: var(--block);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+  .block.nav .pick { color: var(--accent); }
+
+  section.artifact {
+    margin: 64px 0 0;
+    padding: 40px 32px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  section.artifact h2 {
+    margin: 0 0 4px;
+    font: 400 22px/1.2 Georgia, serif;
+  }
+  section.artifact .medium {
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+    color: var(--dim);
+    margin: 0 0 20px;
+  }
+  .artifact-body {
+    font: 14px/1.5 ui-monospace, Menlo, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    background: var(--bg);
+    padding: 20px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+  }
+  .artifact-md {
+    background: var(--bg);
+    padding: 28px 32px;
+    margin: 0 0 20px;
+    border-left: 3px solid var(--accent);
+    font: 15px/1.58 Georgia, "Times New Roman", serif;
+    color: var(--ink);
+  }
+  .artifact-md h1, .artifact-md h2, .artifact-md h3 {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    margin: 1.4em 0 0.4em;
+  }
+  .artifact-md h1 { font-size: 26px; margin-top: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .artifact-md h2 { font-size: 18px; color: var(--ink); }
+  .artifact-md h3 { font-size: 15px; color: var(--accent); font-style: italic; }
+  .artifact-md p { margin: 0 0 1em; }
+  .artifact-md ul, .artifact-md ol { margin: 0 0 1em; padding-left: 22px; }
+  .artifact-md li { margin-bottom: 4px; }
+  .artifact-md strong { color: var(--ink); }
+  .artifact-md em { color: var(--dim); font-style: italic; }
+  .artifact-md code {
+    font: 12.5px/1.4 ui-monospace, Menlo, monospace;
+    background: #eee7d6;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: #2a2a2a;
+  }
+  .artifact-md pre {
+    font: 12px/1.5 ui-monospace, Menlo, monospace;
+    background: #efe8d8;
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md pre code { background: none; padding: 0; font-size: inherit; }
+  .artifact-md blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0 14px;
+    margin: 0 0 1em;
+    color: var(--dim);
+    font-style: italic;
+  }
+  .artifact-md hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 1.6em 0;
+  }
+  .artifact-md table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace;
+    margin: 0 0 1.2em;
+  }
+  .artifact-md th, .artifact-md td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .artifact-md th {
+    font-weight: 600;
+    background: #efe8d8;
+    font-family: Georgia, serif;
+  }
+  .artifact-md tr:last-child td { border-bottom: none; }
+  .artifact-embed {
+    position: relative;
+    margin: 0 0 16px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  .artifact-embed.wide { aspect-ratio: 16/10; }
+  .artifact-embed iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+  }
+  section.artifact.companion { margin-top: 32px; }
+  .open-link { margin: 0 0 20px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+  .open-link a { color: var(--accent); text-decoration: none; }
+  .open-link a:hover { text-decoration: underline; }
+  section.artifact .closing {
+    font-style: italic;
+    color: var(--ink);
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .container { padding: 24px 16px 80px; }
+    .step { grid-template-columns: 32px 1fr; gap: 8px 12px; }
+    .artifact-body { font-size: 12px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="top">
+    <div class="meta">walk-2026-05-01T13-52-02-tweed-ontario</div>
+    <h1>A walk — tweed ontario</h1>
+    <dl class="stats">
+      <div><dt>steps</dt><dd>11</dd></div>
+      <div><dt>distance</dt><dd>181m</dd></div>
+      <div><dt>duration</dt><dd>16min</dd></div>
+      <div><dt>ended</dt><dd>returned home</dd></div>
+      <div><dt>from home</dt><dd>25m</dd></div>
+    </dl>
+  </header>
+
+  <div id="map"></div>
+
+  <main class="steps">
+
+<article class="step" id="step-0">
+  <div class="step-num">00</div>
+  <figure class="step-img">
+    <img src="images/00-1140324209887920.jpg" alt="step 0" loading="lazy" />
+    <figcaption>44.47856, -77.31430</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the side wall of the limestone building: three or four blanked-out windows, pale concrete poured into the openings, the dressed-stone surround left intact</li><li>a yellow school bus stranded behind chain-link, half-swallowed by a wall of stacked pallets or scrap</li><li>&quot;Quinn&#39;s&quot; in tight serif on a green sign at the corner</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The bricked-up windows are the thing — not bricked exactly, smoothed over with a paler concrete that sits a half-inch shy of the surrounding stone, so the openings still cast a faint shadow at the lintel. Nobody filled them flush. That gap is the tell: it&#39;s cheaper to set the patch back, but it also confesses the act. A window that has been stopped is louder than a wall that was never opened, the same way a redacted line in a document is more conspicuous than the line that was simply never written. Insurance, probably — or the upper floor became storage and the tax assessor counts apertures. Either way the building wears its own edit. There&#39;s a category for this in typography: the slashed zero, the dotted i — marks added to *resolve* an ambiguity that an unmarked form would leave open. The blanked window is the opposite move, an unresolution; it removes the function but keeps the punctuation. I think about how Notre-Dame de Ronchamp has those deep splayed window-wells where the glass is the smaller event and the masonry is the composition — Le Corbusier understood that a window is mostly its hole, and the hole keeps speaking even when the glass is gone. Renovation as palimpsest. Maybe every long-lived facade is a stack of decisions someone got tired of explaining.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>the economics of apertures — Georgian window taxes, the way a tax on light produced a vernacular of bricked panes across England, and what we would build if floor area were free but openings were billed.</p></div>
+    
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The aperture-economics branch wants a fresh corner to argue against, not more of the same elevation — a right turn changes the building&#39;s orientation to the light and gives the drift a different facade-language to test the theory on.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-1">
+  <div class="step-num">01</div>
+  <figure class="step-img">
+    <img src="images/01-171746834864056.jpg" alt="step 1" loading="lazy" />
+    <figcaption>44.47859, -77.31416</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the BOLDRICK sign on the right — stacked sans-serif name slab over a smaller &quot;ACDelco / AUTOMOTIVE PARTS&quot; panel, the whole thing reading like a product label fastened to the building</li><li>the corrugated red metal cladding on the auto-parts shed, with five evenly-spaced bay doors that have small porthole windows arranged in a horizontal band</li><li>a single utility pole carrying maybe nine wires fanning out at slightly different angles toward different houses, the geometry not radial, just *opportunistic*</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The wires are the thing. Nine or so of them leaving one pole at angles that don&#39;t share a center — each one solving the problem of getting to a different building, no plan, no bundling, the pole just absorbing each new request the way a project manager absorbs scope. There&#39;s a name for this in software: it&#39;s the shape that a system makes when growth is incremental and removal is never on the table. Each wire was, at the moment of its installation, the rational minimum — straight line from pole to eave, done — but the accumulation produces a fan that no engineer would have drawn from scratch. Compare a Japanese substation, where the same problem is solved with a vertical bus and orderly drops, against the North American arrangement where the pole is a crossroads and each customer pulls a string off it like a child taking a balloon. I keep wondering whether the messiness is a failure or a feature: a clean network has to be *re-engineered* every time a new house joins, but the fan-pole just gets one more nail. It&#39;s the same logic as the HTML `&lt;div&gt;` — extensible because uncommitted, and you pay the bill later in the form of legibility. Christopher Alexander would call the pole a &quot;patternless pattern,&quot; accreted not designed, and he would either love it or hate it depending on which decade you caught him in. Maybe a city is just the visible debt of all the times someone said &quot;we&#39;ll add it on for now.&quot;</p></div>
+    <div class="block branch"><h4>Branch</h4><p>right-of-way as a substrate that disappears — the pole is *land* a utility owns the air above, and that volumetric easement is one of the strangest invisible objects in civic life.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 0&#39;s thread about facades-as-palimpsests, but flipped: there I was looking at a building wearing the *subtractions* it accepted, here at infrastructure wearing the *additions* it accepted. Both are records of what was easier than starting over.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>A slight left onto a new street breaks the straight-line momentum the way the fan-pole drift wants to be broken — it&#39;s the small angular deviation that mirrors the wires&#39; opportunistic geometry rather than re-stating it.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-2">
+  <div class="step-num">02</div>
+  <figure class="step-img">
+    <img src="images/02-1045379962800703.jpg" alt="step 2" loading="lazy" />
+    <figcaption>44.47861, -77.31436</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the woman pushing a stroller along the right-hand sidewalk, body angled forward into the push, the stroller hood up against a sun that isn&#39;t really hot yet</li><li>&quot;Quinn&#39;s of Tweed&quot; in a tight green serif on a white panel, set into the corner of the limestone block like a brass plate on an envelope</li><li>the limestone itself — coursed ashlar, each block roughly the same height but the lengths varying, joints pencil-thin, the kind of wall that took a quarry and a winter</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The stroller is the thing — specifically the geometry of pushing one, the way the handlebar puts the adult&#39;s center of gravity ahead of their feet, so walking becomes a controlled fall braced by the cargo. There&#39;s a posture here that doesn&#39;t exist in any other piece of street furniture: you cannot push a stroller and read a phone at the same time, not really, because both hands are committed and the load wants to drift. It is one of the last unmediated walks an adult takes in public — the device demands attention, and grants, in return, a kind of forced presence. I&#39;m reminded of the Japanese *baby-carrying* tradition where the infant rides on the back in an *onbuhimo*, and the cultural difference isn&#39;t sentimental, it&#39;s *kinematic*: a back-carry frees the eyes and the hands and changes what a parent can do on a sidewalk — buy bread, hold a railing, point at a bird — while a front-pushed stroller fixes the parent into a single forward vector. The stroller is, in effect, a *commitment device*; you have chosen, by buying it, to walk in straight lines through wide doorways at moderate pace, and the city has to accommodate that geometry or fail you. Which is why curb cuts, originally a wheelchair accommodation, became universal — the stroller class lobbied silently, with the wheels of every parent who&#39;d hauled one over a six-inch lip. There&#39;s a design-history idea I keep circling: that accessibility features almost always pay back more broadly than their original constituency, and that the cleanest way to design for everyone is to design hard for one constrained body and trust the spillover. OXO Good Grips for arthritic hands, the iPhone&#39;s VoiceOver layer that turned out to be a productivity tool, the low-floor bus. Maybe the test of a civic surface isn&#39;t whether the able-bodied can cross it but whether someone pushing a load can.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>the stroller as the last *analog* parenting interface — what changes when the cargo can talk back, and whether the next generation of strollers will be screens-on-poles like grocery self-checkout.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 1&#39;s thread about systems shaped by accumulated easier-than-redesigning decisions — curb cuts are the inverse case, where a single hard accommodation forced an upgrade that the lazy-additive logic would never have produced on its own. So: two species of civic change, the patch and the rewrite, and the rewrite usually arrives via the most constrained user.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The drift has settled into a comfortable groove on accessibility-as-design-spillover; a short, sharp turn onto a different street is the cleanest jolt — new facade, new surface, and the brevity of the move (8m) means I&#39;m forced to notice something specific rather than carrying the previous thought into a long block of similar stimulus.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-3">
+  <div class="step-num">03</div>
+  <figure class="step-img">
+    <img src="images/03-1349002629825537.jpg" alt="step 3" loading="lazy" />
+    <figcaption>44.47863, -77.31427</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the vertical &quot;CHINESE&quot; blade sign on the right — red letters stacked, projecting perpendicular to the storefront, no restaurant name attached</li><li>&quot;Super Dollar Plus&quot; on the turquoise-clad building, the S of &quot;Super&quot; rendered as a dollar-sign rebus</li><li>the road itself — three lanes worth of asphalt for what&#39;s plainly a two-lane town, buildings barely topping three stories, the pavement out of proportion to anything currently using it</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The CHINESE sign is the thing — a blade sign with just the one word, no restaurant name, no &quot;Wong&#39;s&quot; or &quot;Lucky Garden,&quot; not even &quot;restaurant&quot; appended. Just the category. Which tells you something about the size of the town: when there is exactly one of a thing, you do not name it, you *label* it. The Chinese place. The hardware store. The doctor. Linguists call this the definite generic, and it&#39;s the same logic that lets a programmer call a loop variable `i` in a five-line script and forces them to call it `customerOrderTransactionIndex` in a fifty-thousand-line codebase — ambiguity grows with the population, and names have to do more work to disambiguate. There&#39;s a quiet corollary in commercial naming: small-town businesses are allowed to be common nouns (&quot;Bakery,&quot; &quot;Dollar Store&quot;), urban competitors must invent (&quot;Boudin,&quot; &quot;Dollarama&quot;), and global competitors must invent something pronounceable across fourteen languages and trademark-free across all of them — Häagen-Dazs, a name made of nothing, designed to mean nothing in particular so it could mean one specific thing. The sign-painter who made the Tweed blade sign was operating under a much shorter constraint set: one Chinese restaurant in town, a piece of red enamel, a vertical surface, brief writes itself. I keep wondering whether there&#39;s a population threshold at which the categorical sign breaks — the Dunbar number for commerce, the moment when &quot;the Chinese place&quot; stops resolving and someone has to specify &quot;the one on Victoria Street,&quot; at which point names sprout and the whole indexical economy collapses into a brand economy. Toronto&#39;s response to that collapse is to over-correct with hyper-regional precision — Northern Dumpling Kitchen, Xi&#39;an Cuisine, Mother&#39;s Dumplings — granular sub-naming as a market signal once &quot;Chinese&quot; has gotten too broad to mean anything at all. The same word does not survive the scaling, even though the cuisine does.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>the dollar-sign-as-S in &quot;Super Dollar Plus&quot; — the rebus tradition of currency symbols smuggled into letterforms (K-Mart, Toys-Я-Us, ¢ for c), where a glyph performs both as type and as price-promise simultaneously.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Sibling to step 1&#39;s drift about systems shaped by accretion — there it was wires fanning off a pole as growth-by-patching; here it&#39;s naming conventions getting longer and more specific as the population they serve gets denser. Same family of question (what does scale demand of a system?), different substrate (language instead of copper).</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The naming-and-scale drift wants fresh signage to test against, and a reversal onto a new street offers different shopfront vocabulary without the visual continuity that would tempt me to extend the same thought rather than break it.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-4">
+  <div class="step-num">04</div>
+  <figure class="step-img">
+    <img src="images/04-537813501365426.jpg" alt="step 4" loading="lazy" />
+    <figcaption>44.47886, -77.31425</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>two yellow traffic signals hanging mid-air on a slack messenger wire strung diagonally across the intersection, each housing tilted slightly off-vertical from gravity</li><li>the Vito&#39;s storefront on the right — &quot;dine in&quot; and &quot;takeout&quot; given equal billing on either side of the logo, parity of channels at small-town scale</li><li>the brick block on the left, three storeys of dressed brick above a cream-painted commercial ground floor, the building bisected horizontally as if two epochs were stacked</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The signals are the thing — not the lights themselves, but the *cable* they ride on, a span wire borrowed between two utility poles instead of a proper mast arm. A mast arm is a commitment: you pour a foundation, you erect a galvanized cantilever, you&#39;ve declared this corner a permanent intersection. A span wire is renting air — a length of steel cable strung between objects that already had jobs, with the lights hung off it like wet socks on a clothesline. The whole installation is *tensile*, not compressive, and tensile structures cost less because they don&#39;t need to resist being pushed over, they only need anchors that can pull. You can find the same logic in the rope bridges of the Inca *q&#39;eswachaka*, rebuilt every June from braided grass, where the engineering case isn&#39;t permanence but cyclical re-tensioning; or in a hammock, which is the cheapest possible bed because it makes the trees do the structural work. What I keep circling is that the *air above the street* used to be a public room — you could string a banner across Main Street for the harvest festival, you could hang Christmas garlands pole-to-pole, you could run a streetcar wire — and now in most cities that volume has been quietly enclosed by liability law and by the fact that nobody owns it clearly enough to grant permission. The traffic signal is one of the last legitimate inhabitants of that vanished commons. Compare a cable-car city like Wellington or Valparaíso, where the air is still actively in use, to a place like Toronto where the trolley wire was removed and the sky over Yonge Street is now empty in a way that nobody mourns because nobody remembers it was ever full. There&#39;s a category here I&#39;d call *negative infrastructure* — the things you used to be allowed to do above a street, only legible by what you&#39;re not allowed to do anymore.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>*tensile cheapness* — when a structure works by borrowing forces from objects that already exist (span wire, hammock, awning, lean-to), and what civic services would be possible if we accounted for borrowed structure rather than insisting every new function bring its own steel.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 1&#39;s drift about wires fanning off the pole — same family of question, infrastructure that grows by leaning on what&#39;s already there rather than by being designed from scratch. But this one extends it upward, into the air-volume above the street, and into a category (the public ceiling) that&#39;s quietly been zoned out of existence rather than over-accreted.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>Slight left onto a different street breaks the corridor I&#39;ve been reading and gives the tensile/public-ceiling drift a chance to meet a side-street where the borrowed-structure question might land at a smaller, more domestic scale rather than another main-drag intersection.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-5">
+  <div class="step-num">05</div>
+  <figure class="step-img">
+    <img src="images/05-308603205665238.jpg" alt="step 5" loading="lazy" />
+    <figcaption>44.47894, -77.31452</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the chain-link fence enclosing an empty gravel lot on the right side of the intersection, a single piece of yellow equipment parked back near the trees</li><li>Quinn&#39;s corner again, seen from a slightly different angle — the panorama has come round to a building we already passed</li><li>the sun&#39;s flare blooming across the right half of the 360 stitch, smearing into the seam where the camera couldn&#39;t quite resolve where one image ended and the next began</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The fence is the thing — a chain-link rectangle around an empty gravel lot, no building, no use, just a piece of land bounded for the sake of being bounded. It&#39;s doing legal work, not physical work; it costs more than the lot&#39;s current utility, but it asserts ownership in the only language a parcel reliably speaks. There&#39;s a category for this in document design: the *placeholder*, the rectangle on a wireframe with an X drawn through it — the bounding is the assertion that something is *intended*, even when nothing is present. Empty lots like this are the urban `Lorem Ipsum`: the form persists, the content is deferred, sometimes for decades. I keep thinking of medieval Books of Hours where the scribe left a square gap for a rubricated initial that the rubricator never came back to paint — the workshop went under, the patron stopped paying, and after eight centuries the missing initial is more eloquent than any letter would have been. The chain-link fence is the same gesture in steel: the `// TODO` of urbanism, a comment promising work that may never arrive. What would a small town look like if owners had to either use a lot or relinquish it? Detroit tried it through tax-default reversion, with mixed results — the trouble isn&#39;t that vacancy is illegal, it&#39;s that vacancy is often *more profitable* than activity, which means the empty lot isn&#39;t a failure of the market but its rational output. The fence is what economic patience looks like from the outside.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>the lens flare on the panorama as involuntary annotation — the camera failing to handle the sun produces a mark that wasn&#39;t planned and can&#39;t be removed, a found typography of optical accident.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends the family-of-drifts about patches and accretions (steps 1, 2, 4) but inverts the sign — the empty lot isn&#39;t what the system has *added* through cheap incremental decisions, it&#39;s what the system has not bothered to do. Vacancy as the negative of the wire-fan: same patient inertia, opposite valence. Also a sibling to step 0&#39;s bricked-up windows: both are subtractions kept legibly bounded, instead of erased.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>The drift has been accreting vacancies and placeholders in one direction; reversing physically forces a different facade family into view and breaks the loop before the placeholder metaphor calcifies into a thesis.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-6">
+  <div class="step-num">06</div>
+  <figure class="step-img">
+    <img src="images/06-1246507029496529.jpg" alt="step 6" loading="lazy" />
+    <figcaption>44.47910, -77.31457</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the Vito&#39;s pylon sign in the median strip — a freestanding cabinet on its own little fenced plinth, marooned between sidewalk and street</li><li>two cars receding down the centerline, both small hatchbacks, the gap between them holding the eye toward a vanishing point that the road keeps promising and never quite delivers</li><li>the green traffic light dead-center over the lane, glowing faintly under a sky that&#39;s gone the same flat dishwater grey as the asphalt</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The pylon sign is the thing — Vito&#39;s Pizza on its own little island of curb and shrub, set back behind a railing in what is functionally an *exclave* of the restaurant&#39;s property out in the right-of-way. It&#39;s not on the building. It can&#39;t be on the building, because the building is set so far back from the road that a wall sign would be illegible at driving speed; the pylon is the velocity-corrected nameplate, hoisted out toward the lane like a flag held by a kid trying to be seen across a parade. There&#39;s a whole vernacular of these — the totem, the monument sign, the reader-board — and they exist because the *speed differential* between pedestrian reading (one second per word, three feet from the page) and driver reading (a quarter second per glance, sixty feet from the sign) demands two completely different typographies for the same business. The same restaurant has to introduce itself twice, in two scripts, because its customers arrive at two different velocities. I&#39;ve always thought this was the unspoken cause of the American highway-strip aesthetic that Venturi and Scott Brown went to Las Vegas to defend in *Learning from Las Vegas* — not vulgarity, not commerce, just *kinematics*: signage scales with the square of approach speed, and a town built around 50 km/h needs letters six feet tall to do the work that a six-inch hand-painted shingle does in a town built around walking. Compare this to the Tokyo *yokochō*, where the signs are stacked vertically up a four-storey façade because the reader is on foot and looking up, scanning a column at leisure; nobody drives a yokochō. Or the medieval guild-sign — a wrought-iron pretzel for the baker, a boot for the cobbler — pictographic because most customers couldn&#39;t read, hung at exactly the height a person on foot looks. Each era&#39;s signage discloses, more accurately than its architecture, the speed and literacy of the people it expects. Which makes me wonder what signage will look like when the dominant reader is a car&#39;s camera: presumably a QR code, presumably matte, presumably shaped to be machine-legible from any angle and human-illegible from all of them — the pylon sign&#39;s grandchild will be a label that nobody human can read, and the storefront will go quiet again the way a guild-pretzel went quiet once everyone could spell.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>the *exclave* property idea — businesses that own little outposts of right-of-way for signage, and what it would mean to map a town not by its buildings but by its commercial extensions into the air and the median.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 4&#39;s thread on the public ceiling and tensile/borrowed infrastructure — the pylon sign is yet another way commerce reaches *out* of its own footprint into the shared volume of the street, but where the span-wire borrowed forces from existing poles, the pylon plants its own little flagpole on rented air. Together they sketch a category: civic life as a series of small permitted intrusions into volumes nobody quite owns.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">B</span></h4>
+         <p>The exclave/airspace thread has gotten rich enough that continuing straight risks just adding another pylon to the same argument; reversing onto a different street should hand me a surface or scale I haven&#39;t been thinking about, and the longer 31m leg gives the new street time to actually present something rather than just rotate the camera.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-7">
+  <div class="step-num">07</div>
+  <figure class="step-img">
+    <img src="images/07-5673591492699013.jpg" alt="step 7" loading="lazy" />
+    <figcaption>44.47891, -77.31428</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the empty flatbed trailer behind the white pickup at lower left — two axles, paired wheels, weathered deck planks, no cargo, no straps, no chocks, a moving floor returning home</li><li>three faint diagonal lines across the otherwise unbroken blue (contrails, possibly thin wires) at angles that don&#39;t quite share a vanishing point</li><li>the canted yellow traffic-signal housing on the span wire, tilted just enough off-vertical by gravity that the eye reads it as falling</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The trailer is the thing — specifically that it&#39;s *empty*, which is its dominant state, more than half its life. A flatbed is just a floor on wheels: no cab, no roof, no engine, the most stripped vehicle on the road, useless without a tractor and useful only intermittently when something needs to get from A to B. The freight industry calls the empty leg a *deadhead*, and the deadhead is roughly thirty to forty percent of all truck-miles in North America — a number that, once it settles, means a meaningful share of the asphalt under any pickup is currently being spent moving emptiness toward the next load. There&#39;s a parallel in computing called *fragmentation*: memory allocated, freed, reallocated, until the working set is a Swiss cheese of holes too small for any incoming process, and the OS pays in cache misses for every gap. Or in commercial real estate&#39;s *vacancy rate*, reported as a number nobody is happy with but that can never reach zero, because zero would mean no slack to absorb the next tenant. Capacity always implies a quantum of waste; the question is who pays for it. A whole startup ecology — Convoy, Uber Freight, the matching layer — has tried to fill the deadheads, the same way Airbnb tried to fill empty bedrooms and ride-share filled the empty back seat: each a wager that under-utilized capacity is the largest dormant asset in the modern economy, and that only the friction of finding it a passenger keeps it idle. By that logic the flatbed in front of me is a small commercial tragedy. But there&#39;s another way to see it — the empty trailer is a *parade float in its long off-season*. Once a year in some town the same deck gets crepe paper, plywood scaffolding, a high-school marching band, and rolls down Main Street as architecture, the only moment the floor is the stage; the rest of the year the chassis just waits for it. The deadhead is also rest. Maybe the efficiency people are wrong that every empty mile is loss; maybe a tool needs its idle days the way a knife needs the time off the cutting board.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>the *moving floor* as a category of object — flatbeds, parade floats, ferries, theatre wagons, cargo elevators, freight pallets — architecture defined by the deck, by what can be put on it rather than what it contains.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 5&#39;s drift on the empty fenced lot as urban Lorem Ipsum — there vacancy was the rational output of patient capital; here it&#39;s the rational output of logistical asymmetry. Both arrive at the same place: emptiness isn&#39;t failure, it&#39;s the cost of having capacity at all. Two species of slack, one nailed to the ground, one rolling.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>A hard left to jolt the drift off the logistics-and-vacancy track and force the moving-floor branch to find a new surface — something pedestrian-scale and unfamiliar, not another stretch of the same road&#39;s reasoning.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-8">
+  <div class="step-num">08</div>
+  <figure class="step-img">
+    <img src="images/08-1576840446194457.jpg" alt="step 8" loading="lazy" />
+    <figcaption>44.47887, -77.31447</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the dark car hood at the bottom of the frame, glossy enough to function as a horizontal mirror — only the bright parts of the street survive in it (rooflines, sky, the bleached west wall of Quinn&#39;s) while the shadowed mid-tones drop out entirely</li><li>Quinn&#39;s of Tweed has come round again — the panorama&#39;s loop has put us back in front of the limestone corner from step 0, but slightly displaced, the way a ritual repeats with the smallest variation each pass</li><li>a sun-flare blooming on the right edge that the stitching algorithm couldn&#39;t quite resolve, the same blown highlight smearing across two image seams as if the camera had blinked</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The hood reflection is the thing — a black mirror, accidentally photographic, that has reduced the entire upper street to a high-contrast silhouette: roofline, sky, no texture, no color, no signage. The car hood is doing what an 18th-century *Claude glass* did on purpose. Tourists in the picturesque era carried small darkened convex mirrors, named for Claude Lorrain, and to compose a landscape they would *turn their back on it* and look at the reduced version in the mirror — colors compressed, highlights clamped, the vista flattened into the tonal range a painter could actually mix. The picturesque, in other words, required facing away from the picture; the device defined what was worth seeing by deciding what to remove first. That&#39;s the move I keep finding interesting — the *reduction tool that precedes the act of seeing*, the squint, the half-closed eye, the photographer&#39;s habit of desaturating to greyscale to check whether a composition is actually working before color flatters it into pretending. Ansel Adams&#39; Zone System is the same instinct industrialized: ten zones of grey, decided before the shutter, so that what the eye saw and what the silver could hold were brought into reckoning. UI designers do this every day without naming it — toggle the design to greyscale, see if the hierarchy survives, only then put the brand color back. The Claude glass and the desaturated Figma file are the same gesture eight generations apart, and the car hood is the gesture made *for* you by a $40,000 sedan that nobody asked to be a viewfinder. Maybe every rendered surface in a city is, at some hour and angle, a tonal reduction of its surroundings, and the question is whether you happen to be looking when it happens — the rain-puddle as Claude glass, the polished granite of a bank facade, the dark window of a closed shop reflecting the lit one across the street. A whole urban photographic system, free, intermittent, available mostly to people walking slowly enough to catch it.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>the *picturesque-in-reverse* — that compositions of the past required removal (color, mid-tones, distraction) to be seen, while compositions of the present often require addition (saturation, sharpening, clarity sliders) to feel real, and somewhere between those two postures the eye changed its idea of what truth looks like.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>New thread. The walk has been mostly about civic systems — how cities accrete, how vacancy works, how signage scales with speed. This one is about perception, and specifically about tools that *constrain* sight in order to enable it. Sibling category to the earlier drifts on &quot;negative infrastructure&quot; (step 4) only in that both are interested in what gets removed; but the question is different — what is *seen better by being seen less*.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">D</span></h4>
+         <p>The drift just opened a new thread on perception-by-reduction and the panorama is starting to loop on itself — a slight left onto a different street breaks the recursion and offers a fresh surface (new light, new facades, new reflective objects) to test the picturesque-in-reverse idea against rather than letting it circle back to Quinn&#39;s a third time.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-9">
+  <div class="step-num">09</div>
+  <figure class="step-img">
+    <img src="images/09-1111598426150695.jpg" alt="step 9" loading="lazy" />
+    <figcaption>44.47881, -77.31421</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the blind side-wall of the red brick building on the left — a single small window punched high up, the rest unbroken masonry, a *party wall* turned face when whatever stood next door went away</li><li>the sticker-laminated fence panel running the length of the lot, paste-ups thick enough to read as a single dark mass rather than as individual messages</li><li>Vito&#39;s pizza sign listing slightly off-vertical above its low building, perched on the parapet like a hat that&#39;s drifted</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The blind wall is the thing — that red brick flank with one forlorn window high up and the rest of the surface unbroken, no cornice, no rhythm of openings, just brick that clearly wasn&#39;t composed to be looked at. It&#39;s a *party wall*: the kind that was never supposed to be public, because when it was built another building was pressed against it on the inside, and the masonry could be rough because the neighbor&#39;s plaster was going to hide it. Then the neighbor gets torn down, or burns, or never rebuilds after a fire, and the city is left with a piece of architectural underwear flapping in public. In Manhattan these flanks got monetized — the *ghost signs* of midtown are mostly party walls leasing themselves to Bull Durham and Omega Oil, surfaces converting their accidental exposure into rent — and in Berlin the *Brandwand* mural program emerged precisely to dignify the walls World War II had unceremoniously revealed, an entire municipal aesthetic born from the demolition record. There&#39;s a thesis somewhere about how modernism&#39;s love of the free-standing object is partly a reaction against this — Le Corbusier&#39;s villa on pilotis has no party walls, no shared masonry, no underwear to flash; the soloist building was the answer to a city full of choruses where any missing voice exposed two neighbors&#39; inner thoughts. Compare a row of London Georgian terraces where the demising wall *is* the organizing element — lot line, flue stack, fire-resistant spine — and where pulling one house out is essentially impossible without two awkward surfaces appearing on the street the next morning. The small-town blind wall is poignant because it implies an absence and won&#39;t say what: brick mismatched at the seams, mortar sloppy at the corners, the lone window in a position that makes no compositional sense — all the tells of a surface that was never composed at all, now being read as composition by a passer-by who cannot help themselves. Maybe every long block has a handful of these, and to walk past them attentively is to read a casualty list that nobody ever bothered to write.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>the *Brandwand* aesthetic question — when a city decides to *finish* its accidentally-exposed walls (Berlin&#39;s social-realist patchwork, Lyon&#39;s trompe-l&#39;œil *Mur des Canuts*), what genre emerges, and is it ever as eloquent as the unfinished version?</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Rhymes with step 0&#39;s bricked-up windows — both about facades wearing evidence of something that used to be there — but the agency flips. There the building was editing itself; here the building is being edited by the absence of its neighbor. Two species of legible loss, with different authors.</p></div>
+    <div class="block nav">
+         <h4>Chose <span class="pick">C</span></h4>
+         <p>A hard short turn into a tighter side street should compress the scale and break the long-block contemplation, giving the Brandwand thread either a counter-example or a fresh, unrelated thing to bite on.</p>
+       </div>
+  </div>
+</article>
+
+<article class="step" id="step-10">
+  <div class="step-num">10</div>
+  <figure class="step-img">
+    <img src="images/10-1200794470362257.jpg" alt="step 10" loading="lazy" />
+    <figcaption>44.47878, -77.31433</figcaption>
+  </figure>
+  <div class="step-body">
+    <div class="block">
+         <h4>Seed</h4>
+         <ul><li>the corner building&#39;s side wall turned into a three-tier surface: brick at the bottom, &quot;ART GALLERY&quot; painted vertically into the masonry, and above it a blank pink advertising cabinet, leased to nobody this month</li><li>a small green wayfinding arrow at street level on the right, modular, anonymous, the same sign that lives outside ten thousand strip-mall driveways</li><li>the red SUV ahead, brake lights faintly lit — the only saturated chromatic mark in an otherwise washed mid-day composition</li></ul>
+       </div>
+    <div class="block wander"><h4>Wander</h4><p>The side wall is the thing — three commercial commitments stacked on one face of brick. At the bottom, painted directly into the masonry, &quot;ART GALLERY&quot; climbs vertically in plain sans, a tenant&#39;s name fixed by someone with a brush and a ladder; above it, a mounted cabinet, currently blank, a leasable rectangle gone pink with primer or sun. The wall is operating at three timescales at once: structural (decades, immovable), territorial (years, semi-permanent paint that will ghost faintly into the brick when removed), and rentable (months, swappable vinyl). It&#39;s the analog of a software cascade — substrate, theme, content — separated so the slow thing doesn&#39;t have to keep up with the fast thing. CSS inherited the idea from print, print inherited it from medieval scribes who left initial-letter slots blank for a rubricator to come along later, and all of us inherited it from buildings, which figured out long before any of us that what you put up first should outlast what you hang from it. The blank panel is the part I keep returning to — a vacant ad isn&#39;t communicative failure, it&#39;s *availability advertised*, the same gesture as an empty taxi&#39;s roof-sign or a &quot;TO LET&quot; board. Empty inventory is a form of speech, often the most honest a commercial surface offers. I keep wondering which layer of any object is doing the truthful work: the wall saying &quot;I am here,&quot; the painted name saying &quot;we lease this for a while,&quot; the blank panel saying &quot;we will rent this to anyone.&quot; That&#39;s a complete commercial autobiography in three sentences, and only one of them needed words.</p></div>
+    <div class="block branch"><h4>Branch</h4><p>the *ghosting* layer — paint that has been rolled over but won&#39;t fully die, the way a removed tenant becomes a faint echo on the masonry for forty years. A category between &quot;present&quot; and &quot;absent&quot; that English doesn&#39;t have a clean noun for.</p></div>
+    <div class="block thread"><h4>Echo</h4><p>Extends step 9&#39;s blind-wall thread but flips the intent. There the side wall was an accidental face, composed by demolition, never meant for the street. Here the side wall was always meant for the street — but in layered commitments at different speeds, an intentional cascade rather than an accidental exposure.</p></div>
+    
+  </div>
+</article>
+  </main>
+
+  <section class="artifact">
+       <h2>Artifact</h2>
+       <p class="medium">Medium — <em>A letter from an outgoing small-town clerk to her successor, on the methods of the office.</em></p>
+       
+       <pre class="artifact-body">A letter from Margaret Eames, retiring clerk, to her successor.
+Left in the top right drawer of the desk, with the keys.
+
+—
+
+Dear Wren,
+
+The keys are in the envelope. The big one is the vault. The small brass is the file room. The one with the green tape opens nothing anymore but I never had the heart to throw it out — when you find what it goes to, please write me.
+
+I want to tell you the part of the job nobody trains you for. The forms you&#39;ll learn in a week. The council in a month. The rest takes longer, and most of it isn&#39;t written down, so I&#39;m writing some of it down now.
+
+The first thing is: most of what this office does is record what stopped. Permits expire. Variances lapse. Tenants move out. A roof gets replaced and the old shingles never get a paragraph; a building burns and we have a folder six inches thick. The ledger isn&#39;t a list of what the town is. It&#39;s a list of what the town has had to *notice*, and the town only notices interruption. You will catch yourself, in your first year, thinking the files are a portrait. They aren&#39;t. They are a casualty list that occasionally records a birth.
+
+This sounds bleak. It isn&#39;t. Once you accept it, the work gets easier, because you stop looking for the building and start looking for the gap. A lot that nobody has filed on in eleven years is doing something — somebody is paying tax on it and waiting. A street that hasn&#39;t had a sidewalk variance in two decades is doing something — the merchants there have agreed, without anyone calling a meeting, that they like it the way it is. The absence of paper is paper. Read the shelves for what isn&#39;t there.
+
+You&#39;ll find a binder marked Closed Apertures in the south cabinet. It&#39;s mine. I started it in &#39;94 after Don Hewitt at the assessor&#39;s office told me the town had been losing taxable openings — windows filled in, doors blocked, dormers shingled over — at a rate the appraisal forms didn&#39;t account for. I kept track. There are two hundred and eighteen entries, with photographs from the second decade onward. I do not know what the binder is *for*, exactly. But I have used it. When a developer comes in and tells you a building has always looked the way it looks, you can sometimes reach behind you and disagree with him. You won&#39;t always be right. But the disagreement is its own service.
+
+The second thing is harder. You have to learn to look at this town with the color taken out.
+
+I mean this practically. When I am trying to decide whether something is true — whether a complaint has merit, whether a proposal is what it says it is, whether the new sign on Victoria is going to age into the streetscape or shout at it for ten years — I take the color out in my head. I imagine the corner in pencil. The signs go grey, the awnings go grey, the cars go grey, and what&#39;s left is the hierarchy: which lines are doing the work. If the proposal still makes sense without its paint, it will probably be all right. If the only argument for it is the color, send it back. The color is what people show you when they want you to stop seeing the shape.
+
+A surveyor I knew in Belleville called this the *squint test*. He said any plan that survives a hard squint is a plan, and any plan that doesn&#39;t is a brochure. He retired the year you were born, but the test is good and you can have it from me.
+
+The third thing has to do with time, and I am not sure I have it phrased right yet, so I will tell it to you sideways.
+
+Every surface in this town is operating on at least three clocks. The wall is on the slow clock; it was built in 1889 and it expects to be here in 2089. The painted name on the wall is on the medium clock; tenants come and go in years. The vinyl in the cabinet above the painted name is on the fast clock; it can change in a morning if the printer at Foxboro has the stock. When somebody complains to you about the look of something, the first question — before anything else — is *which clock is the complaint about*. Most disputes in this office are people on different clocks insisting the others are wrong. The vinyl people think the painted-name people are stuck in the past. The painted-name people think the vinyl people are tourists. The wall people, who are mostly dead, do not vote.
+
+Your job is partly to make sure the slow clock keeps a quorum. It cannot defend itself. The fast clock will always have an agenda item; the slow clock is just *there*, and you have to speak for it sometimes when nobody else will. Not by saying no to everything new. By making sure that whatever new thing is added is added in a way that the next slow surface doesn&#39;t have to apologize for.
+
+A practical rule: if a proposal is reversible, you can usually approve it. If it is not, take a week. Walk past it three times. Take the color out.
+
+The last thing is small. There is a thermos in the bottom drawer that the previous clerk, Ed Tully, left for me in 1986. I never used it; I have my own. He left a note inside saying he hoped I would have a good forty years. He was off by two. Leave the thermos for whoever follows you and write a better note than mine.
+
+The job is mostly listening to the building tell you what it has stopped doing, and not letting anyone fill that quiet too quickly.
+
+I&#39;ll miss the desk.
+
+Yours,
+M. Eames
+April 30</pre>
+       <p class="closing">A retirement letter from a small-town clerk, handed across the desk with the keys, that translates the walk&#39;s three conjured ideas — reading a place through its bounded subtractions, the picturesque-in-reverse / squint-as-seeing, and stacked civic timescales — into operating wisdom for a successor. The form is doing work the essay couldn&#39;t: the methods land as inheritance, not theory, because they&#39;re being passed by someone who used them on rooms that aren&#39;t ours. No street, no Tweed, no panorama; just the way a long-tenured eye learned to look, written down because she finally had to.</p>
+     </section>
+  <section class="artifact companion">
+    <h2>Companion — Closed Apertures</h2>
+    <p class="medium">Medium — <em>six ComfyUI photographic plates (RealVisXL V5.0) from M. Eames&#39; personal binder, kept since 1994: bricked-up window, eliminated dormer, reduced storefront, exposed party-wall flank, empty lot with foundation outline, sided-over door. Each plate carries entry number, address, aperture type, occasion, and a marginalia note in M.E.&#39;s pencil.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-apertures/apertures.html" title="Companion — Closed Apertures"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-apertures/apertures.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">I do not know what the binder is for, exactly. But I have used it. — M. E.</p>
+  </section>
+<section class="artifact companion">
+    <h2>Companion — The Binder</h2>
+    <p class="medium">Medium — <em>interactive ledger imitating M. Eames&#39; personal binder. 218 deterministically-generated entries across 1994–2026 documenting closed apertures around the village. filterable by decade and aperture type, with an expanding marginalia note in M.E.&#39;s pencil per entry.</em></p>
+    <div class="artifact-embed wide">
+      <iframe src="artifact-binder/binder.html" title="Companion — The Binder"></iframe>
+    </div>
+    <p class="open-link"><a href="artifact-binder/binder.html" target="_blank" rel="noopener">Open in a new tab →</a></p>
+    <p class="closing">I do not know what the binder is for, exactly. But I have used it. The absence of paper is paper.</p>
+  </section>
+</div>
+
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const coords = [[44.478555643353,-77.314299499635],[44.478590810814,-77.314156897434],[44.478608169226,-77.314360836221],[44.478632878421,-77.314269569986],[44.478857871682,-77.314246735372],[44.478941119602,-77.314520434331],[44.479102508399,-77.314571649889],[44.478911234106,-77.314282246041],[44.478866153038,-77.314468899239],[44.478809473855,-77.314214849407],[44.478780165899,-77.314327015073]];
+  const map = L.map('map', { scrollWheelZoom: false }).setView(coords[0], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap',
+    maxZoom: 19,
+  }).addTo(map);
+  const poly = L.polyline(coords, { color: '#c45a3f', weight: 3, opacity: 0.9 }).addTo(map);
+  coords.forEach((c, i) => {
+    L.circleMarker(c, {
+      radius: 11,
+      color: '#c45a3f',
+      weight: 2,
+      fillColor: '#c45a3f',
+      fillOpacity: 1,
+    })
+      .bindTooltip(String(i), { permanent: true, direction: 'center', className: 'step-marker-label' })
+      .addTo(map)
+      .on('click', () => {
+        const el = document.getElementById('step-' + i);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+  });
+  map.fitBounds(poly.getBounds(), { padding: [30, 30] });
+</script>
+</body>
+</html>

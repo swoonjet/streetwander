@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>The Binder · Closed Apertures · 218 entries · M. Eames</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ede5cd;
+    --paper: #f5eed5;
+    --ink: #1d1a13;
+    --dim: #6b6253;
+    --faint: #b8ad94;
+    --line: #c2b69b;
+    --pencil: #4a3f30;
+    --rule: #d4cab0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body { font: 12px/1.55 "IBM Plex Serif", Georgia, serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 30px 24px 40px; }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 12px;
+    margin-bottom: 22px;
+  }
+  header .stamp {
+    font: 700 9px/1.3 "IBM Plex Mono", monospace;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  header h1 {
+    font: italic 400 26px/1.15 "Playfair Display", serif;
+    letter-spacing: -0.005em;
+    margin: 0 0 3px;
+  }
+  header .sub { font-size: 11px; color: var(--dim); font-family: "IBM Plex Mono", monospace; letter-spacing: 0.04em; }
+  header .ref { text-align: right; font: 10px/1.5 "IBM Plex Mono", monospace; color: var(--dim); letter-spacing: 0.14em; }
+  header .ref strong { color: var(--ink); display: block; font-weight: 600; }
+
+  .controls {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+  }
+  .controls label {
+    font: 600 9px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-right: 6px;
+  }
+  .controls select, .controls input {
+    font: 11.5px/1.4 "IBM Plex Serif", serif;
+    background: #fff;
+    border: 1px solid var(--faint);
+    padding: 5px 8px;
+    color: var(--ink);
+  }
+  .controls .stat {
+    text-align: right;
+    font: 11px/1.3 "IBM Plex Mono", monospace;
+    color: var(--dim);
+    letter-spacing: 0.04em;
+  }
+  .controls .stat strong {
+    color: var(--ink);
+    font: italic 400 17px/1 "Playfair Display", serif;
+    letter-spacing: 0;
+  }
+
+  .ledger {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .row-head {
+    display: grid;
+    grid-template-columns: 60px 90px 100px 1fr 90px;
+    gap: 12px;
+    padding: 8px 14px;
+    border-bottom: 1.5px solid var(--ink);
+    font: 700 9px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .entries-wrap {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  .entry {
+    display: grid;
+    grid-template-columns: 60px 90px 100px 1fr 90px;
+    gap: 12px;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 11.5px;
+    align-items: baseline;
+  }
+  .entry:hover { background: rgba(180,160,100,0.08); }
+  .entry .num {
+    font: 600 11px/1 "IBM Plex Mono", monospace;
+    color: var(--dim);
+  }
+  .entry .date {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--ink);
+  }
+  .entry .type {
+    font: italic 12px/1.3 "Playfair Display", serif;
+    color: var(--ink);
+  }
+  .entry .desc {
+    color: var(--ink);
+  }
+  .entry .desc .addr {
+    color: var(--dim);
+    font-size: 10.5px;
+    font-family: "IBM Plex Mono", monospace;
+  }
+  .entry .obs {
+    font: italic 11.5px/1.4 "Playfair Display", serif;
+    color: var(--pencil);
+  }
+  .entry.expanded {
+    grid-template-columns: 1fr;
+    background: rgba(180,160,100,0.08);
+  }
+  .entry.expanded .compact { display: grid; grid-template-columns: 60px 90px 100px 1fr 90px; gap: 12px; align-items: baseline; }
+  .entry.expanded .full {
+    grid-column: 1;
+    margin-top: 8px;
+    padding: 10px 14px;
+    border-left: 2px solid var(--pencil);
+    font: italic 12.5px/1.55 "Playfair Display", serif;
+    color: var(--ink);
+  }
+  .entry.expanded .full .marg {
+    font: 600 9px/1 "IBM Plex Mono", monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--pencil);
+    font-style: normal;
+    margin-right: 6px;
+  }
+
+  .empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--dim);
+    font-style: italic;
+    font-family: "Playfair Display", serif;
+  }
+
+  footer {
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ink);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-family: "IBM Plex Mono", monospace;
+  }
+  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); font-family: "Playfair Display", serif; }
+
+  @media (max-width: 720px) {
+    .row-head, .entry { grid-template-columns: 1fr; gap: 4px; }
+    .row-head { display: none; }
+    .entry .num { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="stamp">Office of the Clerk · South cabinet · personal binder</div>
+      <h1>The Binder</h1>
+      <div class="sub">"Closed Apertures, 1994–2026" · M. Eames · 218 entries</div>
+    </div>
+    <div class="ref">
+      <strong>HOW TO READ</strong>
+      Click an entry to expand
+    </div>
+  </header>
+
+  <div class="controls">
+    <div>
+      <label>decade</label>
+      <select id="filter-decade">
+        <option value="all">All</option>
+        <option value="1990s">1990s</option>
+        <option value="2000s">2000s</option>
+        <option value="2010s">2010s</option>
+        <option value="2020s">2020s</option>
+      </select>
+    </div>
+    <div>
+      <label>aperture</label>
+      <select id="filter-type">
+        <option value="all">All</option>
+        <option value="window">window</option>
+        <option value="door">door</option>
+        <option value="dormer">dormer</option>
+        <option value="storefront">storefront</option>
+        <option value="lot">lot</option>
+        <option value="party-wall">party wall</option>
+        <option value="sign">sign</option>
+      </select>
+    </div>
+    <div>
+      <label>search</label>
+      <input id="filter-text" type="text" placeholder="address, observation…" />
+    </div>
+    <div class="stat">
+      <strong id="visible-count">218</strong>
+      of <span id="total-count">218</span> entries
+    </div>
+  </div>
+
+  <div class="ledger">
+    <div class="row-head">
+      <span>№</span>
+      <span>Date</span>
+      <span>Aperture</span>
+      <span>Description</span>
+      <span style="text-align:right;">Marginalia</span>
+    </div>
+    <div class="entries-wrap" id="entries-wrap">
+      <div class="empty" id="empty">No entries match.</div>
+    </div>
+  </div>
+
+  <footer>
+    <div>SOUTH CABINET · CLOSED APERTURES · <em>begun 1994</em></div>
+    <div>"the absence of paper is paper"</div>
+  </footer>
+</div>
+
+<script>
+(() => {
+  // Tweed-ish street names + house numbers + aperture types + observations
+  // Build 218 entries deterministically so they don't reshuffle on each load.
+  const STREETS = [
+    'Victoria N.', 'Victoria S.', 'Metcalf', 'Bridge E.', 'Bridge W.',
+    'Catharine', 'Belleville Rd.', 'Marble Pt. Rd.', 'Old Hungerford',
+    'St. James', 'Yeomans', 'River St.', 'Dunlop', 'Clare',
+    'Albert', 'Edward', 'Charles', 'Ashley', 'Margaret',
+  ];
+  const TYPES = [
+    { key: 'window', words: ['Bricked window', 'Boarded window', 'Reduced window', 'Filled-in sash', 'Painted-over light'], obs: [
+      'Header arch still legible.', 'Two courses lighter than the wall.', 'Sill cap retained.',
+      'Painted to match; the eye still finds it.', 'In raking light, very visible.', 'Storm-shutter mark survives.',
+    ]},
+    { key: 'door', words: ['Sided-over door', 'Boarded-over door', 'Removed entry', 'Door reduced to window'], obs: [
+      'Threshold stone left in place.', 'Lintel re-used in the cladding.', 'A bell-pull mounting hole survives.',
+      'Address number pried off; outline retained.', 'Stoop poured over.',
+    ]},
+    { key: 'dormer', words: ['Eliminated dormer', 'Re-shingled dormer', 'Capped dormer'], obs: [
+      'Roof line straighter than the building wants.', 'Flashing scar.', 'Original cheek-walls visible from below.',
+    ]},
+    { key: 'storefront', words: ['Reduced storefront', 'Bay infilled', 'Vestibule sealed', 'Awning rolled, not removed'], obs: [
+      'A facade that used to be a face.', 'Painted name above survives.', 'Tile threshold survives the conversion.',
+      'Plate glass replaced with stucco.', 'Wood panel with a residential door.',
+    ]},
+    { key: 'lot', words: ['Demolished house', 'Demolished outbuilding', 'Garage removed', 'Foundation only'], obs: [
+      'Grass darker over the old footings.', 'Lilacs at the lot edges remain.', 'A driveway that ends in lawn.',
+      'Two stone steps leading to nothing.', 'Pump still in place.',
+    ]},
+    { key: 'party-wall', words: ['Exposed flank', 'New ghost wall', 'Demolition mark'], obs: [
+      'Interior paint colours visible from outside.', 'Stairway zigzag preserved as paint.',
+      'Mantel position visible as soot.', 'Insulation grain in the brick.',
+    ]},
+    { key: 'sign', words: ['Painted-over sign', 'Sign replaced with vinyl', 'Sign removed; ghost retained'], obs: [
+      'New sign is wider than the old.', 'Old name still legible at noon.',
+      'Three layers stratify; the middle one is the longest-tenured.', 'The vinyl is a year ahead of the building.',
+    ]},
+  ];
+  const SUFFIXES = ['', '', '', ' · cf. #43', ' · photographed', ' · see also #142', ' · permit silent', ' · re-photographed 2014',
+    ' · ask Don Hewitt', ' · taxable status unclear', ' · weather will do it', ' · no permit on file'];
+
+  // Deterministic PRNG (mulberry32) for stable output
+  function mulberry32(a) {
+    return function() {
+      let t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  const r = mulberry32(19940512);
+
+  const ENTRIES = [];
+  // Walk from May 1994 through April 2026 — 32 years, ~7 entries/yr average to land near 218
+  let entryNum = 1;
+  for (let year = 1994; year <= 2026; year++) {
+    const monthsActive = Math.max(2, Math.round(r() * 12));
+    for (let i = 0; i < monthsActive; i++) {
+      if (entryNum > 218) break;
+      const month = 1 + Math.floor(r() * 12);
+      const tIdx = Math.floor(r() * TYPES.length);
+      const t = TYPES[tIdx];
+      const wordIdx = Math.floor(r() * t.words.length);
+      const obsIdx = Math.floor(r() * t.obs.length);
+      const street = STREETS[Math.floor(r() * STREETS.length)];
+      const houseNum = 1 + Math.floor(r() * 380);
+      const sufIdx = Math.floor(r() * SUFFIXES.length);
+      const num = String(entryNum).padStart(3, '0');
+      const dateStr = `${year}.${String(month).padStart(2, '0')}`;
+      ENTRIES.push({
+        num,
+        year,
+        date: dateStr,
+        type: t.key,
+        title: t.words[wordIdx],
+        addr: `${houseNum} ${street}`,
+        obs: t.obs[obsIdx],
+        suffix: SUFFIXES[sufIdx],
+      });
+      entryNum++;
+    }
+    if (entryNum > 218) break;
+  }
+  // sort by num (ascending)
+  ENTRIES.sort((a, b) => a.num.localeCompare(b.num));
+
+  const wrap = document.getElementById('entries-wrap');
+  const empty = document.getElementById('empty');
+  const filterDecade = document.getElementById('filter-decade');
+  const filterType = document.getElementById('filter-type');
+  const filterText = document.getElementById('filter-text');
+  const visibleEl = document.getElementById('visible-count');
+  const totalEl = document.getElementById('total-count');
+
+  totalEl.textContent = ENTRIES.length;
+  let expanded = new Set();
+
+  function decadeOf(year) {
+    if (year < 2000) return '1990s';
+    if (year < 2010) return '2000s';
+    if (year < 2020) return '2010s';
+    return '2020s';
+  }
+
+  function render() {
+    const dec = filterDecade.value;
+    const typ = filterType.value;
+    const txt = filterText.value.trim().toLowerCase();
+    const filtered = ENTRIES.filter((e) => {
+      if (dec !== 'all' && decadeOf(e.year) !== dec) return false;
+      if (typ !== 'all' && e.type !== typ) return false;
+      if (txt) {
+        const s = `${e.addr} ${e.obs} ${e.title}`.toLowerCase();
+        if (!s.includes(txt)) return false;
+      }
+      return true;
+    });
+    visibleEl.textContent = filtered.length;
+    if (filtered.length === 0) {
+      wrap.innerHTML = '';
+      wrap.appendChild(empty);
+      return;
+    }
+    const html = filtered.map((e) => {
+      const isOpen = expanded.has(e.num);
+      return `
+        <div class="entry ${isOpen ? 'expanded' : ''}" data-num="${e.num}">
+          <div class="compact">
+            <span class="num">№ ${e.num}</span>
+            <span class="date">${e.date}</span>
+            <span class="type">${e.type.replace('-', ' ')}</span>
+            <span class="desc"><strong>${e.title}.</strong> <span class="addr">${e.addr}.</span></span>
+            <span class="obs">${e.suffix.replace(' · ', '').trim() || '—'}</span>
+          </div>
+          ${isOpen ? `<div class="full"><span class="marg">M.E.</span>${e.obs}${e.suffix}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('.entry').forEach((el) => {
+      el.addEventListener('click', () => {
+        const n = el.dataset.num;
+        if (expanded.has(n)) expanded.delete(n);
+        else expanded.add(n);
+        render();
+      });
+    });
+  }
+
+  filterDecade.addEventListener('change', render);
+  filterType.addEventListener('change', render);
+  filterText.addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>

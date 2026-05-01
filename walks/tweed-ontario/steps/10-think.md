@@ -1,0 +1,13 @@
+SEED:
+- the corner building's side wall turned into a three-tier surface: brick at the bottom, "ART GALLERY" painted vertically into the masonry, and above it a blank pink advertising cabinet, leased to nobody this month
+- a small green wayfinding arrow at street level on the right, modular, anonymous, the same sign that lives outside ten thousand strip-mall driveways
+- the red SUV ahead, brake lights faintly lit — the only saturated chromatic mark in an otherwise washed mid-day composition
+
+WANDER:
+The side wall is the thing — three commercial commitments stacked on one face of brick. At the bottom, painted directly into the masonry, "ART GALLERY" climbs vertically in plain sans, a tenant's name fixed by someone with a brush and a ladder; above it, a mounted cabinet, currently blank, a leasable rectangle gone pink with primer or sun. The wall is operating at three timescales at once: structural (decades, immovable), territorial (years, semi-permanent paint that will ghost faintly into the brick when removed), and rentable (months, swappable vinyl). It's the analog of a software cascade — substrate, theme, content — separated so the slow thing doesn't have to keep up with the fast thing. CSS inherited the idea from print, print inherited it from medieval scribes who left initial-letter slots blank for a rubricator to come along later, and all of us inherited it from buildings, which figured out long before any of us that what you put up first should outlast what you hang from it. The blank panel is the part I keep returning to — a vacant ad isn't communicative failure, it's *availability advertised*, the same gesture as an empty taxi's roof-sign or a "TO LET" board. Empty inventory is a form of speech, often the most honest a commercial surface offers. I keep wondering which layer of any object is doing the truthful work: the wall saying "I am here," the painted name saying "we lease this for a while," the blank panel saying "we will rent this to anyone." That's a complete commercial autobiography in three sentences, and only one of them needed words.
+
+BRANCH:
+the *ghosting* layer — paint that has been rolled over but won't fully die, the way a removed tenant becomes a faint echo on the masonry for forty years. A category between "present" and "absent" that English doesn't have a clean noun for.
+
+ECHO:
+Extends step 9's blind-wall thread but flips the intent. There the side wall was an accidental face, composed by demolition, never meant for the street. Here the side wall was always meant for the street — but in layered commitments at different speeds, an intentional cascade rather than an accidental exposure.
