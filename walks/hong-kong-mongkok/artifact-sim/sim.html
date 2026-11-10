@@ -6,23 +6,29 @@
 <title>Declared / Constituted — a containment simulation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
 <style>
+  /* Paper and ink. Declared = blue dashed rule, constituted = vermilion hatched wall, agents = ink stipple. */
   :root {
-    --bg: #0e0e10;
-    --panel: #14141a;
-    --ink: #e8e6df;
-    --dim: #8a857b;
-    --faint: #3a3a3f;
-    --line: #26262a;
-    --accent: #c9a962;
-    --declared: #6a9cc4;
-    --constituted: #c45a3f;
+    --paper: #f2f0eb; --field: #fcfbf8; --base: #ede9dc;
+    --ink: #16150f;
+    --ink-70: rgba(22,21,15,.70); --ink-45: rgba(22,21,15,.45); --ink-24: rgba(22,21,15,.24); --ink-10: rgba(22,21,15,.10); --ink-06: rgba(22,21,15,.06);
+    --red: #d93d18;
+    --ochre: #9e7312; --blue: #1a3da8; --slate: #5c616b; --moss: #2e563a;
+    --sans: "Helvetica Neue", Helvetica, Inter, Arial, sans-serif;
+    --mono: "SF Mono", ui-monospace, "IBM Plex Mono", Menlo, monospace;
+    --serif: "Crimson Pro", Georgia, "Times New Roman", serif;
+    --bg: var(--paper); --panel: var(--field); --dim: var(--ink-45); --faint: var(--ink-24); --line: var(--ink-24);
+    --accent: var(--ink);
+    --declared: var(--blue);
+    --constituted: var(--red);
+    color-scheme: light;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); height: 100%; overflow: hidden; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); height: 100%; overflow: hidden; }
   body {
-    font: 11px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font: 12px/1.5 var(--sans);
+    -webkit-font-smoothing: antialiased;
   }
   .stage {
     position: fixed;
@@ -33,7 +39,7 @@
   .canvas-wrap {
     position: relative;
     overflow: hidden;
-    background: #0a0a0c;
+    background: var(--paper);
   }
   canvas {
     display: block;
@@ -43,42 +49,40 @@
   .band-label {
     position: absolute;
     left: 20px;
-    font: 600 11px/1 "IBM Plex Mono", monospace;
-    letter-spacing: 0.24em;
+    font: 500 10px/1 var(--sans);
+    letter-spacing: .14em;
     text-transform: uppercase;
-    padding: 6px 10px;
+    padding: 6px 9px;
     border: 1px solid currentColor;
-    backdrop-filter: blur(2px);
-    background: rgba(10,10,12,0.6);
+    background: var(--field);
   }
-  .band-label.d { top: 16px; color: var(--declared); }
-  .band-label.c { bottom: 16px; color: var(--constituted); }
+  .band-label.d { top: 10px; color: var(--declared); }
+  .band-label.c { bottom: 10px; color: var(--constituted); }
 
   aside {
-    border-left: 1px solid var(--line);
+    border-left: 1px solid var(--ink-24);
     padding: 26px 22px;
-    background: var(--panel);
+    background: var(--field);
     display: flex;
     flex-direction: column;
     gap: 22px;
     overflow-y: auto;
   }
   aside .eyebrow {
-    font-size: 9px;
-    letter-spacing: 0.22em;
+    font: 500 10px/1.2 var(--sans);
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--dim);
+    color: var(--ink-45);
   }
   aside h1 {
-    font: italic 400 22px/1.15 "Playfair Display", Georgia, serif;
-    letter-spacing: -0.005em;
+    font: 700 22px/1.1 var(--sans);
+    letter-spacing: -0.02em;
     color: var(--ink);
-    margin: 4px 0 0;
+    margin: 8px 0 0;
   }
   aside .sub {
-    font-size: 11.5px;
-    color: #c9c3b6;
-    line-height: 1.55;
+    font: 400 15px/1.4 var(--serif);
+    color: var(--ink-70);
   }
 
   .meters {
@@ -94,35 +98,40 @@
   .meter .row {
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
-    letter-spacing: 0.14em;
+    align-items: baseline;
+    font: 500 10px/1.2 var(--sans);
+    letter-spacing: .14em;
     text-transform: uppercase;
   }
-  .meter .row .label { color: var(--dim); }
+  .meter .row .label { color: var(--ink-45); }
   .meter .d .label { color: var(--declared); }
   .meter .c .label { color: var(--constituted); }
   .meter .row .val {
-    font: 700 12px/1 "IBM Plex Mono", monospace;
+    font: 400 12px/1 var(--mono);
     color: var(--ink);
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
+    font-feature-settings: "tnum";
   }
   .bar {
-    height: 5px;
-    background: #1a1a1f;
-    border: 1px solid var(--line);
+    height: 6px;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ink-24);
     position: relative;
     overflow: hidden;
   }
   .bar .fill { position: absolute; inset: 0; width: 0; transition: width 240ms ease; }
-  .bar.d .fill { background: var(--declared); }
-  .bar.c .fill { background: var(--constituted); }
+  .bar.d .fill { border: 1px solid var(--declared); background: repeating-linear-gradient(45deg, var(--declared) 0 1px, transparent 1px 3px); }
+  .bar.c .fill { border: 1px solid var(--constituted); background: repeating-linear-gradient(45deg, var(--constituted) 0 1px, transparent 1px 3px), repeating-linear-gradient(-45deg, var(--constituted) 0 1px, transparent 1px 3px); }
 
   .section-title {
-    font-size: 10px;
-    letter-spacing: 0.22em;
+    font: 500 10px/1.2 var(--sans);
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--dim);
+    color: var(--ink-45);
     margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ink-10);
   }
 
   .trust {
@@ -132,21 +141,31 @@
   .trust .label-row {
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
-    color: var(--dim);
-    letter-spacing: 0.12em;
+    align-items: baseline;
+    font: 500 10px/1.2 var(--sans);
+    color: var(--ink-45);
+    letter-spacing: .14em;
     text-transform: uppercase;
   }
   .trust .label-row strong {
-    color: var(--accent);
-    font-family: "Playfair Display", serif;
-    font-style: italic;
-    font-size: 13px;
+    color: var(--ink);
+    font: 400 12px/1 var(--mono);
     letter-spacing: 0;
-    font-weight: 400;
     text-transform: none;
   }
-  input[type=range] { width: 100%; accent-color: var(--accent); }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 22px; margin: 0;
+    background: transparent;
+    touch-action: pan-y;
+  }
+  input[type=range]::-webkit-slider-runnable-track { height: 3px; background: var(--ink-10); }
+  input[type=range]::-moz-range-track { height: 3px; background: var(--ink-10); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; margin-top: -5px; border: 0; border-radius: 0; background: var(--ink); cursor: pointer; transition: background .2s ease; }
+  input[type=range]::-moz-range-thumb { width: 13px; height: 13px; border: 0; border-radius: 0; background: var(--ink); cursor: pointer; }
+  input[type=range]:hover::-webkit-slider-thumb { background: var(--red); }
+  input[type=range]:hover::-moz-range-thumb { background: var(--red); }
+  input[type=range]:focus-visible { outline: 1px solid var(--red); outline-offset: 2px; }
 
   .controls {
     display: grid;
@@ -154,43 +173,47 @@
     gap: 6px;
   }
   button {
-    font: 600 10px/1 "IBM Plex Mono", monospace;
-    letter-spacing: 0.14em;
+    appearance: none;
+    min-height: 34px;
+    font: 500 10.5px/1 var(--sans);
+    letter-spacing: .1em;
     text-transform: uppercase;
-    color: var(--ink);
-    background: #1a1a1f;
-    border: 1px solid var(--line);
-    padding: 10px;
+    color: var(--ink-70);
+    background: var(--ink-10);
+    border: 0;
+    border-radius: 0;
+    padding: 0 12px;
     cursor: pointer;
-    transition: background 140ms ease;
+    transition: background .2s ease, color .2s ease;
   }
-  button:hover { background: #26262a; }
-  button.primary { background: var(--accent); color: #0e0e10; border-color: var(--accent); }
+  button:hover { color: var(--ink); }
+  button.primary { background: var(--ink); color: var(--paper); }
+  button.primary:hover { background: var(--red); color: var(--paper); }
+  button:focus-visible { outline: 1px solid var(--red); outline-offset: 2px; }
 
   .takeaway {
     margin-top: auto;
-    padding: 14px 16px;
-    border-left: 2px solid var(--accent);
-    background: #1a1a1f;
-    font: italic 12.5px/1.55 "Playfair Display", serif;
-    color: #cfc9bd;
+    padding: 2px 0 2px 14px;
+    border-left: 1px solid var(--ink);
+    background: transparent;
+    font: italic 400 15px/1.45 var(--serif);
+    color: var(--ink-70);
   }
   .takeaway em { color: var(--ink); }
 
   footer {
     padding-top: 12px;
-    border-top: 1px solid var(--line);
-    font-size: 9px;
-    letter-spacing: 0.16em;
+    border-top: 1px solid var(--ink-24);
+    font: 500 10px/1.6 var(--sans);
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--dim);
-    line-height: 1.6;
+    color: var(--ink-45);
   }
-  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); font-family: "Playfair Display", serif; }
+  footer em { font: italic 400 14px/1 var(--serif); text-transform: none; letter-spacing: 0; color: var(--ink); }
 
   @media (max-width: 760px) {
     .stage { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
-    aside { border-left: none; border-top: 1px solid var(--line); max-height: 54vh; }
+    aside { border-left: none; border-top: 1px solid var(--ink-24); max-height: 54vh; }
   }
 </style>
 </head>
@@ -242,7 +265,7 @@
         <strong id="trust-val">0.75</strong>
       </div>
       <input type="range" id="trust" min="0" max="1" step="0.01" value="0.75" />
-      <div class="sub" style="font-size:11px; color:var(--dim); font-style:italic; font-family:'Playfair Display', serif;">The probability that a new agent, meeting a dashed line, respects it. Drag to re-roll the society.</div>
+      <div class="sub" style="font-size:13.5px; color:var(--dim); font-style:italic; font-family:var(--serif);">The probability that a new agent, meeting a dashed line, respects it. Drag to re-roll the society.</div>
     </div>
 
     <div class="controls">
@@ -455,15 +478,36 @@
     }
   }
 
+  // Pen-and-ink wall poché: a small offscreen tile of vermilion diagonal hatching.
+  let wallPat = null, wallPatDpr = 0;
+  function wallPattern() {
+    if (wallPat && wallPatDpr === dpr) return wallPat;
+    const t = document.createElement('canvas');
+    const S = Math.round(4 * dpr);
+    t.width = S; t.height = S;
+    const g = t.getContext('2d');
+    g.strokeStyle = '#d93d18';
+    g.lineWidth = 0.9 * dpr;
+    g.beginPath();
+    g.moveTo(0, S); g.lineTo(S, 0);
+    g.moveTo(-S / 2, S / 2); g.lineTo(S / 2, -S / 2);
+    g.moveTo(S / 2, S * 1.5); g.lineTo(S * 1.5, S / 2);
+    g.stroke();
+    wallPat = ctx.createPattern(t, 'repeat');
+    if (wallPat.setTransform) wallPat.setTransform(new DOMMatrix([1 / dpr, 0, 0, 1 / dpr, 0, 0]));
+    wallPatDpr = dpr;
+    return wallPat;
+  }
+
   function render() {
     ctx.clearRect(0, 0, W, H);
-    // bands subtle background
-    ctx.fillStyle = '#0a0a0c';
+    // paper
+    ctx.fillStyle = '#f2f0eb';
     ctx.fillRect(0, 0, W, H);
 
-    // declared boundaries — dashed lines between rooms
+    // declared boundaries — dashed lines between rooms (blue ink, fine nib)
     ctx.save();
-    ctx.strokeStyle = 'rgba(106,156,196,0.55)';
+    ctx.strokeStyle = 'rgba(26,61,168,0.75)';
     ctx.lineWidth = 1;
     ctx.setLineDash([6, 5]);
     for (const r of rooms) {
@@ -472,19 +516,26 @@
     }
     ctx.restore();
 
-    // constituted boundaries — solid walls
+    // constituted boundaries — walls drawn as hatched poché between two ink lines
     ctx.save();
-    ctx.strokeStyle = 'rgba(196,90,63,0.9)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = wallPattern();
+    ctx.lineWidth = 4;
     for (const r of rooms) {
       if (r.kind !== 'c') continue;
-      ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
+      ctx.strokeRect(r.x + 2.5, r.y + 2.5, r.w - 5, r.h - 5);
+    }
+    ctx.strokeStyle = '#d93d18';
+    ctx.lineWidth = 0.9;
+    for (const r of rooms) {
+      if (r.kind !== 'c') continue;
+      ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
+      ctx.strokeRect(r.x + 4.5, r.y + 4.5, r.w - 9, r.h - 9);
     }
     ctx.restore();
 
     // thin divider between bands
     ctx.save();
-    ctx.strokeStyle = 'rgba(58,58,63,0.7)';
+    ctx.strokeStyle = 'rgba(22,21,15,0.45)';
     ctx.setLineDash([]);
     ctx.beginPath();
     ctx.moveTo(0, H / 2);
@@ -495,8 +546,8 @@
     // agents
     for (const a of agents) {
       const color = a.kind === 'd'
-        ? 'rgba(232,230,223,0.9)'
-        : 'rgba(232,230,223,0.9)';
+        ? 'rgba(22,21,15,0.88)'
+        : 'rgba(22,21,15,0.88)';
       ctx.fillStyle = color;
       ctx.beginPath();
       ctx.arc(a.x, a.y, 1.6, 0, Math.PI * 2);

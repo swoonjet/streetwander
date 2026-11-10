@@ -6,65 +6,67 @@
 <title>Photo Plates — a field guide to unsigned civic protocols</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
 <style>
+  /* paper and ink: plates as an engraved field guide — photographs stay photographs, framed with a hairline */
   :root {
-    --bg: #0e0e10;
-    --panel: #14141a;
-    --ink: #e8e6df;
-    --dim: #8a857b;
-    --line: #26262a;
-    --accent: #c9a962;
+    --paper: #f2f0eb; --field: #fcfbf8; --base: #ede9dc;
+    --ink: #16150f;
+    --ink-70: rgba(22,21,15,.70); --ink-45: rgba(22,21,15,.45); --ink-24: rgba(22,21,15,.24); --ink-10: rgba(22,21,15,.10); --ink-06: rgba(22,21,15,.06);
+    --accent: #d93d18;
+    --ochre: #9e7312;
+    --sans: "Helvetica Neue", Helvetica, Inter, Arial, sans-serif;
+    --mono: "SF Mono", ui-monospace, "IBM Plex Mono", Menlo, monospace;
+    --serif: "Crimson Pro", Georgia, "Times New Roman", serif;
+    color-scheme: light;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
   body {
-    font: 12px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font: 13px/1.5 var(--sans);
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1060px; margin: 0 auto; padding: 40px 28px 56px; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 40px 32px 56px; }
 
   header {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 24px;
     align-items: end;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 18px;
-    margin-bottom: 32px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 26px;
   }
   header .eyebrow {
-    font-size: 10px;
-    letter-spacing: 0.22em;
+    font: 500 10px/1.3 var(--sans);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--dim);
-    margin-bottom: 8px;
+    color: var(--ink-45);
+    margin-bottom: 10px;
   }
   header h1 {
-    font: italic 400 34px/1.1 "Playfair Display", Georgia, serif;
-    letter-spacing: -0.01em;
+    font: 700 clamp(28px, 4vw, 40px)/1.05 var(--sans);
+    letter-spacing: -0.02em;
     margin: 0;
   }
-  header .sub { font-size: 12px; color: var(--dim); margin-top: 6px; }
-  header .n { text-align: right; font-size: 10px; color: var(--dim); letter-spacing: 0.14em; }
-  header .n strong { color: var(--ink); font-weight: 600; font-size: 22px; font-family: "Playfair Display", serif; display: block; }
+  header .sub { font: 400 17px/1.35 var(--serif); color: var(--ink-70); margin-top: 8px; }
+  header .n { text-align: right; font: 500 10px/1.2 var(--sans); color: var(--ink-45); letter-spacing: 0.14em; text-transform: uppercase; }
+  header .n strong { color: var(--ink); font: 400 30px/1 var(--mono); letter-spacing: -0.02em; display: block; margin-bottom: 4px; }
 
   .lede {
-    font: 13px/1.62 "IBM Plex Mono", monospace;
-    color: #c9c3b6;
-    margin: 0 0 36px;
-    max-width: 720px;
+    font: 400 19px/1.45 var(--serif);
+    color: var(--ink-70);
+    margin: 0 0 40px;
+    max-width: 46em;
   }
-  .lede em { font-style: italic; color: var(--accent); }
+  .lede em { font-style: italic; color: var(--ink); }
 
   .plates {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 22px;
+    gap: 44px 36px;
   }
   figure.plate {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    padding: 14px;
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -73,69 +75,78 @@
   figure.plate .img {
     position: relative;
     aspect-ratio: 1/1;
-    background: #0a0a0c;
     overflow: hidden;
+    /* while a plate loads, the frame is an empty engraved square */
+    background: var(--base) repeating-linear-gradient(135deg, var(--ink-10) 0 1px, transparent 1px 6px);
+    outline: 1px solid var(--ink);
+    outline-offset: 4px;
+    margin: 5px;
   }
   figure.plate .img img {
     width: 100%; height: 100%;
     display: block;
     object-fit: cover;
-    filter: contrast(1.02) saturate(0.92);
   }
   figure.plate .img .plate-no {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    font: 600 10px/1 "IBM Plex Mono", monospace;
-    letter-spacing: 0.2em;
-    color: #fff;
-    background: rgba(0,0,0,0.55);
-    padding: 5px 8px;
-    backdrop-filter: blur(2px);
-  }
-  figure.plate figcaption { padding: 0 6px 4px; }
-  figure.plate .name {
-    font: 400 19px/1.15 "Playfair Display", serif;
+    top: 0;
+    left: 0;
+    font: 400 10px/1 var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     color: var(--ink);
-    margin: 0 0 2px;
+    background: var(--paper);
+    padding: 6px 9px 6px 8px;
+  }
+  figure.plate figcaption { padding: 0 5px 4px; }
+  figure.plate .name {
+    font: 500 24px/1.12 var(--serif);
+    color: var(--ink);
+    margin: 0 0 6px;
   }
   figure.plate .name em {
     font-style: italic;
-    color: var(--accent);
+    color: var(--ink-45);
     font-weight: 400;
-    font-size: 13px;
+    font-size: 17px;
     margin-left: 6px;
-    letter-spacing: 0.02em;
   }
   figure.plate .taxon {
-    font-size: 9px;
-    letter-spacing: 0.22em;
+    font: 500 10px/1.45 var(--sans);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--dim);
+    color: var(--ink-45);
     margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink-10);
   }
   figure.plate p {
-    font: italic 12.5px/1.55 "Playfair Display", serif;
-    color: #cfc9bd;
+    font: italic 400 16px/1.45 var(--serif);
+    color: var(--ink-70);
     margin: 0;
   }
+  figure.plate p em { color: var(--ink); }
 
   footer {
-    margin-top: 48px;
-    padding-top: 16px;
-    border-top: 1px solid var(--line);
+    margin-top: 56px;
+    padding-top: 14px;
+    border-top: 1px solid var(--ink-24);
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 12px;
-    font-size: 10px;
+    font: 500 10px/1.5 var(--sans);
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--dim);
+    color: var(--ink-45);
   }
-  footer em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); }
+  footer em { font: italic 400 14px/1 var(--serif); text-transform: none; letter-spacing: 0; color: var(--ink-70); }
 
   @media (max-width: 720px) {
-    .plates { grid-template-columns: 1fr; }
+    .wrap { padding: 28px 16px 40px; }
+    .plates { grid-template-columns: 1fr; gap: 36px; }
+    header { gap: 14px; }
+    .lede { font-size: 17px; margin-bottom: 30px; }
+    footer { grid-template-columns: 1fr; }
   }
 </style>
 </head>

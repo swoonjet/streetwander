@@ -6,20 +6,23 @@
 <title>Gesture Tracker — one burst, six wars</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&family=Anton&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;1,400&family=Anton&display=swap" rel="stylesheet" />
 <style>
+  /* paper and ink: each war is a pen drawing; the burst is the one spot of vermilion and stays put */
   :root {
-    --bg: #06060a;
-    --panel: #14141a;
-    --ink: #e8e6df;
-    --dim: #8a857b;
-    --line: #26262a;
-    --accent: #c9a962;
-    --burst: #c8281a;
+    --paper: #f2f0eb; --field: #fcfbf8; --base: #ede9dc;
+    --ink: #16150f;
+    --ink-70: rgba(22,21,15,.70); --ink-45: rgba(22,21,15,.45); --ink-24: rgba(22,21,15,.24); --ink-10: rgba(22,21,15,.10); --ink-06: rgba(22,21,15,.06);
+    --accent: #d93d18;
+    --burst: #d93d18;
+    --sans: "Helvetica Neue", Helvetica, Inter, Arial, sans-serif;
+    --mono: "SF Mono", ui-monospace, "IBM Plex Mono", Menlo, monospace;
+    --serif: "Crimson Pro", Georgia, "Times New Roman", serif;
+    color-scheme: light;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); height: 100%; overflow: hidden; }
-  body { font: 11px/1.55 "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); height: 100%; overflow: hidden; }
+  body { font: 13px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
 
   .stage {
     position: fixed;
@@ -30,147 +33,169 @@
   .scene {
     position: relative;
     overflow: hidden;
-    background: #050505;
+    background: var(--paper);
   }
   canvas { display: block; width: 100%; height: 100%; }
 
+  /* the caption is pinned under the drawing like a museum label, clear of the burst */
   .overlay {
     position: absolute;
-    top: 24px;
-    left: 26px;
+    bottom: 42px;
+    left: 18px;
     z-index: 5;
-    font: 600 10px/1.4 "IBM Plex Mono", monospace;
-    letter-spacing: 0.22em;
+    max-width: calc(100% - 36px);
+    padding: 9px 14px 11px;
+    background: var(--field);
+    box-shadow: 0 0 0 1px var(--ink);
+    font: 500 10px/1.3 var(--sans);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgba(232,230,223,0.7);
+    color: var(--ink-45);
   }
   .overlay strong {
     display: block;
-    font-family: "Playfair Display", serif;
-    font-style: italic;
-    font-weight: 400;
+    font: italic 400 24px/1.1 var(--serif);
     text-transform: none;
     letter-spacing: -0.005em;
-    font-size: 26px;
     color: var(--ink);
     margin-top: 4px;
   }
 
   .ticker {
     position: absolute;
-    bottom: 24px;
-    left: 26px;
-    right: 26px;
+    bottom: 0;
+    left: 0;
+    right: 0;
     z-index: 5;
     display: flex;
-    gap: 6px;
+    gap: 2px;
+    padding: 10px 18px;
+    background: var(--paper);
+    border-top: 1px solid var(--ink);
   }
   .ticker .pip {
     flex: 1;
     height: 3px;
-    background: rgba(232,230,223,0.15);
+    background: var(--ink-10);
     overflow: hidden;
   }
   .ticker .pip .fill {
     height: 100%;
     width: 0%;
-    background: var(--burst);
+    background: var(--ink);
     transition: width 60ms linear;
   }
   .ticker .pip.done .fill { width: 100%; }
 
   aside {
-    border-left: 1px solid var(--line);
-    padding: 28px 24px;
-    background: var(--panel);
+    border-left: 1px solid var(--ink);
+    padding: 26px 24px 20px;
+    background: var(--paper);
     display: flex;
     flex-direction: column;
     gap: 22px;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink-10) transparent;
   }
   aside .eyebrow {
-    font-size: 9px;
-    letter-spacing: 0.22em;
+    font: 500 10px/1.3 var(--sans);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--dim);
+    color: var(--ink-45);
   }
   aside h1 {
-    font: italic 400 22px/1.15 "Playfair Display", serif;
+    font: 700 24px/1.05 var(--sans);
+    letter-spacing: -0.02em;
     color: var(--ink);
-    margin: 4px 0 0;
+    margin: 8px 0 0;
   }
   aside .sub {
-    font-size: 12px;
-    color: #c9c3b6;
-    line-height: 1.55;
+    font: 400 15px/1.42 var(--serif);
+    color: var(--ink-70);
+    margin: 10px 0 0;
   }
-  aside em { font-style: italic; color: var(--accent); font-family: "Playfair Display", serif; font-size: 12.5px; }
+  aside em { font-style: italic; color: var(--ink); font-family: var(--serif); }
 
   .station-card {
-    background: #1a1a22;
-    border: 1px solid var(--line);
-    padding: 18px;
-    transition: border-color 240ms ease;
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--ink-10);
+    padding: 14px 0 16px;
   }
   .station-card .yr {
-    font: 600 10px/1 "IBM Plex Mono", monospace;
-    letter-spacing: 0.22em;
-    color: var(--burst);
-    text-transform: uppercase;
+    font: 400 11px/1 var(--mono);
+    letter-spacing: 0.04em;
+    color: var(--ink-70);
   }
   .station-card h2 {
-    font: italic 400 18px/1.2 "Playfair Display", serif;
-    margin: 6px 0 8px;
+    font: 500 24px/1.1 var(--serif);
+    margin: 8px 0 8px;
     color: var(--ink);
   }
   .station-card .gloss {
-    font: italic 12.5px/1.55 "Playfair Display", serif;
-    color: #cfc9bd;
-    margin: 0 0 10px;
+    font: 400 15.5px/1.45 var(--serif);
+    color: var(--ink-70);
+    margin: 0 0 12px;
   }
   .station-card .signal {
-    font: 600 10px/1.4 "IBM Plex Mono", monospace;
-    letter-spacing: 0.16em;
+    font: 500 10.5px/1.4 var(--sans);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--burst);
-    padding: 8px 12px;
-    border-left: 2px solid var(--burst);
-    background: #14141c;
+    padding: 2px 0 2px 12px;
+    border-left: 1px solid var(--burst);
+    box-shadow: inset 1px 0 0 var(--burst);
   }
 
   .controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    gap: 4px;
   }
   button {
-    font: 600 10px/1 "IBM Plex Mono", monospace;
-    letter-spacing: 0.16em;
+    appearance: none;
+    font: 500 10.5px/1 var(--sans);
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--ink);
-    background: #1a1a22;
-    border: 1px solid var(--line);
-    padding: 10px;
+    color: var(--ink-70);
+    background: var(--ink-10);
+    border: 0;
+    border-radius: 0;
+    min-height: 34px;
+    padding: 0 10px;
     cursor: pointer;
+    transition: background 200ms ease, color 200ms ease;
   }
-  button:hover { background: #22222c; }
-  button.primary { background: var(--burst); color: #fff; border-color: var(--burst); }
+  button:hover { color: var(--ink); }
+  button.primary { background: var(--ink); color: var(--paper); }
+  button.primary:hover { background: var(--accent); color: var(--paper); }
+  button:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
   .footnote {
     margin-top: auto;
-    padding-top: 14px;
-    border-top: 1px solid var(--line);
-    font-size: 9px;
-    letter-spacing: 0.16em;
+    padding-top: 12px;
+    border-top: 1px solid var(--ink-10);
+    font: 500 10px/1.6 var(--sans);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--dim);
-    line-height: 1.6;
+    color: var(--ink-45);
   }
-  .footnote em { font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 11px; color: var(--ink); font-family: "Playfair Display", serif; }
+  .footnote em { font: italic 400 13px/1 var(--serif); text-transform: none; letter-spacing: 0; color: var(--ink-70); }
 
-  @media (max-width: 760px) {
+  @media (max-width: 900px) {
+    .stage { grid-template-columns: 1fr 250px; }
+    aside { padding: 16px 16px 14px; gap: 14px; }
+    aside h1 { font-size: 20px; }
+    aside .sub { font-size: 14px; }
+    .station-card { padding: 10px 0 12px; }
+    .station-card h2 { font-size: 20px; margin: 6px 0; }
+    .station-card .gloss { font-size: 14px; margin-bottom: 10px; }
+    .overlay { bottom: 36px; left: 12px; padding: 7px 11px 9px; }
+    .overlay strong { font-size: 19px; }
+  }
+  @media (max-width: 600px) {
     .stage { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
-    aside { border-left: none; border-top: 1px solid var(--line); max-height: 50vh; }
+    aside { border-left: none; border-top: 1px solid var(--ink); max-height: 50vh; }
   }
 </style>
 </head>
@@ -222,7 +247,7 @@
   ];
 
   const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
+  let ctx = canvas.getContext('2d');
   const ovTitle = document.getElementById('ov-title');
   const cardYr = document.getElementById('card-yr');
   const cardTitle = document.getElementById('card-title');
@@ -267,112 +292,192 @@
     });
   }
 
+  // ---- pen-and-ink drawing kit ------------------------------------------------------------
+  // Each scene is drawn once (seeded, so it never boils) into an offscreen sheet and blitted per frame;
+  // the red burst is the only flat colour on the page — a spot of vermilion over an ink drawing.
+  const INK = '#16150f', PAPER = '#f2f0eb', FIELD = '#fcfbf8';
+  const OCHRE = '#9e7312', BLUE = '#1a3da8', SLATE = '#5c616b', MOSS = '#2e563a', VERMILION = '#d93d18';
+  let seed = 1;
+  function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  let patCache = {};
+  // kind: diag (/), back (\), cross, horiz, vert, dots
+  function pat(color, kind, gap = 5, lw = 0.8) {
+    const key = [color, kind, gap, lw].join('|');
+    if (patCache[key]) return patCache[key];
+    const sz = Math.max(2, Math.round(gap * dpr));
+    const t = document.createElement('canvas');
+    t.width = t.height = sz;
+    const g = t.getContext('2d');
+    g.strokeStyle = color; g.fillStyle = color; g.lineWidth = Math.max(1, lw * dpr); g.lineCap = 'square';
+    g.beginPath();
+    if (kind === 'diag' || kind === 'cross') for (const o of [-sz, 0, sz]) { g.moveTo(o, sz); g.lineTo(o + sz, 0); }
+    if (kind === 'back' || kind === 'cross') for (const o of [-sz, 0, sz]) { g.moveTo(o, 0); g.lineTo(o + sz, sz); }
+    if (kind === 'horiz') { g.moveTo(0, sz / 2); g.lineTo(sz, sz / 2); }
+    if (kind === 'vert') { g.moveTo(sz / 2, 0); g.lineTo(sz / 2, sz); }
+    g.stroke();
+    if (kind === 'dots') { g.beginPath(); g.arc(sz / 2, sz / 2, Math.max(0.6, 0.55 * lw * dpr), 0, Math.PI * 2); g.fill(); }
+    const p = ctx.createPattern(t, 'repeat');
+    if (p.setTransform && window.DOMMatrix) p.setTransform(new DOMMatrix([1 / dpr, 0, 0, 1 / dpr, 0, 0]));
+    return (patCache[key] = p);
+  }
+  function hatch(x, y, w, h, color, kind, gap, lw) { ctx.fillStyle = pat(color, kind, gap, lw); ctx.fillRect(x, y, w, h); }
+  function pen(color = INK, lw = 1) { ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; }
+  function stipple(x, y, w, h, n, color, r = 0.6) {
+    ctx.fillStyle = color;
+    for (let i = 0; i < n; i++) { ctx.beginPath(); ctx.arc(x + rnd() * w, y + rnd() * h, r * (0.6 + rnd() * 0.8), 0, Math.PI * 2); ctx.fill(); }
+  }
+  function paper() { ctx.fillStyle = PAPER; ctx.fillRect(0, 0, W, H); }
+
+  const mainCtx = ctx;
+  let sheet = null, sheetKey = '';
   function drawContext(ctxName) {
+    const key = ctxName + '|' + W + 'x' + H + '@' + dpr;
+    if (key !== sheetKey) {
+      sheet = sheet || document.createElement('canvas');
+      sheet.width = Math.max(1, Math.round(W * dpr)); sheet.height = Math.max(1, Math.round(H * dpr));
+      ctx = sheet.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      patCache = {};
+      seed = 1415 + ctxName.length * 97;
+      paper();
+      if (ctxName === 'tabard') drawTabard();
+      else if (ctxName === 'detergent') drawDetergent();
+      else if (ctxName === 'shelf') drawShelf();
+      else if (ctxName === 'parking') drawParking();
+      else if (ctxName === 'standpipe') drawStandpipe();
+      else if (ctxName === 'sale') drawSale();
+      ctx = mainCtx;
+      patCache = {};
+      sheetKey = key;
+    }
     ctx.clearRect(0, 0, W, H);
-    if (ctxName === 'tabard') drawTabard();
-    else if (ctxName === 'detergent') drawDetergent();
-    else if (ctxName === 'shelf') drawShelf();
-    else if (ctxName === 'parking') drawParking();
-    else if (ctxName === 'standpipe') drawStandpipe();
-    else if (ctxName === 'sale') drawSale();
+    ctx.drawImage(sheet, 0, 0, W, H);
   }
 
   function drawTabard() {
-    // cream linen background
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#e8d9b0');
-    g.addColorStop(1, '#c8b285');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-    // weave noise
-    ctx.fillStyle = 'rgba(60,40,20,0.03)';
-    for (let i = 0; i < (W*H)/40; i++) ctx.fillRect(Math.random()*W, Math.random()*H, 1, 1);
-    // horizontal warp lines
-    ctx.strokeStyle = 'rgba(60,40,20,0.07)';
-    ctx.lineWidth = 0.6;
-    for (let y = 0; y < H; y += 3) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    // linen: a woven ground of fine warp and weft lines
+    hatch(0, 0, W, H, 'rgba(22,21,15,0.07)', 'horiz', 3, 0.6);
+    hatch(0, 0, W, H, 'rgba(22,21,15,0.045)', 'vert', 4, 0.6);
+    // folds of cloth: a pen line with a hatched shadow beside it
+    for (let i = 0; i < 4; i++) {
+      const fx = W * (0.38 + i * 0.16 + (rnd() - 0.5) * 0.05);
+      const sway = 18 + rnd() * 22;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(fx, 0);
+      ctx.bezierCurveTo(fx + sway, H * 0.33, fx - sway, H * 0.66, fx + sway * 0.4, H);
+      ctx.lineTo(fx + sway * 0.4 + 16, H);
+      ctx.bezierCurveTo(fx - sway + 10, H * 0.66, fx + sway + 6, H * 0.33, fx + 12, 0);
+      ctx.closePath();
+      ctx.clip();
+      hatch(0, 0, W, H, 'rgba(22,21,15,0.22)', 'back', 4, 0.7);
+      ctx.restore();
+      pen('rgba(22,21,15,0.55)', 0.8);
+      ctx.beginPath();
+      ctx.moveTo(fx, 0);
+      ctx.bezierCurveTo(fx + sway, H * 0.33, fx - sway, H * 0.66, fx + sway * 0.4, H);
+      ctx.stroke();
+    }
     // an embroidered border / hem
-    ctx.strokeStyle = 'rgba(120,80,40,0.4)';
-    ctx.lineWidth = 1.2;
+    pen('rgba(22,21,15,0.55)', 1);
     ctx.setLineDash([4, 4]);
-    ctx.strokeRect(20, 20, W-40, H-40);
+    ctx.strokeRect(20, 20, W - 40, H - 40);
+    ctx.setLineDash([2, 5]);
+    ctx.strokeRect(26, 26, W - 52, H - 52);
     ctx.setLineDash([]);
   }
 
   function drawDetergent() {
-    // glossy cardboard box face — saturated mid-century
-    ctx.fillStyle = '#e6c52d';
-    ctx.fillRect(0, 0, W, H);
-    // brand block
-    const cx = W*0.5, cy = H*0.55;
-    ctx.fillStyle = '#1a3060';
-    ctx.fillRect(cx-160, cy-50, 320, 100);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 60px "Playfair Display", serif';
+    // cardboard box face — the mid-century yellow, here as an ochre hatch
+    hatch(0, 0, W, H, OCHRE, 'diag', 5, 0.8);
+    // brand block, cross-hatched in blue ink
+    const cx = W * 0.5, cy = H * 0.55;
+    ctx.fillStyle = FIELD;
+    ctx.fillRect(cx - 160, cy - 50, 320, 100);
+    hatch(cx - 160, cy - 50, 320, 100, BLUE, 'cross', 3, 0.9);
+    pen(INK, 1.25);
+    ctx.strokeRect(cx - 160, cy - 50, 320, 100);
+    ctx.fillStyle = FIELD;
+    ctx.font = '500 62px "Crimson Pro", Georgia, serif';
     ctx.textAlign = 'center';
-    ctx.fillText('BRIGHT', cx, cy + 18);
-    // tagline
-    ctx.font = 'italic 18px "Playfair Display", serif';
-    ctx.fillStyle = '#1a3060';
-    ctx.fillText('a name for cleanness', cx, cy + 80);
-    // box edge highlight
-    ctx.strokeStyle = 'rgba(0,0,0,0.18)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(0, 0, W, H);
-    // subtle scuff marks
-    ctx.fillStyle = 'rgba(0,0,0,0.04)';
-    for (let i = 0; i < 12; i++) ctx.fillRect(Math.random()*W, Math.random()*H, 30, 1);
+    ctx.textBaseline = 'alphabetic';
+    pen(INK, 3);
+    ctx.strokeText('BRIGHT', cx, cy + 20);
+    ctx.fillText('BRIGHT', cx, cy + 20);
+    // tagline, set on a paper strip so it reads through the hatch
+    ctx.font = 'italic 400 21px "Crimson Pro", Georgia, serif';
+    const tw = ctx.measureText('a name for cleanness').width;
+    ctx.fillStyle = FIELD;
+    ctx.fillRect(cx - tw / 2 - 10, cy + 62, tw + 20, 28);
+    ctx.fillStyle = BLUE;
+    ctx.fillText('a name for cleanness', cx, cy + 82);
+    // box edge
+    pen(INK, 1.25);
+    ctx.strokeRect(0.5, 0.5, W - 1, H - 1);
+    // scuff marks: short dry pen strokes
+    pen('rgba(22,21,15,0.35)', 0.7);
+    for (let i = 0; i < 14; i++) {
+      const x = rnd() * W, y = rnd() * H;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 14 + rnd() * 24, y + (rnd() - 0.5) * 3); ctx.stroke();
+    }
   }
 
   function drawShelf() {
     // Many small boxes in a grid, each with a tiny burst — a war
-    ctx.fillStyle = '#2a2a2c';
-    ctx.fillRect(0, 0, W, H);
     const cols = 8, rows = 4;
     const cellW = W / cols, cellH = H / rows;
-    const palette = ['#d23a2a','#e6b020','#1a3060','#2d6a4a','#7a2a4a','#c46a20','#2a4a8a'];
+    const inks = [BLUE, OCHRE, MOSS, SLATE, INK, BLUE, OCHRE];
+    const kinds = ['diag', 'cross', 'horiz', 'back', 'dots', 'vert', 'cross'];
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const x = c * cellW, y = r * cellH;
-        const col = palette[(r*7+c*3)%palette.length];
-        ctx.fillStyle = col;
-        ctx.fillRect(x+4, y+4, cellW-8, cellH-8);
+        const k = (r * 7 + c * 3) % inks.length;
+        ctx.fillStyle = FIELD;
+        ctx.fillRect(x + 4, y + 4, cellW - 8, cellH - 8);
+        hatch(x + 4, y + 4, cellW - 8, cellH - 8, inks[k], kinds[(k + r) % kinds.length], kinds[(k + r) % kinds.length] === 'dots' ? 4 : 5, 0.75);
+        pen(INK, 1);
+        ctx.strokeRect(x + 4.5, y + 4.5, cellW - 9, cellH - 9);
         // tiny corner burst (mini)
-        ctx.fillStyle = '#c8281a';
+        ctx.fillStyle = VERMILION;
         ctx.beginPath();
-        ctx.moveTo(x+4, y+4);
-        ctx.lineTo(x+4+cellW*0.35, y+4);
-        ctx.lineTo(x+4, y+4+cellH*0.35);
+        ctx.moveTo(x + 4, y + 4);
+        ctx.lineTo(x + 4 + cellW * 0.35, y + 4);
+        ctx.lineTo(x + 4, y + 4 + cellH * 0.35);
         ctx.closePath();
         ctx.fill();
+        pen(INK, 0.75);
+        ctx.beginPath(); ctx.moveTo(x + 4 + cellW * 0.35, y + 4); ctx.lineTo(x + 4, y + 4 + cellH * 0.35); ctx.stroke();
         // mini text
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 9px "IBM Plex Mono", monospace';
+        ctx.fillStyle = FIELD;
+        ctx.font = 'bold 9px "Helvetica Neue", Helvetica, Arial, sans-serif';
+        ctx.textAlign = 'left';
         ctx.save();
-        ctx.translate(x+12, y+18);
-        ctx.rotate(-Math.PI/4);
+        ctx.translate(x + 12, y + 18);
+        ctx.rotate(-Math.PI / 4);
         ctx.fillText('NEW', 0, 0);
         ctx.restore();
       }
+      // the shelf board under each row: one heavy line and a hatched lip
+      pen(INK, 1.5);
+      ctx.beginPath(); ctx.moveTo(0, (r + 1) * cellH - 1); ctx.lineTo(W, (r + 1) * cellH - 1); ctx.stroke();
     }
-    ctx.fillStyle = 'rgba(0,0,0,0.18)';
-    ctx.fillRect(0, H*0.86, W, 8);
+    hatch(0, H * 0.86, W, 8, INK, 'back', 3, 0.8);
   }
 
   function drawParking() {
-    // metal sign — white background
-    ctx.fillStyle = '#f1ede4';
+    // metal sign — enamel white, a printed ink band
+    ctx.fillStyle = FIELD;
     ctx.fillRect(0, 0, W, H);
-    // top band
-    ctx.fillStyle = '#1a1a1a';
+    stipple(0, 0, W, H, Math.floor(W * H / 900), 'rgba(22,21,15,0.18)', 0.6);
+    ctx.fillStyle = INK;
     ctx.fillRect(0, 0, W, 38);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 18px "IBM Plex Mono", monospace';
+    ctx.fillStyle = FIELD;
+    ctx.font = 'bold 18px "Helvetica Neue", Helvetica, Arial, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('PARKING', 24, 26);
     // rate grid
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = 'bold 14px "IBM Plex Mono", monospace';
+    ctx.fillStyle = INK;
+    ctx.font = '500 14px "SF Mono", ui-monospace, Menlo, monospace';
     const lines = [
       ['MON–FRI 7–18', '$4 / HOUR'],
       ['MON–FRI 18–7', '$2 / HOUR'],
@@ -382,151 +487,151 @@
     ];
     let y = H * 0.4;
     for (const [a, b] of lines) {
+      ctx.fillStyle = INK;
       ctx.textAlign = 'left';
       ctx.fillText(a, 36, y);
       ctx.textAlign = 'right';
       ctx.fillText(b, W - 36, y);
       // dashed underline
-      ctx.strokeStyle = 'rgba(26,26,26,0.3)';
+      ctx.strokeStyle = 'rgba(22,21,15,0.35)';
+      ctx.lineWidth = 0.75;
       ctx.setLineDash([3, 3]);
       ctx.beginPath();
       ctx.moveTo(36, y + 6); ctx.lineTo(W - 36, y + 6); ctx.stroke();
       ctx.setLineDash([]);
       y += 28;
     }
-    // bolt holes
-    [[20,20],[W-20,20],[20,H-20],[W-20,H-20]].forEach(([x,y])=>{
-      ctx.fillStyle = '#888';
-      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+    pen(INK, 1.25);
+    ctx.strokeRect(6.5, 6.5, W - 13, H - 13);
+    // bolt holes: drawn rivets with a hatched shadow
+    [[20, 20], [W - 20, 20], [20, H - 20], [W - 20, H - 20]].forEach(([x, y]) => {
+      ctx.fillStyle = FIELD;
+      ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fill();
+      ctx.save(); ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.clip();
+      hatch(x - 5, y - 5, 10, 10, INK, 'back', 2, 0.6); ctx.restore();
+      pen(INK, 1); ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.stroke();
     });
   }
 
   function drawStandpipe() {
-    // weathered red brick wall
-    ctx.fillStyle = '#7a2a1f';
-    ctx.fillRect(0, 0, W, H);
+    // brick wall: every brick outlined with a pen, shaded with hatching of varying weight
     const brickH = 26, brickW = 64;
-    for (let r = 0; r < Math.ceil(H/brickH)+1; r++) {
-      const off = (r % 2) ? brickW/2 : 0;
+    for (let r = 0; r < Math.ceil(H / brickH) + 1; r++) {
+      const off = (r % 2) ? brickW / 2 : 0;
       for (let x = -brickW; x < W + brickW; x += brickW) {
-        const bx = x + off;
-        const by = r * brickH;
-        ctx.fillStyle = `rgba(${110 + (r*7+x*3)%30}, ${42 + (r*3)%14}, ${30 + (x*2)%14}, 1)`;
-        ctx.fillRect(bx+1, by+1, brickW-2, brickH-2);
+        const bx = x + off, by = r * brickH;
+        const v = (r * 7 + x * 3) % 30;
+        const a = (0.16 + v / 30 * 0.22).toFixed(2);
+        hatch(bx + 1, by + 1, brickW - 2, brickH - 2, 'rgba(22,21,15,' + a + ')', v % 3 === 0 ? 'cross' : (v % 2 ? 'diag' : 'back'), 4, 0.7);
+        pen('rgba(22,21,15,0.7)', 0.8);
+        ctx.strokeRect(bx + 1.5, by + 1.5, brickW - 3, brickH - 3);
       }
     }
-    // mortar lines
-    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-    ctx.lineWidth = 1;
-    for (let r = 0; r < Math.ceil(H/brickH)+1; r++) {
-      ctx.beginPath(); ctx.moveTo(0, r*brickH); ctx.lineTo(W, r*brickH); ctx.stroke();
-    }
-    // two brass standpipe connections lower-center
+    // two brass standpipe connections lower-center, engraved in ochre rings
     const ccy = H * 0.7;
     [-1, 1].forEach((s) => {
-      const cx2 = W*0.5 + s * 50;
-      const grad = ctx.createRadialGradient(cx2, ccy, 5, cx2, ccy, 28);
-      grad.addColorStop(0, '#d4a85a');
-      grad.addColorStop(0.5, '#a08038');
-      grad.addColorStop(1, '#5a4222');
-      ctx.fillStyle = grad;
-      ctx.beginPath(); ctx.arc(cx2, ccy, 24, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#1a1410';
-      ctx.beginPath(); ctx.arc(cx2, ccy, 10, 0, Math.PI*2); ctx.fill();
+      const cx2 = W * 0.5 + s * 50;
+      ctx.fillStyle = FIELD;
+      ctx.beginPath(); ctx.arc(cx2, ccy, 24, 0, Math.PI * 2); ctx.fill();
+      for (let rr = 22; rr > 11; rr -= 3) { pen(OCHRE, 0.9); ctx.beginPath(); ctx.arc(cx2, ccy, rr, 0, Math.PI * 2); ctx.stroke(); }
+      ctx.save(); ctx.beginPath(); ctx.arc(cx2, ccy, 24, Math.PI * 0.15, Math.PI * 0.85); ctx.arc(cx2, ccy, 12, Math.PI * 0.85, Math.PI * 0.15, true); ctx.closePath(); ctx.clip();
+      hatch(cx2 - 25, ccy - 25, 50, 50, OCHRE, 'back', 3, 0.8); ctx.restore();
+      ctx.fillStyle = INK;
+      ctx.beginPath(); ctx.arc(cx2, ccy, 10, 0, Math.PI * 2); ctx.fill();
+      pen(INK, 1.25); ctx.beginPath(); ctx.arc(cx2, ccy, 24, 0, Math.PI * 2); ctx.stroke();
     });
     // small enamel placard
-    ctx.fillStyle = '#f1ede4';
-    ctx.fillRect(W*0.5 - 90, H*0.45, 180, 56);
-    ctx.strokeStyle = '#1a1a1a';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(W*0.5 - 90, H*0.45, 180, 56);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = 'bold 11px "IBM Plex Mono", monospace';
+    ctx.fillStyle = FIELD;
+    ctx.fillRect(W * 0.5 - 90, H * 0.45, 180, 56);
+    pen(INK, 1.5);
+    ctx.strokeRect(W * 0.5 - 90, H * 0.45, 180, 56);
+    ctx.fillStyle = INK;
+    ctx.font = 'bold 11px "Helvetica Neue", Helvetica, Arial, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('FIRE DEPT', W*0.5, H*0.45 + 22);
-    ctx.font = '10px "IBM Plex Mono", monospace';
-    ctx.fillText('CONNECTION', W*0.5, H*0.45 + 38);
+    ctx.fillText('FIRE DEPT', W * 0.5, H * 0.45 + 22);
+    ctx.font = '10px "SF Mono", ui-monospace, Menlo, monospace';
+    ctx.fillText('CONNECTION', W * 0.5, H * 0.45 + 38);
   }
 
   function drawSale() {
-    // glass storefront — dark interior with reflections
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#1a2230');
-    g.addColorStop(0.5, '#2a3848');
-    g.addColorStop(1, '#11161e');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-    // hint of merchandise inside
-    ctx.fillStyle = 'rgba(120,140,170,0.18)';
+    // glass storefront at night — darkness built up from layers of blue and ink hatching
+    hatch(0, 0, W, H, 'rgba(26,61,168,0.55)', 'back', 4, 0.8);
+    hatch(0, 0, W, H * 0.5, 'rgba(22,21,15,0.45)', 'diag', 4, 0.8);
+    hatch(0, H * 0.5, W, H * 0.5, 'rgba(22,21,15,0.6)', 'cross', 4, 0.8);
+    // hint of merchandise inside: pale shapes drawn in outline
     for (let i = 0; i < 8; i++) {
-      const w = 30 + Math.random()*60;
-      const h = 60 + Math.random()*80;
-      ctx.fillRect(Math.random()*W*0.9, H*0.45 + Math.random()*H*0.3, w, h);
+      const w = 30 + rnd() * 60;
+      const h = 60 + rnd() * 80;
+      const x = rnd() * W * 0.9, y = H * 0.45 + rnd() * H * 0.3;
+      ctx.fillStyle = 'rgba(242,240,235,0.55)';
+      ctx.fillRect(x, y, w, h);
+      hatch(x, y, w, h, 'rgba(92,97,107,0.6)', 'horiz', 3, 0.6);
+      pen('rgba(22,21,15,0.8)', 0.8);
+      ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
     }
-    // streetlamp reflection
-    const rx = W*0.7, ry = H*0.25;
+    // streetlamp reflection: the hatching is left out, and the paper shows through
+    const rx = W * 0.7, ry = H * 0.25;
     const rg = ctx.createRadialGradient(rx, ry, 4, rx, ry, 80);
-    rg.addColorStop(0, 'rgba(255,220,160,0.45)');
-    rg.addColorStop(1, 'rgba(255,220,160,0)');
+    rg.addColorStop(0, 'rgba(242,240,235,1)');
+    rg.addColorStop(0.45, 'rgba(242,240,235,0.85)');
+    rg.addColorStop(1, 'rgba(242,240,235,0)');
     ctx.fillStyle = rg;
-    ctx.beginPath(); ctx.arc(rx, ry, 80, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rx, ry, 80, 0, Math.PI * 2); ctx.fill();
+    pen('rgba(158,115,18,0.7)', 0.7);
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      ctx.beginPath(); ctx.moveTo(rx + Math.cos(a) * 14, ry + Math.sin(a) * 14); ctx.lineTo(rx + Math.cos(a) * (30 + (i % 2) * 14), ry + Math.sin(a) * (30 + (i % 2) * 14)); ctx.stroke();
+    }
     // window mullions
-    ctx.fillStyle = 'rgba(40,40,48,0.85)';
-    ctx.fillRect(W*0.5 - 4, 0, 8, H);
-    ctx.fillRect(0, H*0.5 - 3, W, 6);
-    // diagonal scratch / wear on sticker corner (handled by burst)
+    ctx.fillStyle = INK;
+    ctx.fillRect(W * 0.5 - 4, 0, 8, H);
+    ctx.fillRect(0, H * 0.5 - 3, W, 6);
   }
 
   function drawBurst(text) {
     // Constant red diagonal corner burst at the top-left
     // Define triangle from (0,0) → (0.5W, 0) → (0, 0.5W) — but cap to a max size
-    const size = Math.min(W*0.42, H*0.65);
+    const size = Math.min(W * 0.42, H * 0.65);
     ctx.save();
-    // soft drop shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    // its shadow, drawn the engraver's way: a hatched band along the cut edge
     ctx.beginPath();
-    ctx.moveTo(0+8, 0+8);
-    ctx.lineTo(size+8, 0+8);
-    ctx.lineTo(0+8, size+8);
+    ctx.moveTo(size, 0);
+    ctx.lineTo(size + 10, 0);
+    ctx.lineTo(0, size + 10);
+    ctx.lineTo(0, size);
     ctx.closePath();
+    ctx.fillStyle = FIELD;
     ctx.fill();
-    // burst body
-    ctx.fillStyle = '#c8281a';
+    ctx.fillStyle = pat(INK, 'diag', 3, 0.7);
+    ctx.fill();
+    // burst body: the one spot colour
+    ctx.fillStyle = VERMILION;
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(size, 0);
     ctx.lineTo(0, size);
     ctx.closePath();
     ctx.fill();
-    // inner highlight
-    const grad = ctx.createLinearGradient(0, 0, size, size);
-    grad.addColorStop(0, 'rgba(255,255,255,0.18)');
-    grad.addColorStop(0.4, 'rgba(255,255,255,0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(size, 0);
-    ctx.lineTo(0, size);
-    ctx.closePath();
+    // a fine engraved hatch over the red, so it sits in the drawing
+    ctx.fillStyle = pat('rgba(120,24,4,0.28)', 'back', 4, 0.7);
     ctx.fill();
     // text rotated -45°
     if (text) {
       ctx.save();
-      ctx.translate(size*0.32, size*0.32);
-      ctx.rotate(-Math.PI/4);
-      ctx.fillStyle = '#fff';
+      ctx.translate(size * 0.32, size * 0.32);
+      ctx.rotate(-Math.PI / 4);
+      ctx.fillStyle = FIELD;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const lines = text.split('\n');
       const lineH = lines.length > 1 ? 28 : 0;
-      const fontSize = Math.min(36, size/Math.max(text.length/4, 4));
-      ctx.font = `bold ${Math.round(fontSize)}px Anton, "IBM Plex Mono", monospace`;
-      lines.forEach((ln, i) => ctx.fillText(ln, 0, (i - (lines.length-1)/2) * lineH));
+      const fontSize = Math.min(36, size / Math.max(text.length / 4, 4));
+      ctx.font = `bold ${Math.round(fontSize)}px Anton, "Helvetica Neue", Helvetica, Arial, sans-serif`;
+      lines.forEach((ln, i) => ctx.fillText(ln, 0, (i - (lines.length - 1) / 2) * lineH));
       ctx.restore();
     }
-    // dark edge along the diagonal
-    ctx.strokeStyle = 'rgba(80,8,2,0.6)';
-    ctx.lineWidth = 1.5;
+    // ink edge along the diagonal
+    pen(INK, 1.25);
     ctx.beginPath();
     ctx.moveTo(size, 0);
     ctx.lineTo(0, size);
@@ -551,6 +656,8 @@
   prevBtn.addEventListener('click', () => { auto = false; setStation(stationIdx - 1); });
   nextBtn.addEventListener('click', () => { auto = false; setStation(stationIdx + 1); });
   window.addEventListener('resize', resize);
+  // scenes are drawn once and cached; redraw them when the webfonts arrive
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { sheetKey = ''; });
 
   resize();
   buildTicker();

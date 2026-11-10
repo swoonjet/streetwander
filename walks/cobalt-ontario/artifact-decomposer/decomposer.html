@@ -3,23 +3,33 @@
 <head>
 <meta charset="utf-8">
 <title>Decomposer — Stacked Equations</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;1,400&display=swap">
 <style>
+  /* Paper and ink. Channel inks: physics = ochre, optics = blue, what you see = vermilion (the one accent). */
   :root {
-    --bg: #0e0f10;
-    --panel: #16181a;
-    --line: #2a2d31;
-    --ink: #e8e6e1;
-    --mute: #6f7378;
-    --accent-physics: #d4a45e;
-    --accent-optics: #5e9bd4;
-    --accent-bundled: #d46f8a;
+    --paper: #f2f0eb; --field: #fcfbf8; --base: #ede9dc;
+    --ink: #16150f;
+    --ink-70: rgba(22,21,15,.70); --ink-45: rgba(22,21,15,.45); --ink-24: rgba(22,21,15,.24); --ink-10: rgba(22,21,15,.10); --ink-06: rgba(22,21,15,.06);
+    --accent: #d93d18;
+    --ochre: #9e7312; --blue: #1a3da8; --slate: #5c616b; --moss: #2e563a;
+    --sans: "Helvetica Neue", Helvetica, Inter, Arial, sans-serif;
+    --mono: "SF Mono", ui-monospace, "IBM Plex Mono", Menlo, monospace;
+    --serif: "Crimson Pro", Georgia, "Times New Roman", serif;
+    /* legacy names kept so nothing downstream loses a value */
+    --bg: var(--paper); --panel: var(--field); --line: var(--ink-10); --mute: var(--ink-45);
+    --accent-physics: var(--ochre); --accent-optics: var(--blue); --accent-bundled: var(--accent);
+    color-scheme: light;
   }
   * { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0; height: 100%;
-    background: var(--bg); color: var(--ink);
-    font-family: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, Menlo, monospace;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--sans);
     font-size: 13px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
   .wrap {
     display: grid;
@@ -29,7 +39,7 @@
   }
   .stage {
     position: relative;
-    background: var(--bg);
+    background: var(--paper);
     overflow: hidden;
   }
   canvas {
@@ -39,173 +49,174 @@
   }
   .stage .legend {
     position: absolute;
-    left: 28px; top: 28px;
-    color: var(--mute);
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    left: 28px; top: 26px;
+    color: var(--ink-45);
+    font: 400 15px/1.3 var(--serif);
+    font-style: italic;
     pointer-events: none;
   }
   .stage .legend strong {
     display: block;
     color: var(--ink);
-    letter-spacing: 0.16em;
-    margin-bottom: 4px;
+    font: 700 13px/1 var(--sans);
+    font-style: normal;
+    letter-spacing: .14em;
+    margin-bottom: 8px;
   }
   .stage .product {
     position: absolute;
-    right: 28px; bottom: 28px;
-    color: var(--mute);
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    right: 28px; bottom: 26px;
+    color: var(--ink-45);
+    font: 400 11px/1.6 var(--mono);
     text-align: right;
     pointer-events: none;
     max-width: 320px;
   }
   .stage .product b {
-    color: var(--ink);
-    font-weight: 500;
+    color: var(--accent);
+    font: 500 10px/1.2 var(--sans);
+    letter-spacing: .14em;
   }
   .panel {
-    background: var(--panel);
-    border-left: 1px solid var(--line);
+    background: var(--field);
+    border-left: 1px solid var(--ink-24);
     padding: 28px 24px;
     overflow-y: auto;
   }
   .panel h1 {
-    font-size: 11px;
-    letter-spacing: 0.22em;
+    font: 500 10px/1.2 var(--sans);
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--mute);
-    margin: 0 0 6px 0;
-    font-weight: 500;
+    color: var(--ink-45);
+    margin: 0 0 10px 0;
   }
   .panel h2 {
-    font-size: 18px;
-    line-height: 1.3;
+    font: 400 22px/1.2 var(--serif);
     color: var(--ink);
-    margin: 0 0 18px 0;
-    font-weight: 500;
-    font-family: 'Söhne', 'IBM Plex Sans', system-ui, sans-serif;
+    margin: 0 0 16px 0;
     letter-spacing: -0.005em;
   }
   .panel p {
-    font-size: 12px;
-    color: var(--mute);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink-70);
     margin: 0 0 18px 0;
   }
+  .panel p i { font-family: var(--serif); font-size: 14px; }
   .panel hr {
     border: none;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--ink-24);
     margin: 22px 0;
   }
   .row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
-    font-size: 11px;
-    letter-spacing: 0.04em;
+    margin-bottom: 4px;
   }
   .row label {
-    color: var(--mute);
+    font: 500 10px/1.2 var(--sans);
+    color: var(--ink-45);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: .14em;
   }
   .row .val {
+    font: 400 11.5px/1 var(--mono);
     color: var(--ink);
     font-feature-settings: "tnum";
   }
   input[type=range] {
-    width: 100%;
-    -webkit-appearance: none;
-    appearance: none;
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 22px;
     background: transparent;
-    margin: 4px 0 18px 0;
+    margin: 0 0 14px 0;
     cursor: ew-resize;
+    touch-action: pan-y;
   }
-  input[type=range]::-webkit-slider-runnable-track {
-    height: 1px;
-    background: var(--line);
-  }
+  input[type=range]::-webkit-slider-runnable-track { height: 3px; background: var(--ink-10); }
+  input[type=range]::-moz-range-track { height: 3px; background: var(--ink-10); }
   input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    height: 14px; width: 14px;
+    -webkit-appearance: none; appearance: none;
+    width: 13px; height: 13px; margin-top: -5px;
+    border: 0; border-radius: 0;
     background: var(--ink);
-    border-radius: 50%;
-    margin-top: -6.5px;
-    border: 1px solid var(--bg);
+    transition: background .2s ease;
   }
+  input[type=range]::-moz-range-thumb { width: 13px; height: 13px; border: 0; border-radius: 0; background: var(--ink); }
+  input[type=range]:hover::-webkit-slider-thumb { background: var(--accent); }
+  input[type=range]:hover::-moz-range-thumb { background: var(--accent); }
+  input[type=range]:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
   .toggles {
-    display: flex; flex-direction: column; gap: 8px;
-    margin-bottom: 18px;
+    display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 20px;
   }
   .toggle {
     display: flex; align-items: center; gap: 10px;
-    padding: 9px 11px;
-    border: 1px solid var(--line);
-    background: transparent;
-    color: var(--ink);
-    font-family: inherit;
-    font-size: 11px;
-    letter-spacing: 0.1em;
+    min-height: 32px;
+    padding: 0 12px;
+    border: 0; border-radius: 0;
+    background: var(--ink-06);
+    color: var(--ink-45);
+    font: 500 10.5px/1 var(--sans);
+    letter-spacing: .1em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: background 120ms ease;
+    transition: background .2s ease, color .2s ease;
     text-align: left;
   }
-  .toggle:hover { background: #1d2024; }
+  .toggle.on { background: var(--ink-10); color: var(--ink); }
+  .toggle:hover { color: var(--ink); }
+  .toggle:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
   .toggle .swatch {
     width: 10px; height: 10px;
-    border-radius: 50%;
+    border-radius: 0;
     background: transparent;
-    border: 1px solid var(--mute);
+    border: 1px solid var(--ink-45);
     flex-shrink: 0;
   }
-  .toggle.on .swatch { border-color: transparent; }
-  .toggle[data-layer=physics].on .swatch { background: var(--accent-physics); }
-  .toggle[data-layer=optics].on .swatch { background: var(--accent-optics); }
-  .toggle[data-layer=bundled].on .swatch { background: var(--accent-bundled); }
+  /* "on" swatches are drawn, not filled: a hatched square in the layer's ink */
+  .toggle.on .swatch { border-color: currentColor; }
+  .toggle[data-layer=physics].on .swatch { color: var(--ochre); background: repeating-linear-gradient(45deg, var(--ochre) 0 1px, transparent 1px 3px); }
+  .toggle[data-layer=optics].on .swatch { color: var(--blue); background: repeating-linear-gradient(-45deg, var(--blue) 0 1px, transparent 1px 3px); }
+  .toggle[data-layer=bundled].on .swatch { color: var(--accent); background: var(--accent); }
   .toggle .name { flex: 1; }
   .toggle .eq {
-    color: var(--mute);
-    font-size: 10px;
-    letter-spacing: 0.04em;
+    color: var(--ink-45);
+    font: 400 10.5px/1 var(--mono);
+    letter-spacing: 0;
     text-transform: none;
   }
   .footer {
-    color: var(--mute);
-    font-size: 11px;
+    color: var(--ink-45);
+    font-size: 11.5px;
     line-height: 1.6;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--ink-24);
     padding-top: 16px;
     margin-top: 22px;
   }
-  .footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--ink-24); }
   .hint {
     position: absolute;
-    bottom: 24px; left: 28px;
-    color: var(--mute);
-    font-size: 11px;
-    letter-spacing: 0.08em;
+    bottom: 26px; left: 28px;
+    color: var(--ink-45);
+    font: 500 10px/1 var(--sans);
+    letter-spacing: .14em;
     text-transform: uppercase;
     pointer-events: none;
   }
   .hint kbd {
-    font-family: inherit;
-    font-size: 10px;
-    color: var(--ink);
-    border: 1px solid var(--line);
-    padding: 2px 6px;
+    font: 500 10px/1 var(--sans);
+    letter-spacing: .1em;
+    color: var(--ink-70);
+    border: 0;
+    padding: 4px 7px;
     margin: 0 2px;
-    border-radius: 2px;
-    background: rgba(255,255,255,0.02);
+    border-radius: 0;
+    background: var(--ink-10);
   }
   @media (max-width: 720px) {
     .wrap { grid-template-columns: 1fr; grid-template-rows: 60vh 1fr; }
-    .panel { border-left: none; border-top: 1px solid var(--line); }
+    .panel { border-left: none; border-top: 1px solid var(--ink-24); }
   }
 </style>
 </head>
@@ -342,13 +353,12 @@
     const horiz = Math.abs(dx);
     const targetSag = sagRatio * horiz;
     // Iteratively find 'a' such that a*(cosh(horiz/(2a)) - 1) = targetSag
-    let a = horiz / 4;
-    for (let i = 0; i < 24; i++) {
-      const k = horiz / (2 * a);
-      const val = a * (Math.cosh(k) - 1);
-      const d = (Math.cosh(k) - 1) - k * Math.sinh(k);
-      a = a - (val - targetSag) / Math.max(d, 1e-6) * 0.5;
-      a = Math.max(0.001, a);
+    // a·(cosh(horiz/2a) − 1) falls monotonically as a grows, so bisect on log(a).
+    let lo = Math.log(horiz * 1e-3), hi = Math.log(horiz * 1e3), a = horiz / 4;
+    for (let i = 0; i < 48; i++) {
+      a = Math.exp((lo + hi) / 2);
+      const val = a * (Math.cosh(horiz / (2 * a)) - 1);
+      if (!(val < targetSag)) lo = Math.log(a); else hi = Math.log(a);
     }
     const x = p1.x + dx * t;
     const offset = a * (Math.cosh((x - xMid) / a) - Math.cosh(horiz / (2 * a)));
@@ -376,6 +386,7 @@
   function px(p) { return { x: p.x * W, y: p.y * H }; }
 
   function resize() {
+    hatchPat = null;
     DPR = Math.max(1, window.devicePixelRatio || 1);
     const r = cv.parentElement.getBoundingClientRect();
     W = r.width; H = r.height;
@@ -390,8 +401,8 @@
 
   function drawGrid() {
     if (!layerOn.optics) return;
-    ctx.strokeStyle = 'rgba(94, 155, 212, 0.18)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(26, 61, 168, 0.30)'; // blue ink, fine nib
+    ctx.lineWidth = 0.75;
     const N = grid;
     for (let i = 0; i <= N; i++) {
       // horizontal grid lines
@@ -423,9 +434,10 @@
 
   function drawCatenary(distorted) {
     const SEG = 240;
-    ctx.lineWidth = distorted ? 2.4 : 1.4;
-    if (distorted) ctx.strokeStyle = 'rgba(212, 111, 138, 0.95)';
-    else ctx.strokeStyle = 'rgba(212, 164, 94, 0.7)';
+    ctx.lineWidth = distorted ? 1.6 : 1;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    if (distorted) { ctx.strokeStyle = '#d93d18'; ctx.setLineDash([]); }
+    else { ctx.strokeStyle = '#9e7312'; ctx.setLineDash([5, 3]); }
 
     ctx.beginPath();
     let first = true;
@@ -440,20 +452,64 @@
       else ctx.lineTo(px, py);
     }
     ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Pen-and-ink: the gap between the true catenary and what the lens shows, hatched.
+  let hatchPat = null;
+  function hatchPattern() {
+    if (hatchPat) return hatchPat;
+    const t = document.createElement('canvas');
+    const S = 6 * DPR;
+    t.width = S; t.height = S;
+    const g = t.getContext('2d');
+    g.strokeStyle = 'rgba(217, 61, 24, 0.55)';
+    g.lineWidth = 0.8 * DPR;
+    g.beginPath();
+    g.moveTo(0, S); g.lineTo(S, 0);
+    g.moveTo(-S / 2, S / 2); g.lineTo(S / 2, -S / 2);
+    g.moveTo(S / 2, S * 1.5); g.lineTo(S * 1.5, S / 2);
+    g.stroke();
+    hatchPat = ctx.createPattern(t, 'repeat');
+    if (hatchPat.setTransform) hatchPat.setTransform(new DOMMatrix([1 / DPR, 0, 0, 1 / DPR, 0, 0]));
+    return hatchPat;
+  }
+  function drawDiscrepancy() {
+    const SEG = 240;
+    ctx.beginPath();
+    for (let i = 0; i <= SEG; i++) {
+      const t = i / SEG;
+      const x = anchors[0].x + (anchors[1].x - anchors[0].x) * t;
+      const p = { x, y: catenaryY(t, anchors[0], anchors[1], sag) };
+      if (i === 0) ctx.moveTo(p.x * W, p.y * H); else ctx.lineTo(p.x * W, p.y * H);
+    }
+    for (let i = SEG; i >= 0; i--) {
+      const t = i / SEG;
+      const x = anchors[0].x + (anchors[1].x - anchors[0].x) * t;
+      const p = projectBarrel({ x, y: catenaryY(t, anchors[0], anchors[1], sag) });
+      ctx.lineTo(p.x * W, p.y * H);
+    }
+    ctx.closePath();
+    ctx.fillStyle = hatchPattern();
+    ctx.fill('evenodd');
   }
 
   function drawAnchors() {
     anchors.forEach((a, i) => {
       const p = px(a);
-      ctx.fillStyle = '#0e0f10';
-      ctx.strokeStyle = '#e8e6e1';
-      ctx.lineWidth = 1.4;
+      ctx.fillStyle = '#fcfbf8';
+      ctx.strokeStyle = '#16150f';
+      ctx.lineWidth = 1.25;
       ctx.beginPath();
       ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#6f7378';
-      ctx.font = '10px IBM Plex Mono, ui-monospace, monospace';
+      ctx.fillStyle = '#16150f';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(22, 21, 15, 0.70)';
+      ctx.font = '10.5px "SF Mono", ui-monospace, Menlo, monospace';
       ctx.fillText('p' + (i+1), p.x + 10, p.y - 8);
     });
   }
@@ -461,7 +517,7 @@
   function drawOpticalCenter() {
     if (!layerOn.optics) return;
     const cx = 0.5 * W, cy = 0.5 * H;
-    ctx.strokeStyle = 'rgba(94, 155, 212, 0.5)';
+    ctx.strokeStyle = '#1a3da8';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(cx - 8, cy); ctx.lineTo(cx + 8, cy);
@@ -475,16 +531,14 @@
   function draw() {
     ctx.clearRect(0, 0, W, H);
 
-    // Vignette / atmosphere
-    const grd = ctx.createRadialGradient(W*0.5, H*0.5, 50, W*0.5, H*0.5, Math.max(W, H));
-    grd.addColorStop(0, 'rgba(255,255,255,0.018)');
-    grd.addColorStop(1, 'rgba(0,0,0,0.4)');
-    ctx.fillStyle = grd;
+    // Paper ground (no vignette: ink sits on a flat sheet)
+    ctx.fillStyle = '#f2f0eb';
     ctx.fillRect(0, 0, W, H);
 
     drawGrid();
     drawOpticalCenter();
 
+    if (layerOn.physics && layerOn.bundled) drawDiscrepancy();
     if (layerOn.physics) drawCatenary(false);
     if (layerOn.bundled) drawCatenary(true);
 
